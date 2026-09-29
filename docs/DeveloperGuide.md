@@ -261,71 +261,199 @@ _{Explain here how the data archiving feature will be implemented}_
 
 **Target user profile**:
 
-* has a need to manage a significant number of contacts
-* prefers desktop apps over other types of applications
-* can type fast
-* prefers typing to mouse interactions
-* is reasonably comfortable using CLI apps
+* is a director coordinating a large-scale computing event, such as an orientation camp
+* repeatedly records, retrieves, and corrects participant information
+* needs to track how participants are assigned to groups, roles, and activities
+* prefers fast, keyboard-driven workflows
+* needs participant data to remain available locally without relying on a remote service
 
-**Value proposition**: Manage contacts faster than with a typical mouse-driven GUI application.
+**Value proposition**: ZoomAddress helps computing event directors keep track of participants and their relevant
+information, making it easier to coordinate people across different groups, roles, and activities during large-scale
+computing events.
+
+ZoomAddress covers a local participant directory and participant-to-group, participant-to-role, and
+participant-to-activity assignments. It does not cover registration collection, messaging, payments, a full event
+timetable, simultaneous multi-user editing, or remote hosting.
 
 
 ### User stories
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | As a …​                                    | I want to …​                     | So that I can…​                                                        |
-| -------- | ------------------------------------------ | ------------------------------ | ---------------------------------------------------------------------- |
-| `* * *`  | new user                                   | see usage instructions         | refer to instructions when I forget how to use the App                 |
-| `* * *`  | user                                       | add a new person               |                                                                        |
-| `* * *`  | user                                       | delete a person                | remove entries that I no longer need                                   |
-| `* * *`  | user                                       | find a person by name          | locate details of persons without having to go through the entire list |
-| `* *`    | user                                       | hide private contact details   | minimize chance of someone else seeing them by accident                |
-| `*`      | user with many persons in the address book | sort persons by name           | locate a person easily                                                 |
-
-*{More to be added}*
+| ID | Priority | As a …​ | I want to …​ | So that I can …​ |
+| -- | -------- | ------- | ------------ | ---------------- |
+| ZA-01 | `* * *` | event director | add a participant | record someone involved in the event |
+| ZA-02 | `* * *` | event director | view all participants | see whom I am coordinating |
+| ZA-03 | `* * *` | event director | view one participant's full record | understand that participant's relevant details |
+| ZA-04 | `* * *` | busy event director | find participants by name | retrieve a record quickly |
+| ZA-05 | `* *` | event director | find a participant by contact information | identify a person when the name is uncertain |
+| ZA-06 | `* *` | event director | edit a participant's details | correct or update information |
+| ZA-07 | `* * *` | event director | delete a participant | remove withdrawn or mistakenly entered people |
+| ZA-08 | `*` | new user | see sample participant data | understand the information ZoomAddress manages |
+| ZA-09 | `*` | user ready to enter real data | clear all sample data | begin with a clean directory |
+| ZA-10 | `* *` | event director | be warned about a possible duplicate | avoid conflicting participant records |
+| ZA-11 | `* *` | event director | record the groups used by the event | use meaningful assignment groupings |
+| ZA-12 | `* * *` | event director | assign a participant to a group | know which group is responsible for them |
+| ZA-13 | `* *` | event director | move a participant to another group | keep late allocation changes accurate |
+| ZA-14 | `* *` | event director | list the participants in a group | coordinate that group as a unit |
+| ZA-15 | `* *` | event director | list participants without a group | finish incomplete allocations |
+| ZA-16 | `* *` | event director | record the roles used by the event | use consistent responsibility labels |
+| ZA-17 | `* * *` | event director | assign a role to a participant | know what the participant is responsible for |
+| ZA-18 | `* *` | event director | assign more than one role to a participant | represent overlapping responsibilities |
+| ZA-19 | `* *` | event director | list participants with a specified role | find the people responsible for a task |
+| ZA-20 | `* *` | event director | record the activities in an event | use consistent activity names |
+| ZA-21 | `* * *` | event director | assign a participant to an activity | know who is expected to take part |
+| ZA-22 | `* *` | event director | remove a participant from an activity | keep withdrawals and changes accurate |
+| ZA-23 | `* *` | event director | list participants assigned to an activity | prepare and coordinate that activity |
+| ZA-24 | `* *` | event director | list participants without any activity | identify incomplete allocations |
+| ZA-25 | `* *` | busy event director | filter by group, role, and activity together | answer operational questions quickly |
+| ZA-26 | `* *` | event director | sort participant records by name | scan a large directory predictably |
+| ZA-27 | `*` | event director | add a short note to a participant | retain context not covered by standard fields |
+| ZA-28 | `*` | event director | mark a participant's attendance | see who has arrived |
+| ZA-29 | `*` | event director | list participants whose attendance is unconfirmed | follow up on missing people |
+| ZA-30 | `*` | event director | record authorised dietary or accessibility needs | support participants appropriately |
+| ZA-31 | `*` | event director | record an authorised emergency contact | respond appropriately during an incident |
+| ZA-32 | `*` | event director migrating from a spreadsheet | import participant records in bulk | avoid re-entering every participant |
+| ZA-33 | `*` | event director | export an authorised participant list | use it in permitted offline workflows |
+| ZA-34 | `*` | event director who made a mistake | undo my latest data-changing action | recover quickly |
+| ZA-35 | `* * *` | event director | retain data between sessions | avoid losing records when the app closes |
+| ZA-36 | `* * *` | privacy-conscious event director | avoid sending data to a remote server | keep participant records local |
+| ZA-37 | `*` | event director | create a local backup | recover from device or file failure |
+| ZA-38 | `* *` | first-time user | access concise usage help | perform essential operations independently |
+| ZA-39 | `* * *` | experienced user | perform common operations by typing | update records quickly during a busy event |
+| ZA-40 | `* *` | event director | see a clear confirmation after a change | know whether records were updated |
 
 ### Use cases
 
-(For all use cases below, the **System** is the `AddressBook` and the **Actor** is the `user`, unless specified otherwise)
+(For all use cases below, the **System** is `ZoomAddress` and the **Actor** is the event director.)
 
-**Use case: Delete a person**
+**Use case UC01: Add a participant**
 
 **MSS**
 
-1.  User requests to list persons
-2.  AddressBook shows a list of persons
-3.  User requests to delete a specific person in the list
-4.  AddressBook deletes the person
+1.  Event director enters the participant's name, phone, email, and address.
+2.  ZoomAddress validates the supplied information.
+3.  ZoomAddress checks the phone number and email address for a definite duplicate.
+4.  ZoomAddress adds and saves the participant.
+5.  ZoomAddress refreshes the list, selects the new participant, and confirms the addition.
 
     Use case ends.
 
 **Extensions**
 
-* 2a. The list is empty.
+* 2a. Any supplied field is invalid.
 
-  Use case ends.
+  * 2a1. ZoomAddress shows the relevant validation error.
+
+    Use case ends.
+
+* 3a. A participant has the same normalized phone number or email address.
+
+  * 3a1. ZoomAddress reports that the participant already exists.
+
+    Use case ends.
+
+* 4a. ZoomAddress cannot save the change.
+
+  * 4a1. ZoomAddress rolls back the addition and reports that no participant was added.
+
+    Use case ends.
+
+**Use case UC02: Assign a participant to event structures**
+
+**MSS**
+
+1.  Event director lists or finds participants.
+2.  ZoomAddress displays the matching participants with visible indexes.
+3.  Event director assigns the selected participant to a group.
+4.  Event director assigns a role to the participant.
+5.  Event director assigns an activity to the participant.
+6.  ZoomAddress saves each change and displays the updated record.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. No participant matches the search.
+
+  * 2a1. ZoomAddress reports that no participants matched.
+
+    Use case ends.
+
+* 3a. The visible index or assignment label is invalid.
+
+  * 3a1. ZoomAddress shows the relevant error without changing the record.
+
+    Use case resumes at step 2.
+
+* 4a. The participant already has the normalized role.
+
+  * 4a1. ZoomAddress reports the duplicate role.
+
+    Use case resumes at step 4.
+
+* 5a. The participant is already assigned to the normalized activity.
+
+  * 5a1. ZoomAddress reports the duplicate activity.
+
+    Use case resumes at step 5.
+
+**Use case UC03: Find and inspect a participant**
+
+**MSS**
+
+1.  Event director enters one or more name keywords.
+2.  ZoomAddress displays participants whose names contain at least one complete matching word.
+3.  Event director requests to view one participant using the visible index.
+4.  ZoomAddress highlights the participant and displays the full record.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. No keyword is supplied.
+
+  * 1a1. ZoomAddress requests at least one name keyword.
+
+    Use case ends.
+
+* 2a. No participant matches the keywords.
+
+  * 2a1. ZoomAddress displays an empty result list and a no-matches message.
+
+    Use case ends.
 
 * 3a. The given index is invalid.
 
-    * 3a1. AddressBook shows an error message.
+  * 3a1. ZoomAddress shows an error message.
 
-      Use case resumes at step 2.
-
-*{More to be added}*
+    Use case resumes at step 2.
 
 ### Non-Functional Requirements
 
-1.  Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
-2.  Should be able to hold up to 1000 persons without noticeable sluggishness in performance for typical usage.
-3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
-
-*{More to be added}*
+1.  ZoomAddress should work on any _mainstream OS_ with Java `25` or above installed.
+2.  ZoomAddress should support at least 1000 participant records, with typical commands completing within 2 seconds.
+3.  A user with above-average typing speed should be able to complete common record operations faster using commands
+    than using a mouse-driven interface.
+4.  Participant data must remain on the user's device; ZoomAddress must not require a remote server or internet
+    connection for core operations.
+5.  Every successful data-changing command must be saved automatically before success is reported to the user.
+6.  A failed or interrupted save must not silently overwrite the last valid data file.
+7.  Commands and validation errors should use consistent terminology and state how the user can correct the input.
+8.  The application should start and display the participant directory within 5 seconds on a typical course-approved
+    computer.
 
 ### Glossary
 
 * **Mainstream OS**: Windows, Linux, Unix, or macOS
-* **Private contact detail**: A contact detail that is not meant to be shared with others
+* **Participant**: A person involved in the computing event and recorded in ZoomAddress
+* **Group**: The single operational unit currently responsible for a participant
+* **Role**: A responsibility held by a participant; a participant can have multiple roles
+* **Activity**: An event programme or task in which a participant is involved
+* **Visible index**: A positive integer referring to a participant's position in the list currently shown
+* **Normalized value**: A value transformed for comparison by applying its field-specific spacing and case rules
+* **Definite duplicate**: A participant record with a normalized phone number or email address matching an existing
+  record
 
 --------------------------------------------------------------------------------------------------------------------
 
