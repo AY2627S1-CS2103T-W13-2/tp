@@ -9,51 +9,48 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ## Project team
 
-### John Doe
+### Pavan Madhu
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/pavan2184.png" width="200px">
 
-[[homepage](http://www.comp.nus.edu.sg/~damithch)]
-[[github](https://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
-
-* Role: Project Advisor
-
-### Jane Doe
-
-<img src="images/johndoe.png" width="200px">
-
-[[github](http://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
+[[github](https://github.com/pavan2184)]
 
 * Role: Team Lead
-* Responsibilities: UI
+* Responsibilities: Overall project coordination
 
-### Johnny Doe
+### Evan Ng
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/evanng213.png" width="200px">
 
-[[github](http://github.com/johndoe)] [[portfolio](team/johndoe.md)]
-
-* Role: Developer
-* Responsibilities: Data
-
-### Jean Doe
-
-<img src="images/johndoe.png" width="200px">
-
-[[github](http://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
+[[github](https://github.com/EvanNg213)]
 
 * Role: Developer
-* Responsibilities: Dev Ops + Threading
+* Responsibilities: Deliverables and Deadlines
 
-### James Doe
+### Nix Koh
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/nyxkk.png" width="200px">
 
-[[github](http://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
+[[github](https://github.com/nyxkk)]
 
 * Role: Developer
-* Responsibilities: UI
+* Responsibilities: Testing
+
+### Tan Sow Young
+
+<img src="images/sowyoung.png" width="200px">
+
+[[github](https://github.com/sowyoung)]
+
+* Role: Integration
+* Responsibilities: Versioning the code, maintaining the code repository, and integrating various parts of the software to create a whole.
+
+### Ethan
+
+<img src="images/ewje.png" width="200px">
+
+[[github](https://github.com/ewje)]
+
+* Role: Code Quality
+* Responsibilities: Looks after code quality and ensures adherence to coding standards
+
