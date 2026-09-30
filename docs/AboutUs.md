@@ -27,14 +27,14 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 * Role: Developer
 * Responsibilities: Deliverables and Deadlines
 
-### Johnny Doe
+### Nix Koh
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/nyxkk.png" width="200px">
 
-[[github](http://github.com/johndoe)] [[portfolio](team/johndoe.md)]
+[[github](https://github.com/nyxkk)]
 
 * Role: Developer
-* Responsibilities: Data
+* Responsibilities: Testing
 
 ### Jean Doe
 
