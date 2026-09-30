@@ -261,29 +261,67 @@ _{Explain here how the data archiving feature will be implemented}_
 
 **Target user profile**:
 
-* has a need to manage a significant number of contacts
-* prefers desktop apps over other types of applications
-* can type fast
-* prefers typing to mouse interactions
-* is reasonably comfortable using CLI apps
+* is a director coordinating a large-scale computing event, such as an orientation camp
+* repeatedly records, retrieves, and corrects participant information
+* needs to track how participants are assigned to groups, roles, and activities
+* prefers fast, keyboard-driven workflows
+* needs participant data to remain available locally without relying on a remote service
 
-**Value proposition**: Manage contacts faster than with a typical mouse-driven GUI application.
+**Value proposition**: ZoomAddress helps computing event directors keep track of participants and their relevant
+information, making it easier to coordinate people across different groups, roles, and activities during large-scale
+computing events.
+
+ZoomAddress covers a local participant directory and participant-to-group, participant-to-role, and
+participant-to-activity assignments. It does not cover registration collection, messaging, payments, a full event
+timetable, simultaneous multi-user editing, or remote hosting.
 
 
 ### User stories
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | As a …​                                    | I want to …​                     | So that I can…​                                                        |
-| -------- | ------------------------------------------ | ------------------------------ | ---------------------------------------------------------------------- |
-| `* * *`  | new user                                   | see usage instructions         | refer to instructions when I forget how to use the App                 |
-| `* * *`  | user                                       | add a new person               |                                                                        |
-| `* * *`  | user                                       | delete a person                | remove entries that I no longer need                                   |
-| `* * *`  | user                                       | find a person by name          | locate details of persons without having to go through the entire list |
-| `* *`    | user                                       | hide private contact details   | minimize chance of someone else seeing them by accident                |
-| `*`      | user with many persons in the address book | sort persons by name           | locate a person easily                                                 |
-
-*{More to be added}*
+| ID | Priority | As a …​ | I want to …​ | So that I can …​ |
+| -- | -------- | ------- | ------------ | ---------------- |
+| ZA-01 | `* * *` | event director | add a participant | record someone involved in the event |
+| ZA-02 | `* * *` | event director | view all participants | see whom I am coordinating |
+| ZA-03 | `* * *` | event director | view one participant's full record | understand that participant's relevant details |
+| ZA-04 | `* * *` | busy event director | find participants by name | retrieve a record quickly |
+| ZA-05 | `* *` | event director | find a participant by contact information | identify a person when the name is uncertain |
+| ZA-06 | `* *` | event director | edit a participant's details | correct or update information |
+| ZA-07 | `* * *` | event director | delete a participant | remove withdrawn or mistakenly entered people |
+| ZA-08 | `*` | new user | see sample participant data | understand the information ZoomAddress manages |
+| ZA-09 | `*` | user ready to enter real data | clear all sample data | begin with a clean directory |
+| ZA-10 | `* *` | event director | be warned about a possible duplicate | avoid conflicting participant records |
+| ZA-11 | `* *` | event director | record the groups used by the event | use meaningful assignment groupings |
+| ZA-12 | `* * *` | event director | assign a participant to a group | know which group is responsible for them |
+| ZA-13 | `* *` | event director | move a participant to another group | keep late allocation changes accurate |
+| ZA-14 | `* *` | event director | list the participants in a group | coordinate that group as a unit |
+| ZA-15 | `* *` | event director | list participants without a group | finish incomplete allocations |
+| ZA-16 | `* *` | event director | record the roles used by the event | use consistent responsibility labels |
+| ZA-17 | `* * *` | event director | assign a role to a participant | know what the participant is responsible for |
+| ZA-18 | `* *` | event director | assign more than one role to a participant | represent overlapping responsibilities |
+| ZA-19 | `* *` | event director | list participants with a specified role | find the people responsible for a task |
+| ZA-20 | `* *` | event director | record the activities in an event | use consistent activity names |
+| ZA-21 | `* * *` | event director | assign a participant to an activity | know who is expected to take part |
+| ZA-22 | `* *` | event director | remove a participant from an activity | keep withdrawals and changes accurate |
+| ZA-23 | `* *` | event director | list participants assigned to an activity | prepare and coordinate that activity |
+| ZA-24 | `* *` | event director | list participants without any activity | identify incomplete allocations |
+| ZA-25 | `* *` | busy event director | filter by group, role, and activity together | answer operational questions quickly |
+| ZA-26 | `* *` | event director | sort participant records by name | scan a large directory predictably |
+| ZA-27 | `*` | event director | add a short note to a participant | retain context not covered by standard fields |
+| ZA-28 | `*` | event director | mark a participant's attendance | see who has arrived |
+| ZA-29 | `*` | event director | list participants whose attendance is unconfirmed | follow up on missing people |
+| ZA-30 | `*` | event director | record authorised dietary or accessibility needs | support participants appropriately |
+| ZA-31 | `*` | event director | record an authorised emergency contact | respond appropriately during an incident |
+| ZA-32 | `*` | event director migrating from a spreadsheet | import participant records in bulk | avoid re-entering every participant |
+| ZA-33 | `*` | event director | export an authorised participant list | use it in permitted offline workflows |
+| ZA-34 | `*` | event director who made a mistake | undo my latest data-changing action | recover quickly |
+| ZA-35 | `* * *` | event director | retain data between sessions | avoid losing records when the app closes |
+| ZA-36 | `* * *` | privacy-conscious event director | avoid sending data to a remote server | keep participant records local |
+| ZA-37 | `*` | event director | create a local backup | recover from device or file failure |
+| ZA-38 | `* *` | first-time user | access concise usage help | perform essential operations independently |
+| ZA-39 | `* * *` | experienced user | perform common operations by typing | update records quickly during a busy event |
+| ZA-40 | `* *` | event director | see a clear confirmation after a change | know whether records were updated |
 
 ### Use cases
 
