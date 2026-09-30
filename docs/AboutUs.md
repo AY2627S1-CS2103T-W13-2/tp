@@ -9,6 +9,15 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ## Project team
 
+### Ethan
+
+<img src="images/ewje.png" width="200px">
+
+[[github](https://github.com/ewje)]
+
+* Role: Code Quality
+* Responsibilities: Looks after code quality and ensures adherence to coding standards
+
 ### John Doe
 
 <img src="images/johndoe.png" width="200px">
