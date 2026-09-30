@@ -15,8 +15,8 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 [[github](https://github.com/pavan2184)]
 
-* Role: Developer
-* Responsibilities: Testing and Code Quality
+* Role: Team Lead
+* Responsibilities: Overall project coordination
 
 ### Jane Doe
 
