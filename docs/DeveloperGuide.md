@@ -325,32 +325,189 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Use cases
 
-(For all use cases below, the **System** is the `AddressBook` and the **Actor** is the `user`, unless specified otherwise)
+#### UC01: Add a participant
 
-**Use case: Delete a person**
+* **System:** ZoomAddress
+* **Use-case name:** Add a participant
+* **Actor:** Event director
+* **Preconditions:** The event director has the participant's authorised details.
+* **Guarantees:** On success, a new participant record is stored. On failure, no partial participant record is stored.
 
-**MSS**
+**Main Success Scenario**
 
-1.  User requests to list persons
-2.  AddressBook shows a list of persons
-3.  User requests to delete a specific person in the list
-4.  AddressBook deletes the person
+1. **Actor:** Requests to record a new participant.
+2. **System:** Requests the participant information required for a complete record.
+3. **Actor:** Provides the participant information.
+4. **System:** Validates the information and checks for a definite duplicate.
+5. **System:** Stores the new participant record.
+6. **System:** Confirms that the participant was added.
 
     Use case ends.
 
 **Extensions**
 
-* 2a. The list is empty.
+* 3a. The actor does not provide all required information.
+    * 3a1. **System:** Identifies the missing information.
+    * 3a2. Use case resumes at step 3.
+* 4a. Some participant information is invalid.
+    * 4a1. **System:** Identifies the invalid information and explains the applicable constraint.
+    * 4a2. Use case resumes at step 3.
+* 4b. The supplied information definitely matches an existing participant.
+    * 4b1. **System:** Reports the duplicate and does not create a record.
 
-  Use case ends.
+    Use case ends.
 
-* 3a. The given index is invalid.
+* 5a. The participant record cannot be stored.
+    * 5a1. **System:** Reports that the participant was not added and leaves the existing data unchanged.
 
-    * 3a1. AddressBook shows an error message.
+    Use case ends.
 
-      Use case resumes at step 2.
+#### UC02: Update a participant's details
 
-*{More to be added}*
+* **System:** ZoomAddress
+* **Use-case name:** Update a participant's details
+* **Actor:** Event director
+* **Preconditions:** The participant has an existing record.
+* **Guarantees:** On success, the revised participant record is stored. On failure, the existing record remains
+  unchanged.
+
+**Main Success Scenario**
+
+1. **Actor:** Requests participants matching identifying information.
+2. **System:** Provides the matching participant records.
+3. **Actor:** Identifies the participant and provides the revised details.
+4. **System:** Validates the revised details and checks for conflicts with other participant records.
+5. **System:** Stores the revised participant record.
+6. **System:** Confirms the changes.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. No participant matches the identifying information.
+    * 2a1. **System:** Reports that no participant was found.
+
+    Use case ends.
+
+* 4a. Some revised details are invalid.
+    * 4a1. **System:** Identifies the invalid details and explains the applicable constraint.
+    * 4a2. Use case resumes at step 3.
+* 4b. The revised details definitely match another participant.
+    * 4b1. **System:** Reports the conflict and does not update the record.
+    * 4b2. Use case resumes at step 3.
+* 5a. The revised record cannot be stored.
+    * 5a1. **System:** Reports that the participant was not updated and retains the previous record.
+
+    Use case ends.
+
+#### UC03: Assign a participant to event structures
+
+* **System:** ZoomAddress
+* **Use-case name:** Assign a participant to event structures
+* **Actor:** Event director
+* **Preconditions:** The participant and the relevant groups, roles, and activities have been recorded.
+* **Guarantees:** On success, the participant's assignments are stored. On failure, no partial set of requested
+  assignments is stored.
+
+**Main Success Scenario**
+
+1. **Actor:** Requests participants matching identifying information.
+2. **System:** Provides the matching participant records.
+3. **Actor:** Identifies a participant and specifies the required group, roles, and activities.
+4. **System:** Validates the requested assignments.
+5. **System:** Stores the participant's assignments.
+6. **System:** Confirms the participant's current assignments.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. No participant matches the identifying information.
+    * 2a1. **System:** Reports that no participant was found.
+
+    Use case ends.
+
+* 4a. A specified group, role, or activity has not been recorded.
+    * 4a1. **System:** Identifies the unknown event structure.
+    * 4a2. Use case resumes at step 3.
+* 4b. The participant is already assigned to a different group.
+    * 4b1. **System:** Reports the existing group assignment and requests confirmation before replacing it.
+    * 4b2. **Actor:** Confirms the replacement.
+    * 4b3. Use case resumes at step 5.
+* 4c. The participant already has a specified role or activity assignment.
+    * 4c1. **System:** Reports the duplicate assignment.
+    * 4c2. Use case resumes at step 3.
+* 5a. The assignments cannot be stored.
+    * 5a1. **System:** Reports that the assignments were not updated and retains the previous assignments.
+
+    Use case ends.
+
+#### UC04: Find participants by event assignment
+
+* **System:** ZoomAddress
+* **Use-case name:** Find participants by event assignment
+* **Actor:** Event director
+* **Preconditions:** Participant records and their event assignments have been stored.
+* **Guarantees:** Participant records and assignments remain unchanged.
+
+**Main Success Scenario**
+
+1. **Actor:** Specifies one or more group, role, or activity criteria.
+2. **System:** Validates the criteria.
+3. **System:** Finds participants who satisfy all the specified criteria.
+4. **System:** Provides the matching participants.
+5. **Actor:** Requests the full record of a matching participant.
+6. **System:** Provides the participant's full record and assignments.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. A criterion is invalid or refers to an unknown event structure.
+    * 2a1. **System:** Identifies the invalid criterion.
+    * 2a2. Use case resumes at step 1.
+* 3a. No participant satisfies all the criteria.
+    * 3a1. **System:** Reports that no participant was found.
+
+    Use case ends.
+
+#### UC05: Delete a participant
+
+* **System:** ZoomAddress
+* **Use-case name:** Delete a participant
+* **Actor:** Event director
+* **Preconditions:** The participant has an existing record.
+* **Guarantees:** On success, the participant record and its assignments are removed. On failure, the participant
+  record and assignments remain unchanged.
+
+**Main Success Scenario**
+
+1. **Actor:** Requests participants matching identifying information.
+2. **System:** Provides the matching participant records.
+3. **Actor:** Identifies a participant and requests deletion.
+4. **System:** Provides the participant details and requests confirmation.
+5. **Actor:** Confirms the deletion.
+6. **System:** Removes the participant record and its assignments.
+7. **System:** Confirms the deletion.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. No participant matches the identifying information.
+    * 2a1. **System:** Reports that no participant was found.
+
+    Use case ends.
+
+* 5a. The actor does not confirm the deletion.
+    * 5a1. **System:** Leaves the participant record and assignments unchanged.
+
+    Use case ends.
+
+* 6a. The deletion cannot be stored.
+    * 6a1. **System:** Reports that the participant was not deleted and retains the participant record and assignments.
+
+    Use case ends.
 
 ### Non-Functional Requirements
 
