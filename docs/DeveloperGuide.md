@@ -354,16 +354,52 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Non-Functional Requirements
 
-1.  Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
-2.  Should be able to hold up to 1000 persons without noticeable sluggishness in performance for typical usage.
-3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
+These are acceptance targets for ZoomAddress, not claims that every target has already been verified.
+Unless stated otherwise, checks use one running instance, a writable local data folder, and at most 1,000
+participant records, each with up to 10 group, role, or activity assignments in total.
 
-*{More to be added}*
+1. **Usability - keyboard operation:** After launch, an event director must be able to enter and submit every
+   participant-management command documented in the User Guide using only the keyboard, without clicking a control.
+2. **Usability - learnability:** In a trial with five first-time users who are familiar with typing commands,
+   at least four must be able to add a participant, find that participant, and correct one detail within 10 minutes,
+   using only the User Guide and the application's feedback, without help from another person.
+3. **Performance - response time:** On a computer with at least two CPU cores, 8 GB of RAM, an SSD, and Java 25,
+   at least 95 of 100 consecutive valid local participant-management commands must display their result within
+   two seconds of submission. The trial must include adding, listing, finding, editing, deleting, and changing
+   assignments, with no other resource-intensive applications running.
+4. **Portability:** The same release JAR must launch and pass the add, list, find, edit, delete, and save/reopen
+   smoke checks on Windows 11 x64, Ubuntu 24.04 LTS x64, and macOS 14 x64 with Java 25 and compatible JavaFX
+   libraries, without changing the source code or rebuilding the JAR.
+5. **Reliability - persistence:** After each of 20 valid data-changing commands that completes without a save
+   error, closing the application normally and reopening it must restore all participant fields and assignments
+   exactly as they were before closing. This target excludes forced termination and hardware failure.
+6. **Reliability - invalid input:** For each documented command, missing required arguments, invalid field
+   values, and out-of-range participant indices, where applicable, must produce an error without terminating the
+   application or changing stored participant data. A subsequent valid command must still execute successfully.
+7. **Availability - offline use:** After installation, the documented local participant-management commands
+   must produce the same results with all network connections disabled as with them enabled, using the same data
+   and command sequence. Opening external documentation links is excluded.
+8. **Security - data disclosure:** ZoomAddress must not transmit participant records, contact details, or
+   assignment data over the network during launch, local participant-management commands, or shutdown.
+   A network trace of these operations must contain no application-originated transmission of this data.
 
 ### Glossary
 
-* **Mainstream OS**: Windows, Linux, Unix, or macOS
-* **Private contact detail**: A contact detail that is not meant to be shared with others
+* **Activity**: A named part of a computing event to which participants can be assigned; it is not a full timetable entry.
+* **Assignment**: A recorded association between a participant and a group, role, or activity.
+* **Computing event**: An organised event for a computing community, such as an orientation camp, whose participants
+  are coordinated using ZoomAddress.
+* **Event director**: The intended operator of ZoomAddress who maintains participant information and coordinates
+  assignments for a computing event.
+* **Group**: A named collection used to organise participants within an event, such as an orientation group.
+* **Participant**: A person involved in a computing event whose details are kept in ZoomAddress, including attendees
+  and people with event responsibilities.
+* **Participant record**: The stored details and assignments for one participant; represented by `Person` in the
+  existing codebase and referred to as a person or contact in inherited documentation.
+* **Role**: An event responsibility assigned to a participant. In the requirements, this means an event role,
+  not a software development team role or an application access permission.
+* **Unassigned participant**: A participant with no assignment in the category being queried; for example, no group
+  or no activity. Being unassigned in one category does not imply being unassigned in the others.
 
 --------------------------------------------------------------------------------------------------------------------
 
