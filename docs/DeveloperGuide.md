@@ -325,45 +325,238 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Use cases
 
-(For all use cases below, the **System** is the `AddressBook` and the **Actor** is the `user`, unless specified otherwise)
+#### UC01: Add a participant
 
-**Use case: Delete a person**
+* **System:** ZoomAddress
+* **Use-case name:** Add a participant
+* **Actor:** Event director
+* **Preconditions:** The event director has the participant's authorised details.
+* **Guarantees:** On success, a new participant record is stored. On failure, no partial participant record is stored.
 
-**MSS**
+**Main Success Scenario**
 
-1.  User requests to list persons
-2.  AddressBook shows a list of persons
-3.  User requests to delete a specific person in the list
-4.  AddressBook deletes the person
+1. **Actor:** Requests to record a new participant.
+2. **System:** Requests the participant information required for a complete record.
+3. **Actor:** Provides the participant information.
+4. **System:** Validates the information and checks for a definite duplicate.
+5. **System:** Stores the new participant record.
+6. **System:** Confirms that the participant was added.
 
     Use case ends.
 
 **Extensions**
 
-* 2a. The list is empty.
+* 3a. The actor does not provide all required information.
+    * 3a1. **System:** Identifies the missing information.
+    * 3a2. Use case resumes at step 3.
+* 4a. Some participant information is invalid.
+    * 4a1. **System:** Identifies the invalid information and explains the applicable constraint.
+    * 4a2. Use case resumes at step 3.
+* 4b. The supplied information definitely matches an existing participant.
+    * 4b1. **System:** Reports the duplicate and does not create a record.
 
-  Use case ends.
+    Use case ends.
 
-* 3a. The given index is invalid.
+* 5a. The participant record cannot be stored.
+    * 5a1. **System:** Reports that the participant was not added and leaves the existing data unchanged.
 
-    * 3a1. AddressBook shows an error message.
+    Use case ends.
 
-      Use case resumes at step 2.
+#### UC02: Update a participant's details
 
-*{More to be added}*
+* **System:** ZoomAddress
+* **Use-case name:** Update a participant's details
+* **Actor:** Event director
+* **Preconditions:** The participant has an existing record.
+* **Guarantees:** On success, the revised participant record is stored. On failure, the existing record remains
+  unchanged.
+
+**Main Success Scenario**
+
+1. **Actor:** Requests participants matching identifying information.
+2. **System:** Provides the matching participant records.
+3. **Actor:** Identifies the participant and provides the revised details.
+4. **System:** Validates the revised details and checks for conflicts with other participant records.
+5. **System:** Stores the revised participant record.
+6. **System:** Confirms the changes.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. No participant matches the identifying information.
+    * 2a1. **System:** Reports that no participant was found.
+
+    Use case ends.
+
+* 4a. Some revised details are invalid.
+    * 4a1. **System:** Identifies the invalid details and explains the applicable constraint.
+    * 4a2. Use case resumes at step 3.
+* 4b. The revised details definitely match another participant.
+    * 4b1. **System:** Reports the conflict and does not update the record.
+    * 4b2. Use case resumes at step 3.
+* 5a. The revised record cannot be stored.
+    * 5a1. **System:** Reports that the participant was not updated and retains the previous record.
+
+    Use case ends.
+
+#### UC03: Assign a participant to event structures
+
+* **System:** ZoomAddress
+* **Use-case name:** Assign a participant to event structures
+* **Actor:** Event director
+* **Preconditions:** The participant and the relevant groups, roles, and activities have been recorded.
+* **Guarantees:** On success, the participant's assignments are stored. On failure, no partial set of requested
+  assignments is stored.
+
+**Main Success Scenario**
+
+1. **Actor:** Requests participants matching identifying information.
+2. **System:** Provides the matching participant records.
+3. **Actor:** Identifies a participant and specifies the required group, roles, and activities.
+4. **System:** Validates the requested assignments.
+5. **System:** Stores the participant's assignments.
+6. **System:** Confirms the participant's current assignments.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. No participant matches the identifying information.
+    * 2a1. **System:** Reports that no participant was found.
+
+    Use case ends.
+
+* 4a. A specified group, role, or activity has not been recorded.
+    * 4a1. **System:** Identifies the unknown event structure.
+    * 4a2. Use case resumes at step 3.
+* 4b. The participant is already assigned to a different group.
+    * 4b1. **System:** Reports the existing group assignment and requests confirmation before replacing it.
+    * 4b2. **Actor:** Confirms the replacement.
+    * 4b3. Use case resumes at step 5.
+* 4c. The participant already has a specified role or activity assignment.
+    * 4c1. **System:** Reports the duplicate assignment.
+    * 4c2. Use case resumes at step 3.
+* 5a. The assignments cannot be stored.
+    * 5a1. **System:** Reports that the assignments were not updated and retains the previous assignments.
+
+    Use case ends.
+
+#### UC04: Find participants by event assignment
+
+* **System:** ZoomAddress
+* **Use-case name:** Find participants by event assignment
+* **Actor:** Event director
+* **Preconditions:** Participant records and their event assignments have been stored.
+* **Guarantees:** Participant records and assignments remain unchanged.
+
+**Main Success Scenario**
+
+1. **Actor:** Specifies one or more group, role, or activity criteria.
+2. **System:** Validates the criteria.
+3. **System:** Finds participants who satisfy all the specified criteria.
+4. **System:** Provides the matching participants.
+5. **Actor:** Requests the full record of a matching participant.
+6. **System:** Provides the participant's full record and assignments.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. A criterion is invalid or refers to an unknown event structure.
+    * 2a1. **System:** Identifies the invalid criterion.
+    * 2a2. Use case resumes at step 1.
+* 3a. No participant satisfies all the criteria.
+    * 3a1. **System:** Reports that no participant was found.
+
+    Use case ends.
+
+#### UC05: Delete a participant
+
+* **System:** ZoomAddress
+* **Use-case name:** Delete a participant
+* **Actor:** Event director
+* **Preconditions:** The participant has an existing record.
+* **Guarantees:** On success, the participant record and its assignments are removed. On failure, the participant
+  record and assignments remain unchanged.
+
+**Main Success Scenario**
+
+1. **Actor:** Requests participants matching identifying information.
+2. **System:** Provides the matching participant records.
+3. **Actor:** Identifies a participant and requests deletion.
+4. **System:** Provides the participant details and requests confirmation.
+5. **Actor:** Confirms the deletion.
+6. **System:** Removes the participant record and its assignments.
+7. **System:** Confirms the deletion.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. No participant matches the identifying information.
+    * 2a1. **System:** Reports that no participant was found.
+
+    Use case ends.
+
+* 5a. The actor does not confirm the deletion.
+    * 5a1. **System:** Leaves the participant record and assignments unchanged.
+
+    Use case ends.
+
+* 6a. The deletion cannot be stored.
+    * 6a1. **System:** Reports that the participant was not deleted and retains the participant record and assignments.
+
+    Use case ends.
 
 ### Non-Functional Requirements
 
-1.  Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
-2.  Should be able to hold up to 1000 persons without noticeable sluggishness in performance for typical usage.
-3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
+These are acceptance targets for ZoomAddress, not claims that every target has already been verified.
+Unless stated otherwise, checks use one running instance, a writable local data folder, and at most 1,000
+participant records, each with up to 10 group, role, or activity assignments in total.
 
-*{More to be added}*
+1. **Usability - keyboard operation:** After launch, an event director must be able to enter and submit every
+   participant-management command documented in the User Guide using only the keyboard, without clicking a control.
+2. **Usability - learnability:** In a trial with five first-time users who are familiar with typing commands,
+   at least four must be able to add a participant, find that participant, and correct one detail within 10 minutes,
+   using only the User Guide and the application's feedback, without help from another person.
+3. **Performance - response time:** On a computer with at least two CPU cores, 8 GB of RAM, an SSD, and Java 25,
+   at least 95 of 100 consecutive valid local participant-management commands must display their result within
+   two seconds of submission. The trial must include adding, listing, finding, editing, deleting, and changing
+   assignments, with no other resource-intensive applications running.
+4. **Portability:** The same release JAR must launch and pass the add, list, find, edit, delete, and save/reopen
+   smoke checks on Windows 11 x64, Ubuntu 24.04 LTS x64, and macOS 14 x64 with Java 25 and compatible JavaFX
+   libraries, without changing the source code or rebuilding the JAR.
+5. **Reliability - persistence:** After each of 20 valid data-changing commands that completes without a save
+   error, closing the application normally and reopening it must restore all participant fields and assignments
+   exactly as they were before closing. This target excludes forced termination and hardware failure.
+6. **Reliability - invalid input:** For each documented command, missing required arguments, invalid field
+   values, and out-of-range participant indices, where applicable, must produce an error without terminating the
+   application or changing stored participant data. A subsequent valid command must still execute successfully.
+7. **Availability - offline use:** After installation, the documented local participant-management commands
+   must produce the same results with all network connections disabled as with them enabled, using the same data
+   and command sequence. Opening external documentation links is excluded.
+8. **Security - data disclosure:** ZoomAddress must not transmit participant records, contact details, or
+   assignment data over the network during launch, local participant-management commands, or shutdown.
+   A network trace of these operations must contain no application-originated transmission of this data.
 
 ### Glossary
 
-* **Mainstream OS**: Windows, Linux, Unix, or macOS
-* **Private contact detail**: A contact detail that is not meant to be shared with others
+* **Activity**: A named part of a computing event to which participants can be assigned; it is not a full timetable entry.
+* **Assignment**: A recorded association between a participant and a group, role, or activity.
+* **Computing event**: An organised event for a computing community, such as an orientation camp, whose participants
+  are coordinated using ZoomAddress.
+* **Event director**: The intended operator of ZoomAddress who maintains participant information and coordinates
+  assignments for a computing event.
+* **Group**: A named collection used to organise participants within an event, such as an orientation group.
+* **Participant**: A person involved in a computing event whose details are kept in ZoomAddress, including attendees
+  and people with event responsibilities.
+* **Participant record**: The stored details and assignments for one participant; represented by `Person` in the
+  existing codebase and referred to as a person or contact in inherited documentation.
+* **Role**: An event responsibility assigned to a participant. In the requirements, this means an event role,
+  not a software development team role or an application access permission.
+* **Unassigned participant**: A participant with no assignment in the category being queried; for example, no group
+  or no activity. Being unassigned in one category does not imply being unassigned in the others.
 
 --------------------------------------------------------------------------------------------------------------------
 
