@@ -48,12 +48,11 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 * Role: Developer
 * Responsibilities: Dev Ops + Threading
 
-### James Doe
+### Tan Sow Young
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/sowyoung.png" width="200px">
 
-[[github](http://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
+[[github](https://github.com/sowyoung)]
 
-* Role: Developer
-* Responsibilities: UI
+* Role: Integration
+* Responsibilities: Versioning the code, maintaining the code repository, and integrating various parts of the software to create a whole.
