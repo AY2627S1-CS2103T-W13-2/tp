@@ -50,7 +50,8 @@ public class AssignActivityCommand extends Command {
 
         Person participant = lastShownList.get(index.getZeroBased());
         Person updatedParticipant = new Person(participant.getName(), participant.getPhone(), participant.getEmail(),
-                participant.getAddress(), participant.getTags(), participant.getRole(), Optional.of(activity));
+                participant.getAddress(), participant.getTags(), participant.getRole(), Optional.of(activity),
+                participant.getGroup());
         model.setPerson(participant, updatedParticipant);
         return new CommandResult(String.format(MESSAGE_SUCCESS, activity, participant.getName()));
     }

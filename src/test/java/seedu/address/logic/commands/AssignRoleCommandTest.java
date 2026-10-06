@@ -28,7 +28,7 @@ public class AssignRoleCommandTest {
     @Test
     public void execute_participantWithActivity_preservesActivityOnAssignmentAndReplacement() throws Exception {
         Person original = model.getFilteredPersonList().get(0);
-        Person assigned = new PersonBuilder(original).withActivity("Campfire").build();
+        Person assigned = new PersonBuilder(original).withActivity("Campfire").withGroup("Logistics").build();
         model.setPerson(original, assigned);
 
         new AssignRoleCommand(INDEX_FIRST_PERSON, new Role("Facilitator")).execute(model);
@@ -69,6 +69,23 @@ public class AssignRoleCommandTest {
 
         String expectedMessage = String.format(AssignRoleCommand.MESSAGE_ASSIGN_ROLE_SUCCESS,
                 replacementRole, participant.getName());
+        assertCommandSuccess(command, model, expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void execute_existingGroup_groupPreserved() {
+        Person participant = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person participantWithGroup = new PersonBuilder(participant).withGroup("Logistics").build();
+        model.setPerson(participant, participantWithGroup);
+
+        Role role = new Role("Facilitator");
+        AssignRoleCommand command = new AssignRoleCommand(INDEX_FIRST_PERSON, role);
+        Person expectedPerson = new PersonBuilder(participantWithGroup).withRole(role.value).build();
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+        expectedModel.setPerson(participantWithGroup, expectedPerson);
+
+        String expectedMessage = String.format(AssignRoleCommand.MESSAGE_ASSIGN_ROLE_SUCCESS,
+                role, participant.getName());
         assertCommandSuccess(command, model, expectedMessage, expectedModel);
     }
 

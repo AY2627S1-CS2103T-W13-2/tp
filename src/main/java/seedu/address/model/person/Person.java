@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.model.group.Group;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -27,6 +28,7 @@ public class Person {
     private final Set<Tag> tags = new HashSet<>();
     private final Optional<Role> role;
     private final Optional<Activity> activity;
+    private final Optional<Group> group;
 
     /**
      * Every field must be present and not null.
@@ -54,7 +56,15 @@ public class Person {
      */
     public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags,
             Optional<Role> role, Optional<Activity> activity) {
-        requireAllNonNull(name, phone, email, address, tags, role, activity);
+        this(name, phone, email, address, tags, role, activity, Optional.empty());
+    }
+
+    /**
+     * Creates a person with independent optional role, activity, and group assignments.
+     */
+    public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags,
+            Optional<Role> role, Optional<Activity> activity, Optional<Group> group) {
+        requireAllNonNull(name, phone, email, address, tags, role, activity, group);
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -62,6 +72,7 @@ public class Person {
         this.tags.addAll(tags);
         this.role = role;
         this.activity = activity;
+        this.group = group;
     }
 
     public Name getName() {
@@ -90,6 +101,10 @@ public class Person {
 
     public Optional<Activity> getActivity() {
         return activity;
+    }
+
+    public Optional<Group> getGroup() {
+        return group;
     }
 
     public Optional<Role> getRole() {
@@ -130,13 +145,14 @@ public class Person {
                 && address.equals(otherPerson.address)
                 && tags.equals(otherPerson.tags)
                 && role.equals(otherPerson.role)
-                && activity.equals(otherPerson.activity);
+                && activity.equals(otherPerson.activity)
+                && group.equals(otherPerson.group);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, tags, role, activity);
+        return Objects.hash(name, phone, email, address, tags, role, activity, group);
     }
 
     @Override
@@ -149,6 +165,7 @@ public class Person {
                 .add("tags", tags)
                 .add("role", role.orElse(null))
                 .add("activity", activity)
+                .add("group", group.orElse(null))
                 .toString();
     }
 

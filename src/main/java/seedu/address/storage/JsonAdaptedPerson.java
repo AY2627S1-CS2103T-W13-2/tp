@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import seedu.address.commons.exceptions.IllegalValueException;
+import seedu.address.model.group.Group;
 import seedu.address.model.person.Activity;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
@@ -33,6 +34,7 @@ class JsonAdaptedPerson {
     private final String address;
     private final String role;
     private final String activity;
+    private final String group;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
 
     /**
@@ -42,16 +44,25 @@ class JsonAdaptedPerson {
     public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("address") String address,
             @JsonProperty("tags") List<JsonAdaptedTag> tags, @JsonProperty("role") String role,
-            @JsonProperty("activity") String activity) {
+            @JsonProperty("activity") String activity, @JsonProperty("group") String group) {
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
         this.role = role;
         this.activity = activity;
+        this.group = group;
         if (tags != null) {
             this.tags.addAll(tags);
         }
+    }
+
+    /**
+     * Constructs an adapted person without a group for backward compatibility.
+     */
+    public JsonAdaptedPerson(String name, String phone, String email, String address,
+            List<JsonAdaptedTag> tags, String role, String activity) {
+        this(name, phone, email, address, tags, role, activity, null);
     }
 
     /**
@@ -79,6 +90,7 @@ class JsonAdaptedPerson {
         address = source.getAddress().value;
         role = source.getRole().map(assignedRole -> assignedRole.value).orElse(null);
         activity = source.getActivity().map(assignedActivity -> assignedActivity.value).orElse(null);
+        group = source.getGroup().map(Object::toString).orElse(null);
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
                 .collect(Collectors.toList()));
@@ -140,8 +152,12 @@ class JsonAdaptedPerson {
             throw new IllegalValueException(Activity.MESSAGE_CONSTRAINTS);
         }
         final Optional<Activity> modelActivity = Optional.ofNullable(activity).map(Activity::new);
+        if (group != null && !Group.isValidGroupName(group)) {
+            throw new IllegalValueException(Group.MESSAGE_CONSTRAINTS);
+        }
+        final Optional<Group> modelGroup = Optional.ofNullable(group).map(Group::new);
         return new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags,
-                Optional.ofNullable(modelRole), modelActivity);
+                Optional.ofNullable(modelRole), modelActivity, modelGroup);
     }
 
 }

@@ -38,7 +38,8 @@ public class EditCommandTest {
     @Test
     public void execute_assignedParticipant_preservesActivity() {
         Person original = model.getFilteredPersonList().get(0);
-        Person assigned = new PersonBuilder(original).withRole("Facilitator").withActivity("Campfire").build();
+        Person assigned = new PersonBuilder(original).withRole("Facilitator").withActivity("Campfire")
+                .withGroup("Logistics").build();
         model.setPerson(original, assigned);
         Person edited = new PersonBuilder(assigned).withName(VALID_NAME_BOB).withPhone(VALID_PHONE_BOB).build();
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
@@ -115,16 +116,17 @@ public class EditCommandTest {
     }
 
     @Test
-    public void execute_participantHasRole_rolePreserved() {
+    public void execute_participantHasAssignments_assignmentsPreserved() {
         Person participant = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
-        Person participantWithRole = new PersonBuilder(participant).withRole("Facilitator").build();
-        model.setPerson(participant, participantWithRole);
+        Person participantWithAssignments = new PersonBuilder(participant).withRole("Facilitator")
+                .withGroup("Logistics").build();
+        model.setPerson(participant, participantWithAssignments);
 
-        Person editedParticipant = new PersonBuilder(participantWithRole).withPhone(VALID_PHONE_BOB).build();
+        Person editedParticipant = new PersonBuilder(participantWithAssignments).withPhone(VALID_PHONE_BOB).build();
         EditCommand command = new EditCommand(INDEX_FIRST_PERSON,
                 new EditPersonDescriptorBuilder().withPhone(VALID_PHONE_BOB).build());
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
-        expectedModel.setPerson(participantWithRole, editedParticipant);
+        expectedModel.setPerson(participantWithAssignments, editedParticipant);
 
         String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS,
                 Messages.format(editedParticipant));

@@ -156,6 +156,21 @@ Format: `assign-role INDEX r/ROLE`
 Example:
 * `assign-role 2 r/Logistics Lead` assigns the role `Logistics Lead` to the second displayed participant.
 
+### Assigning a person to a group: `assign-group`
+
+Assigns one group to an existing person.
+
+Format: `assign-group INDEX g/GROUP`
+
+* Assigns the person at the specified `INDEX` to `GROUP`.
+* The index refers to the index number shown in the displayed person list and must be a positive integer.
+* `GROUP` must not be blank and may contain spaces.
+* A participant can belong to at most one group. Assigning another group replaces the current group and preserves their role and activity.
+* Group removal and managing a separate list of groups are not supported yet.
+
+Example:
+* `assign-group 2 g/Logistics` assigns the second displayed person to the `Logistics` group.
+
 ### Locating participants by name: `find`
 
 Finds participants whose names contain any of the given keywords.
@@ -238,6 +253,7 @@ Action | Format, Examples
 --------|------------------
 **Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
 **Assign role** | `assign-role INDEX r/ROLE`<br> e.g., `assign-role 2 r/Logistics Lead`
+**Assign group** | `assign-group INDEX g/GROUP`<br> e.g., `assign-group 2 g/Logistics`
 **Clear** | `clear`
 **Assign activity** | `assign-activity INDEX a/ACTIVITY`<br> e.g., `assign-activity 1 a/Campfire`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`

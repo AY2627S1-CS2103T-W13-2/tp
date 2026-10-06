@@ -50,6 +50,13 @@ public class JsonAddressBookStorageTest {
         original.addPerson(new PersonBuilder().withName("Unassigned Participant").build());
         original.addPerson(new PersonBuilder().withName("Role Participant").withRole("Facilitator").build());
         original.addPerson(new PersonBuilder().withName("Activity Participant").withActivity("Campfire").build());
+        original.addPerson(new PersonBuilder().withName("Group Participant").withGroup("Logistics").build());
+        original.addPerson(new PersonBuilder().withName("Role Group Participant")
+                .withRole("Facilitator").withGroup("Logistics").build());
+        original.addPerson(new PersonBuilder().withName("Activity Group Participant")
+                .withActivity("Campfire").withGroup("Logistics").build());
+        original.addPerson(new PersonBuilder().withName("All Assignments Participant")
+                .withRole("Facilitator").withActivity("Campfire").withGroup("Logistics").build());
         original.addPerson(new PersonBuilder().withName("Both Participant")
                 .withRole("Facilitator").withActivity("Campfire").build());
         JsonAddressBookStorage storage = new JsonAddressBookStorage(filePath);
@@ -148,6 +155,21 @@ public class JsonAddressBookStorageTest {
 
         assertEquals(original, new AddressBook(readBack));
         assertEquals("Logistics Lead", readBack.getPersonList().get(0).getRole().get().value);
+    }
+
+    @Test
+    public void readAndSaveAddressBook_groupAssignmentPreserved() throws Exception {
+        Path filePath = testFolder.resolve("AddressBookWithGroup.json");
+        Person assignedPerson = new PersonBuilder().withGroup("Logistics").build();
+        AddressBook original = new AddressBook();
+        original.addPerson(assignedPerson);
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(filePath);
+
+        storage.saveAddressBook(original);
+        ReadOnlyAddressBook readBack = storage.readAddressBook().orElseThrow();
+
+        assertEquals(original, new AddressBook(readBack));
+        assertEquals(assignedPerson.getGroup(), readBack.getPersonList().getFirst().getGroup());
     }
 
     @Test
