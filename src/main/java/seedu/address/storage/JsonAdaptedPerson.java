@@ -3,6 +3,7 @@ package seedu.address.storage;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import seedu.address.commons.exceptions.IllegalValueException;
+import seedu.address.model.person.Activity;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
@@ -30,6 +32,7 @@ class JsonAdaptedPerson {
     private final String email;
     private final String address;
     private final String role;
+    private final String activity;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
 
     /**
@@ -38,15 +41,25 @@ class JsonAdaptedPerson {
     @JsonCreator
     public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("address") String address,
-            @JsonProperty("tags") List<JsonAdaptedTag> tags, @JsonProperty("role") String role) {
+            @JsonProperty("tags") List<JsonAdaptedTag> tags, @JsonProperty("role") String role,
+            @JsonProperty("activity") String activity) {
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
         this.role = role;
+        this.activity = activity;
         if (tags != null) {
             this.tags.addAll(tags);
         }
+    }
+
+    /**
+     * Constructs an adapted person without an activity for backward compatibility.
+     */
+    public JsonAdaptedPerson(String name, String phone, String email, String address,
+            List<JsonAdaptedTag> tags, String role) {
+        this(name, phone, email, address, tags, role, null);
     }
 
     /**
@@ -65,6 +78,7 @@ class JsonAdaptedPerson {
         email = source.getEmail().value;
         address = source.getAddress().value;
         role = source.getRole().map(assignedRole -> assignedRole.value).orElse(null);
+        activity = source.getActivity().map(assignedActivity -> assignedActivity.value).orElse(null);
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
                 .collect(Collectors.toList()));
@@ -122,9 +136,12 @@ class JsonAdaptedPerson {
         }
 
         final Set<Tag> modelTags = new HashSet<>(personTags);
-        return modelRole == null
-                ? new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags)
-                : new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags, modelRole);
+        if (activity != null && !Activity.isValidActivity(activity)) {
+            throw new IllegalValueException(Activity.MESSAGE_CONSTRAINTS);
+        }
+        final Optional<Activity> modelActivity = Optional.ofNullable(activity).map(Activity::new);
+        return new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags,
+                Optional.ofNullable(modelRole), modelActivity);
     }
 
 }

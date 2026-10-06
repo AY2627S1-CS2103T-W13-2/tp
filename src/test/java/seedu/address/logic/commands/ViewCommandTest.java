@@ -18,10 +18,23 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.person.Person;
+import seedu.address.testutil.PersonBuilder;
 
 public class ViewCommandTest {
 
     private final Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+
+    @Test
+    public void execute_bothAssignments_displaysRoleAndActivity() throws Exception {
+        Person original = model.getFilteredPersonList().get(0);
+        Person assigned = new PersonBuilder(original).withRole("Facilitator").withActivity("Campfire").build();
+        model.setPerson(original, assigned);
+
+        String feedback = new ViewCommand(INDEX_FIRST_PERSON).execute(model).getFeedbackToUser();
+        assertTrue(feedback.contains("Role: Facilitator"));
+        assertTrue(feedback.contains("Activity: Campfire"));
+        assertEquals(assigned, model.getFilteredPersonList().get(0));
+    }
 
     @Test
     public void execute_validIndexUnfilteredList_displaysCompleteRecordWithoutChangingModel() {

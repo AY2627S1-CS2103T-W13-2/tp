@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.exceptions.IllegalValueException;
+import seedu.address.model.person.Activity;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
@@ -41,6 +42,38 @@ public class JsonAdaptedPersonTest {
     public void toModelType_validPersonDetails_returnsPerson() throws Exception {
         JsonAdaptedPerson person = new JsonAdaptedPerson(BENSON);
         assertEquals(BENSON, person.toModelType());
+    }
+
+    @Test
+    public void toModelType_bothAssignments_returnsPersonWithRoleAndActivity() throws Exception {
+        Person assigned = new PersonBuilder(BENSON).withRole("Facilitator").withActivity("Campfire").build();
+        assertEquals(assigned, new JsonAdaptedPerson(assigned).toModelType());
+        JsonAdaptedPerson details = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
+                VALID_TAGS, "Facilitator", "Campfire");
+        assertEquals(assigned, details.toModelType());
+    }
+
+    @Test
+    public void toModelType_assignedActivity_returnsAssignedPerson() throws Exception {
+        JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
+                VALID_TAGS, null, "Campfire");
+        assertEquals(new PersonBuilder(BENSON).withActivity("Campfire").build(), person.toModelType());
+    }
+
+    @Test
+    public void toModelType_nullActivity_returnsUnassignedPerson() throws Exception {
+        JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
+                VALID_TAGS, null, null);
+        assertEquals(BENSON, person.toModelType());
+    }
+
+    @Test
+    public void toModelType_blankActivity_throwsIllegalValueException() {
+        for (String blank : new String[] {"", " ", "\t", "\u2003"}) {
+            JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
+                    VALID_TAGS, null, blank);
+            assertThrows(IllegalValueException.class, Activity.MESSAGE_CONSTRAINTS, person::toModelType);
+        }
     }
 
     @Test

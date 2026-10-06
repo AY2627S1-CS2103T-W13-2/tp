@@ -9,6 +9,7 @@ import static seedu.address.testutil.TypicalPersons.IDA;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -43,8 +44,54 @@ public class JsonAddressBookStorageTest {
     }
 
     @Test
+    public void saveAndReadAddressBook_optionalAssignments_preservesEachCombination() throws Exception {
+        Path filePath = testFolder.resolve("Assignments.json");
+        AddressBook original = new AddressBook();
+        original.addPerson(new PersonBuilder().withName("Unassigned Participant").build());
+        original.addPerson(new PersonBuilder().withName("Role Participant").withRole("Facilitator").build());
+        original.addPerson(new PersonBuilder().withName("Activity Participant").withActivity("Campfire").build());
+        original.addPerson(new PersonBuilder().withName("Both Participant")
+                .withRole("Facilitator").withActivity("Campfire").build());
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(filePath);
+
+        storage.saveAddressBook(original);
+        JsonAddressBookStorage restartedStorage = new JsonAddressBookStorage(filePath);
+        assertEquals(original, new AddressBook(restartedStorage.readAddressBook().orElseThrow()));
+    }
+
+    @Test
+    public void readAddressBook_missingOptionalAssignments_preservesExistingAssignment() throws Exception {
+        Path filePath = testFolder.resolve("OlderAssignments.json");
+        Files.writeString(filePath, """
+                {"persons": [
+                  {"name": "Role Participant", "phone": "91234567", "email": "role@example.com",
+                   "address": "Kent Ridge", "tags": [], "role": "Facilitator"},
+                  {"name": "Activity Participant", "phone": "92345678", "email": "activity@example.com",
+                   "address": "Kent Ridge", "tags": [], "activity": "Campfire"}
+                ]}
+                """);
+        AddressBook expected = new AddressBook();
+        expected.addPerson(new PersonBuilder().withName("Role Participant").withPhone("91234567")
+                .withEmail("role@example.com").withAddress("Kent Ridge").withRole("Facilitator").build());
+        expected.addPerson(new PersonBuilder().withName("Activity Participant").withPhone("92345678")
+                .withEmail("activity@example.com").withAddress("Kent Ridge").withActivity("Campfire").build());
+
+        ReadOnlyAddressBook loaded = new JsonAddressBookStorage(filePath).readAddressBook().orElseThrow();
+        assertEquals(expected, new AddressBook(loaded));
+    }
+
+    @Test
     public void read_missingFile_emptyResult() throws Exception {
         assertFalse(readAddressBook("NonExistentFile.json").isPresent());
+    }
+
+    @Test
+    public void readAddressBook_legacyFileWithoutActivities_success() throws Exception {
+        Path legacyFile = Paths.get("src", "test", "data", "JsonSerializableAddressBookTest",
+                "typicalPersonsAddressBook.json");
+        ReadOnlyAddressBook legacy = new JsonAddressBookStorage(legacyFile).readAddressBook().orElseThrow();
+        assertEquals(getTypicalAddressBook(), new AddressBook(legacy));
+        legacy.getPersonList().forEach(person -> assertFalse(person.getActivity().isPresent()));
     }
 
     @Test

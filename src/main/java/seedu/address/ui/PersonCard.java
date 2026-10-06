@@ -39,6 +39,8 @@ public class PersonCard extends UiPart<Region> {
     @FXML
     private Label email;
     @FXML
+    private Label activity;
+    @FXML
     private Label role;
     @FXML
     private FlowPane tags;
@@ -54,6 +56,9 @@ public class PersonCard extends UiPart<Region> {
         phone.setText(person.getPhone().value);
         address.setText(person.getAddress().value);
         email.setText(person.getEmail().value);
+        activity.setText(person.getActivity().map(value -> "Activity: " + value).orElse(""));
+        activity.setVisible(person.getActivity().isPresent());
+        activity.setManaged(person.getActivity().isPresent());
         if (person.getRole().isPresent()) {
             role.setText("Role: " + person.getRole().get().value);
         } else {

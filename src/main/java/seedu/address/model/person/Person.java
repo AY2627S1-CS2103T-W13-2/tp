@@ -26,6 +26,7 @@ public class Person {
     private final Address address;
     private final Set<Tag> tags = new HashSet<>();
     private final Optional<Role> role;
+    private final Optional<Activity> activity;
 
     /**
      * Every field must be present and not null.
@@ -45,13 +46,22 @@ public class Person {
      * Creates a person with an optional assigned role.
      */
     public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags, Optional<Role> role) {
-        requireAllNonNull(name, phone, email, address, tags, role);
+        this(name, phone, email, address, tags, role, Optional.empty());
+    }
+
+    /**
+     * Creates a person with independent optional role and activity assignments.
+     */
+    public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags,
+            Optional<Role> role, Optional<Activity> activity) {
+        requireAllNonNull(name, phone, email, address, tags, role, activity);
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
         this.tags.addAll(tags);
         this.role = role;
+        this.activity = activity;
     }
 
     public Name getName() {
@@ -76,6 +86,10 @@ public class Person {
      */
     public Set<Tag> getTags() {
         return Collections.unmodifiableSet(tags);
+    }
+
+    public Optional<Activity> getActivity() {
+        return activity;
     }
 
     public Optional<Role> getRole() {
@@ -115,13 +129,14 @@ public class Person {
                 && email.equals(otherPerson.email)
                 && address.equals(otherPerson.address)
                 && tags.equals(otherPerson.tags)
-                && role.equals(otherPerson.role);
+                && role.equals(otherPerson.role)
+                && activity.equals(otherPerson.activity);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, tags, role);
+        return Objects.hash(name, phone, email, address, tags, role, activity);
     }
 
     @Override
@@ -133,6 +148,7 @@ public class Person {
                 .add("address", address)
                 .add("tags", tags)
                 .add("role", role.orElse(null))
+                .add("activity", activity)
                 .toString();
     }
 

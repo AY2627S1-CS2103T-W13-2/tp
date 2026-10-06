@@ -26,6 +26,20 @@ public class AssignRoleCommandTest {
     private final Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
     @Test
+    public void execute_participantWithActivity_preservesActivityOnAssignmentAndReplacement() throws Exception {
+        Person original = model.getFilteredPersonList().get(0);
+        Person assigned = new PersonBuilder(original).withActivity("Campfire").build();
+        model.setPerson(original, assigned);
+
+        new AssignRoleCommand(INDEX_FIRST_PERSON, new Role("Facilitator")).execute(model);
+        assertEquals(new PersonBuilder(assigned).withRole("Facilitator").build(),
+                model.getFilteredPersonList().get(0));
+        new AssignRoleCommand(INDEX_FIRST_PERSON, new Role("Logistics Lead")).execute(model);
+        assertEquals(new PersonBuilder(assigned).withRole("Logistics Lead").build(),
+                model.getFilteredPersonList().get(0));
+    }
+
+    @Test
     public void execute_validIndex_assignsRole() {
         Person participant = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         Role role = new Role("Facilitator");
