@@ -3,6 +3,7 @@ package seedu.address.storage;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import seedu.address.commons.exceptions.IllegalValueException;
+import seedu.address.model.group.Group;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
@@ -30,6 +32,7 @@ class JsonAdaptedPerson {
     private final String email;
     private final String address;
     private final String role;
+    private final String group;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
 
     /**
@@ -38,22 +41,32 @@ class JsonAdaptedPerson {
     @JsonCreator
     public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("address") String address,
-            @JsonProperty("tags") List<JsonAdaptedTag> tags, @JsonProperty("role") String role) {
+            @JsonProperty("tags") List<JsonAdaptedTag> tags, @JsonProperty("role") String role,
+            @JsonProperty("group") String group) {
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
         this.role = role;
+        this.group = group;
         if (tags != null) {
             this.tags.addAll(tags);
         }
     }
 
     /**
-     * Constructs a {@code JsonAdaptedPerson} without a role for backward compatibility.
+     * Constructs a {@code JsonAdaptedPerson} without assignments for backward compatibility.
      */
     public JsonAdaptedPerson(String name, String phone, String email, String address, List<JsonAdaptedTag> tags) {
-        this(name, phone, email, address, tags, null);
+        this(name, phone, email, address, tags, null, null);
+    }
+
+    /**
+     * Constructs a {@code JsonAdaptedPerson} without a group for role-assignment tests.
+     */
+    public JsonAdaptedPerson(String name, String phone, String email, String address, List<JsonAdaptedTag> tags,
+            String role) {
+        this(name, phone, email, address, tags, role, null);
     }
 
     /**
@@ -65,6 +78,7 @@ class JsonAdaptedPerson {
         email = source.getEmail().value;
         address = source.getAddress().value;
         role = source.getRole().map(assignedRole -> assignedRole.value).orElse(null);
+        group = source.getGroup().map(Object::toString).orElse(null);
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
                 .collect(Collectors.toList()));
@@ -113,18 +127,28 @@ class JsonAdaptedPerson {
         }
         final Address modelAddress = new Address(address);
 
-        Role modelRole = null;
-        if (role != null) {
+        final Optional<Role> modelRole;
+        if (role == null) {
+            modelRole = Optional.empty();
+        } else {
             if (!Role.isValidRole(role)) {
                 throw new IllegalValueException(Role.MESSAGE_CONSTRAINTS);
             }
-            modelRole = new Role(role);
+            modelRole = Optional.of(new Role(role));
+        }
+
+        final Optional<Group> modelGroup;
+        if (group == null) {
+            modelGroup = Optional.empty();
+        } else {
+            if (!Group.isValidGroupName(group)) {
+                throw new IllegalValueException(Group.MESSAGE_CONSTRAINTS);
+            }
+            modelGroup = Optional.of(new Group(group));
         }
 
         final Set<Tag> modelTags = new HashSet<>(personTags);
-        return modelRole == null
-                ? new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags)
-                : new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags, modelRole);
+        return new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags, modelRole, modelGroup);
     }
 
 }

@@ -5,6 +5,7 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_ROLE;
 import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 
 import java.util.List;
+import java.util.Optional;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
@@ -51,7 +52,7 @@ public class AssignRoleCommand extends Command {
 
         Person participant = lastShownList.get(index.getZeroBased());
         Person participantWithRole = new Person(participant.getName(), participant.getPhone(), participant.getEmail(),
-                participant.getAddress(), participant.getTags(), role);
+                participant.getAddress(), participant.getTags(), Optional.of(role), participant.getGroup());
 
         model.setPerson(participant, participantWithRole);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);

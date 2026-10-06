@@ -59,6 +59,23 @@ public class AssignRoleCommandTest {
     }
 
     @Test
+    public void execute_existingGroup_groupPreserved() {
+        Person participant = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person participantWithGroup = new PersonBuilder(participant).withGroup("Logistics").build();
+        model.setPerson(participant, participantWithGroup);
+
+        Role role = new Role("Facilitator");
+        AssignRoleCommand command = new AssignRoleCommand(INDEX_FIRST_PERSON, role);
+        Person expectedPerson = new PersonBuilder(participantWithGroup).withRole(role.value).build();
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+        expectedModel.setPerson(participantWithGroup, expectedPerson);
+
+        String expectedMessage = String.format(AssignRoleCommand.MESSAGE_ASSIGN_ROLE_SUCCESS,
+                role, participant.getName());
+        assertCommandSuccess(command, model, expectedMessage, expectedModel);
+    }
+
+    @Test
     public void execute_invalidIndex_throwsCommandException() {
         Index outOfBounds = Index.fromOneBased(model.getFilteredPersonList().size() + 1);
         AssignRoleCommand command = new AssignRoleCommand(outOfBounds, new Role("Facilitator"));

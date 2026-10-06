@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.AddCommand;
+import seedu.address.logic.commands.AssignGroupCommand;
 import seedu.address.logic.commands.AssignRoleCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.DeleteCommand;
@@ -24,6 +25,7 @@ import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.ViewCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.group.Group;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Role;
@@ -54,6 +56,13 @@ public class AddressBookParserTest {
         AssignRoleCommand command = (AssignRoleCommand) parser.parseCommand(
                 AssignRoleCommand.COMMAND_WORD + " " + INDEX_FIRST_PERSON.getOneBased() + " r/" + role.value);
         assertEquals(new AssignRoleCommand(INDEX_FIRST_PERSON, role), command);
+    }
+
+    @Test
+    public void parseCommand_assignGroup() throws Exception {
+        AssignGroupCommand command = (AssignGroupCommand) parser.parseCommand(
+                AssignGroupCommand.COMMAND_WORD + " " + INDEX_FIRST_PERSON.getOneBased() + " g/Logistics");
+        assertEquals(new AssignGroupCommand(INDEX_FIRST_PERSON, new Group("Logistics")), command);
     }
 
     @Test

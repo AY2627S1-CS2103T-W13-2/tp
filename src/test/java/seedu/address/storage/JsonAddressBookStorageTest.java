@@ -104,6 +104,21 @@ public class JsonAddressBookStorageTest {
     }
 
     @Test
+    public void readAndSaveAddressBook_groupAssignmentPreserved() throws Exception {
+        Path filePath = testFolder.resolve("AddressBookWithGroup.json");
+        Person assignedPerson = new PersonBuilder().withGroup("Logistics").build();
+        AddressBook original = new AddressBook();
+        original.addPerson(assignedPerson);
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(filePath);
+
+        storage.saveAddressBook(original);
+        ReadOnlyAddressBook readBack = storage.readAddressBook().orElseThrow();
+
+        assertEquals(original, new AddressBook(readBack));
+        assertEquals(assignedPerson.getGroup(), readBack.getPersonList().getFirst().getGroup());
+    }
+
+    @Test
     public void saveAddressBook_nullAddressBook_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> saveAddressBook(null, "SomeFile.json"));
     }
