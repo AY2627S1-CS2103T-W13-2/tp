@@ -32,6 +32,8 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
+   * `view 3` : Displays all stored details of the 3rd participant shown in the current list.
+
    * `clear` : Deletes all contacts.
 
    * `exit` : Exits the app.
@@ -92,6 +94,20 @@ Examples:
 Shows a list of all persons in the address book.
 
 Format: `list`
+
+### Viewing a participant: `view`
+
+Displays all stored details of a participant without changing the participant's data.
+
+Format: `view INDEX`
+
+* Displays the participant at the specified `INDEX`.
+* The index refers to the index number shown in the displayed participant list.
+* The index **must be a positive integer** 1, 2, 3, …​
+
+Examples:
+* `list` followed by `view 2` displays all stored details of the 2nd participant in the address book.
+* `find Betsy` followed by `view 1` displays all stored details of the 1st participant in the results of the `find` command.
 
 ### Editing a person: `edit`
 
@@ -195,4 +211,5 @@ Action | Format, Examples
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List** | `list`
+**View** | `view INDEX`<br> e.g., `view 3`
 **Help** | `help`
