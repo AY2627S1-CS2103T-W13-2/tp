@@ -125,6 +125,20 @@ Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st participant to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd participant to be `Betsy Crower` and clears all existing tags.
 
+### Assigning a role to a participant: `assign-role`
+
+Assigns one event role to an existing participant.
+
+Format: `assign-role INDEX r/ROLE`
+
+* Assigns the role to the participant at the specified `INDEX` in the displayed participant list.
+* The index **must be a positive integer** 1, 2, 3, …​ and refer to a displayed participant.
+* The role must contain at least one non-whitespace character.
+* Assigning another role to the same participant replaces the existing role.
+
+Example:
+* `assign-role 2 r/Logistics Lead` assigns the role `Logistics Lead` to the second displayed participant.
+
 ### Locating participants by name: `find`
 
 Finds participants whose names contain any of the given keywords.
@@ -206,6 +220,7 @@ _Details coming soon ..._
 Action | Format, Examples
 --------|------------------
 **Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Assign role** | `assign-role INDEX r/ROLE`<br> e.g., `assign-role 2 r/Logistics Lead`
 **Clear** | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`

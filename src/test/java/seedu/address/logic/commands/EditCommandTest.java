@@ -100,6 +100,23 @@ public class EditCommandTest {
     }
 
     @Test
+    public void execute_participantHasRole_rolePreserved() {
+        Person participant = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person participantWithRole = new PersonBuilder(participant).withRole("Facilitator").build();
+        model.setPerson(participant, participantWithRole);
+
+        Person editedParticipant = new PersonBuilder(participantWithRole).withPhone(VALID_PHONE_BOB).build();
+        EditCommand command = new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withPhone(VALID_PHONE_BOB).build());
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+        expectedModel.setPerson(participantWithRole, editedParticipant);
+
+        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS,
+                Messages.format(editedParticipant));
+        assertCommandSuccess(command, model, expectedMessage, expectedModel);
+    }
+
+    @Test
     public void execute_duplicatePersonUnfilteredList_failure() {
         Person firstPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder(firstPerson).build();
