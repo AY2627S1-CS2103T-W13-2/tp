@@ -45,6 +45,8 @@ public class Messages {
                 .append(person.getAddress())
                 .append("; Role: ")
                 .append(person.getRole().map(Object::toString).orElse("Unassigned"))
+                .append("; Activity: ")
+                .append(person.getActivity().map(Object::toString).orElse("Unassigned"))
                 .append("; Group: ")
                 .append(person.getGroup().map(Object::toString).orElse("Unassigned"))
                 .append("; Tags: ");

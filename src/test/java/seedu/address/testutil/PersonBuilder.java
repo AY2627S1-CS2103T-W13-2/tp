@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import seedu.address.model.group.Group;
+import seedu.address.model.person.Activity;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
@@ -30,7 +31,8 @@ public class PersonBuilder {
     private Address address;
     private Set<Tag> tags;
     private Optional<Role> role;
-    private Optional<Group> group;
+    private Optional<Activity> activity = Optional.empty();
+    private Optional<Group> group = Optional.empty();
 
     /**
      * Creates a {@code PersonBuilder} with the default details.
@@ -42,7 +44,6 @@ public class PersonBuilder {
         address = new Address(DEFAULT_ADDRESS);
         tags = new HashSet<>();
         role = Optional.empty();
-        group = Optional.empty();
     }
 
     /**
@@ -55,6 +56,7 @@ public class PersonBuilder {
         address = personToCopy.getAddress();
         tags = new HashSet<>(personToCopy.getTags());
         role = personToCopy.getRole();
+        activity = personToCopy.getActivity();
         group = personToCopy.getGroup();
     }
 
@@ -107,7 +109,15 @@ public class PersonBuilder {
     }
 
     /**
-     * Sets the {@code Group} of the {@code Person} that we are building.
+     * Sets the activity of the person being built.
+     */
+    public PersonBuilder withActivity(String activity) {
+        this.activity = Optional.of(new Activity(activity));
+        return this;
+    }
+
+    /**
+     * Sets the group of the person being built.
      */
     public PersonBuilder withGroup(String group) {
         this.group = Optional.of(new Group(group));
@@ -115,7 +125,7 @@ public class PersonBuilder {
     }
 
     public Person build() {
-        return new Person(name, phone, email, address, tags, role, group);
+        return new Person(name, phone, email, address, tags, role, activity, group);
     }
 
 }

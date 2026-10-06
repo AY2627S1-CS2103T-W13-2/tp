@@ -103,7 +103,31 @@ public class PersonTest {
     public void toStringMethod() {
         String expected = Person.class.getCanonicalName() + "{name=" + ALICE.getName() + ", phone=" + ALICE.getPhone()
                 + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress() + ", tags=" + ALICE.getTags()
-                + ", role=null, group=null}";
+                + ", role=null, activity=" + ALICE.getActivity() + ", group=null}";
         assertEquals(expected, ALICE.toString());
+    }
+
+    @Test
+    public void equals_differentActivity_sameIdentityButDifferentData() {
+        Person assignedAlice = new PersonBuilder(ALICE).withActivity("Campfire").build();
+        assertTrue(ALICE.getActivity().isEmpty());
+        assertTrue(ALICE.isSamePerson(assignedAlice));
+        assertFalse(ALICE.equals(assignedAlice));
+        Person copy = new PersonBuilder(assignedAlice).build();
+        assertEquals(assignedAlice, copy);
+        assertEquals(assignedAlice.hashCode(), copy.hashCode());
+    }
+
+    @Test
+    public void equals_bothAssignments_comparesRoleAndActivityIndependently() {
+        Person assigned = new PersonBuilder(ALICE).withRole("Facilitator").withActivity("Campfire").build();
+        Person copy = new PersonBuilder(assigned).build();
+        assertEquals(assigned, copy);
+        assertEquals(assigned.hashCode(), copy.hashCode());
+        assertTrue(ALICE.isSamePerson(assigned));
+        assertFalse(assigned.equals(new PersonBuilder(assigned).withRole("Logistics Lead").build()));
+        assertFalse(assigned.equals(new PersonBuilder(assigned).withActivity("Hiking").build()));
+        assertTrue(assigned.toString().contains("role=Facilitator"));
+        assertTrue(assigned.toString().contains("activity=Optional[Campfire]"));
     }
 }

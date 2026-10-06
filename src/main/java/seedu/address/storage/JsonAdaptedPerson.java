@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.group.Group;
+import seedu.address.model.person.Activity;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
@@ -32,6 +33,7 @@ class JsonAdaptedPerson {
     private final String email;
     private final String address;
     private final String role;
+    private final String activity;
     private final String group;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
 
@@ -42,12 +44,13 @@ class JsonAdaptedPerson {
     public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("address") String address,
             @JsonProperty("tags") List<JsonAdaptedTag> tags, @JsonProperty("role") String role,
-            @JsonProperty("group") String group) {
+            @JsonProperty("activity") String activity, @JsonProperty("group") String group) {
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
         this.role = role;
+        this.activity = activity;
         this.group = group;
         if (tags != null) {
             this.tags.addAll(tags);
@@ -55,18 +58,26 @@ class JsonAdaptedPerson {
     }
 
     /**
-     * Constructs a {@code JsonAdaptedPerson} without assignments for backward compatibility.
+     * Constructs an adapted person without a group for backward compatibility.
      */
-    public JsonAdaptedPerson(String name, String phone, String email, String address, List<JsonAdaptedTag> tags) {
-        this(name, phone, email, address, tags, null, null);
+    public JsonAdaptedPerson(String name, String phone, String email, String address,
+            List<JsonAdaptedTag> tags, String role, String activity) {
+        this(name, phone, email, address, tags, role, activity, null);
     }
 
     /**
-     * Constructs a {@code JsonAdaptedPerson} without a group for role-assignment tests.
+     * Constructs an adapted person without an activity for backward compatibility.
      */
-    public JsonAdaptedPerson(String name, String phone, String email, String address, List<JsonAdaptedTag> tags,
-            String role) {
+    public JsonAdaptedPerson(String name, String phone, String email, String address,
+            List<JsonAdaptedTag> tags, String role) {
         this(name, phone, email, address, tags, role, null);
+    }
+
+    /**
+     * Constructs a {@code JsonAdaptedPerson} without a role for backward compatibility.
+     */
+    public JsonAdaptedPerson(String name, String phone, String email, String address, List<JsonAdaptedTag> tags) {
+        this(name, phone, email, address, tags, null);
     }
 
     /**
@@ -78,6 +89,7 @@ class JsonAdaptedPerson {
         email = source.getEmail().value;
         address = source.getAddress().value;
         role = source.getRole().map(assignedRole -> assignedRole.value).orElse(null);
+        activity = source.getActivity().map(assignedActivity -> assignedActivity.value).orElse(null);
         group = source.getGroup().map(Object::toString).orElse(null);
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
@@ -127,28 +139,25 @@ class JsonAdaptedPerson {
         }
         final Address modelAddress = new Address(address);
 
-        final Optional<Role> modelRole;
-        if (role == null) {
-            modelRole = Optional.empty();
-        } else {
+        Role modelRole = null;
+        if (role != null) {
             if (!Role.isValidRole(role)) {
                 throw new IllegalValueException(Role.MESSAGE_CONSTRAINTS);
             }
-            modelRole = Optional.of(new Role(role));
-        }
-
-        final Optional<Group> modelGroup;
-        if (group == null) {
-            modelGroup = Optional.empty();
-        } else {
-            if (!Group.isValidGroupName(group)) {
-                throw new IllegalValueException(Group.MESSAGE_CONSTRAINTS);
-            }
-            modelGroup = Optional.of(new Group(group));
+            modelRole = new Role(role);
         }
 
         final Set<Tag> modelTags = new HashSet<>(personTags);
-        return new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags, modelRole, modelGroup);
+        if (activity != null && !Activity.isValidActivity(activity)) {
+            throw new IllegalValueException(Activity.MESSAGE_CONSTRAINTS);
+        }
+        final Optional<Activity> modelActivity = Optional.ofNullable(activity).map(Activity::new);
+        if (group != null && !Group.isValidGroupName(group)) {
+            throw new IllegalValueException(Group.MESSAGE_CONSTRAINTS);
+        }
+        final Optional<Group> modelGroup = Optional.ofNullable(group).map(Group::new);
+        return new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags,
+                Optional.ofNullable(modelRole), modelActivity, modelGroup);
     }
 
 }

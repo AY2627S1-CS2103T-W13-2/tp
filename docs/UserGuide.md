@@ -125,6 +125,23 @@ Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st participant to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd participant to be `Betsy Crower` and clears all existing tags.
 
+### Assigning an activity: `assign-activity`
+
+Assigns one activity to an existing participant and displays it on their card.
+
+Format: `assign-activity INDEX a/ACTIVITY`
+
+* `INDEX` is the positive integer shown beside the participant in the current list. After `find`, use the index in the search results.
+* Each participant can have at most one activity. Assigning another activity replaces the previous assignment.
+* `ACTIVITY` must not be blank. Names can contain spaces and punctuation; surrounding whitespace is removed.
+* Supply `a/` exactly once. In this command it means activity; in `add` and `edit`, it still means address.
+* The assignment is saved automatically and retained after restarting or editing the participant's other details. Assigning or replacing an activity preserves their role; assigning or replacing a role preserves their activity.
+* Existing records start without an activity. Removing an activity, multiple activities, attendance, and filtering by activity are not supported yet.
+
+Examples:
+* `assign-activity 1 a/Campfire` assigns Campfire to the first participant in the displayed list.
+* `assign-activity 1 a/Arts & Crafts` replaces that participant's activity with Arts & Crafts.
+
 ### Assigning a role to a participant: `assign-role`
 
 Assigns one event role to an existing participant.
@@ -148,7 +165,7 @@ Format: `assign-group INDEX g/GROUP`
 * Assigns the person at the specified `INDEX` to `GROUP`.
 * The index refers to the index number shown in the displayed person list and must be a positive integer.
 * `GROUP` must not be blank and may contain spaces.
-* A person can belong to exactly one group. Assigning another group replaces the current group.
+* A participant can belong to at most one group. Assigning another group replaces the current group and preserves their role and activity.
 * Group removal and managing a separate list of groups are not supported yet.
 
 Example:
@@ -238,6 +255,7 @@ Action | Format, Examples
 **Assign role** | `assign-role INDEX r/ROLE`<br> e.g., `assign-role 2 r/Logistics Lead`
 **Assign group** | `assign-group INDEX g/GROUP`<br> e.g., `assign-group 2 g/Logistics`
 **Clear** | `clear`
+**Assign activity** | `assign-activity INDEX a/ACTIVITY`<br> e.g., `assign-activity 1 a/Campfire`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`

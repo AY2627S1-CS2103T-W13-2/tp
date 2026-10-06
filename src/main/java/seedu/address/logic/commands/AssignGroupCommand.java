@@ -53,7 +53,7 @@ public class AssignGroupCommand extends Command {
         Person personToAssign = lastShownList.get(index.getZeroBased());
         Person assignedPerson = new Person(personToAssign.getName(), personToAssign.getPhone(),
                 personToAssign.getEmail(), personToAssign.getAddress(), personToAssign.getTags(),
-                personToAssign.getRole(), Optional.of(group));
+                personToAssign.getRole(), personToAssign.getActivity(), Optional.of(group));
 
         model.setPerson(personToAssign, assignedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);

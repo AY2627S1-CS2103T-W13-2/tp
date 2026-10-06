@@ -69,7 +69,8 @@ public class AssignGroupCommandTest {
     @Test
     public void execute_existingGroup_replacesGroup() {
         Person originalPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
-        Person personWithGroup = new PersonBuilder(originalPerson).withGroup(VALID_GROUP_PROGRAMMES).build();
+        Person personWithGroup = new PersonBuilder(originalPerson).withGroup(VALID_GROUP_PROGRAMMES)
+                .withRole("Facilitator").withActivity("Campfire").build();
         model.setPerson(originalPerson, personWithGroup);
 
         AssignGroupCommand command = new AssignGroupCommand(INDEX_FIRST_PERSON, new Group(VALID_GROUP_LOGISTICS));
@@ -85,7 +86,8 @@ public class AssignGroupCommandTest {
     @Test
     public void execute_existingRole_rolePreserved() {
         Person originalPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
-        Person personWithRole = new PersonBuilder(originalPerson).withRole("Facilitator").build();
+        Person personWithRole = new PersonBuilder(originalPerson).withRole("Facilitator")
+                .withActivity("Campfire").build();
         model.setPerson(originalPerson, personWithRole);
 
         Group group = new Group(VALID_GROUP_LOGISTICS);
