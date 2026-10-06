@@ -10,6 +10,7 @@ import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.person.Role;
 import seedu.address.model.tag.Tag;
 import seedu.address.model.util.SampleDataUtil;
 
@@ -28,6 +29,7 @@ public class PersonBuilder {
     private Email email;
     private Address address;
     private Set<Tag> tags;
+    private Optional<Role> role;
     private Optional<Activity> activity = Optional.empty();
 
     /**
@@ -39,6 +41,7 @@ public class PersonBuilder {
         email = new Email(DEFAULT_EMAIL);
         address = new Address(DEFAULT_ADDRESS);
         tags = new HashSet<>();
+        role = Optional.empty();
     }
 
     /**
@@ -50,6 +53,7 @@ public class PersonBuilder {
         email = personToCopy.getEmail();
         address = personToCopy.getAddress();
         tags = new HashSet<>(personToCopy.getTags());
+        role = personToCopy.getRole();
         activity = personToCopy.getActivity();
     }
 
@@ -93,8 +97,12 @@ public class PersonBuilder {
         return this;
     }
 
-    public Person build() {
-        return new Person(name, phone, email, address, tags, activity);
+    /**
+     * Sets the {@code Role} of the {@code Person} that we are building.
+     */
+    public PersonBuilder withRole(String role) {
+        this.role = Optional.of(new Role(role));
+        return this;
     }
 
     /**
@@ -103,6 +111,10 @@ public class PersonBuilder {
     public PersonBuilder withActivity(String activity) {
         this.activity = Optional.of(new Activity(activity));
         return this;
+    }
+
+    public Person build() {
+        return new Person(name, phone, email, address, tags, role, activity);
     }
 
 }

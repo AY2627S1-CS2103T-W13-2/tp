@@ -41,6 +41,8 @@ public class PersonCard extends UiPart<Region> {
     @FXML
     private Label activity;
     @FXML
+    private Label role;
+    @FXML
     private FlowPane tags;
 
     /**
@@ -57,6 +59,12 @@ public class PersonCard extends UiPart<Region> {
         activity.setText(person.getActivity().map(value -> "Activity: " + value).orElse(""));
         activity.setVisible(person.getActivity().isPresent());
         activity.setManaged(person.getActivity().isPresent());
+        if (person.getRole().isPresent()) {
+            role.setText("Role: " + person.getRole().get().value);
+        } else {
+            role.setManaged(false);
+            role.setVisible(false);
+        }
         person.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
                 .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));

@@ -16,7 +16,9 @@ import seedu.address.model.person.Activity;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
+import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.person.Role;
 import seedu.address.testutil.PersonBuilder;
 
 public class JsonAdaptedPersonTest {
@@ -25,6 +27,8 @@ public class JsonAdaptedPersonTest {
     private static final String INVALID_ADDRESS = " ";
     private static final String INVALID_EMAIL = "example.com";
     private static final String INVALID_TAG = "#friend";
+    private static final String INVALID_ROLE = "   ";
+    private static final String VALID_ROLE = "Facilitator";
 
     private static final String VALID_NAME = BENSON.getName().toString();
     private static final String VALID_PHONE = BENSON.getPhone().toString();
@@ -41,16 +45,25 @@ public class JsonAdaptedPersonTest {
     }
 
     @Test
+    public void toModelType_bothAssignments_returnsPersonWithRoleAndActivity() throws Exception {
+        Person assigned = new PersonBuilder(BENSON).withRole("Facilitator").withActivity("Campfire").build();
+        assertEquals(assigned, new JsonAdaptedPerson(assigned).toModelType());
+        JsonAdaptedPerson details = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
+                VALID_TAGS, "Facilitator", "Campfire");
+        assertEquals(assigned, details.toModelType());
+    }
+
+    @Test
     public void toModelType_assignedActivity_returnsAssignedPerson() throws Exception {
         JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
-                VALID_TAGS, "Campfire");
+                VALID_TAGS, null, "Campfire");
         assertEquals(new PersonBuilder(BENSON).withActivity("Campfire").build(), person.toModelType());
     }
 
     @Test
     public void toModelType_nullActivity_returnsUnassignedPerson() throws Exception {
         JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
-                VALID_TAGS, null);
+                VALID_TAGS, null, null);
         assertEquals(BENSON, person.toModelType());
     }
 
@@ -58,7 +71,7 @@ public class JsonAdaptedPersonTest {
     public void toModelType_blankActivity_throwsIllegalValueException() {
         for (String blank : new String[] {"", " ", "\t", "\u2003"}) {
             JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
-                    VALID_TAGS, blank);
+                    VALID_TAGS, null, blank);
             assertThrows(IllegalValueException.class, Activity.MESSAGE_CONSTRAINTS, person::toModelType);
         }
     }
@@ -130,6 +143,20 @@ public class JsonAdaptedPersonTest {
         JsonAdaptedPerson person =
                 new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, invalidTags);
         assertThrows(IllegalValueException.class, person::toModelType);
+    }
+
+    @Test
+    public void toModelType_invalidRole_throwsIllegalValueException() {
+        JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
+                VALID_TAGS, INVALID_ROLE);
+        assertThrows(IllegalValueException.class, Role.MESSAGE_CONSTRAINTS, person::toModelType);
+    }
+
+    @Test
+    public void toModelType_validRole_returnsPersonWithRole() throws Exception {
+        Person personWithRole = new PersonBuilder(BENSON).withRole(VALID_ROLE).build();
+        JsonAdaptedPerson person = new JsonAdaptedPerson(personWithRole);
+        assertEquals(personWithRole, person.toModelType());
     }
 
 }

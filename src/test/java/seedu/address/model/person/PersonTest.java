@@ -88,13 +88,17 @@ public class PersonTest {
         // different tags -> returns false
         editedAlice = new PersonBuilder(ALICE).withTags(VALID_TAG_HUSBAND).build();
         assertFalse(ALICE.equals(editedAlice));
+
+        // different role -> returns false
+        editedAlice = new PersonBuilder(ALICE).withRole("Facilitator").build();
+        assertFalse(ALICE.equals(editedAlice));
     }
 
     @Test
     public void toStringMethod() {
         String expected = Person.class.getCanonicalName() + "{name=" + ALICE.getName() + ", phone=" + ALICE.getPhone()
                 + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress() + ", tags=" + ALICE.getTags()
-                + ", activity=" + ALICE.getActivity() + "}";
+                + ", role=null, activity=" + ALICE.getActivity() + "}";
         assertEquals(expected, ALICE.toString());
     }
 
@@ -107,5 +111,18 @@ public class PersonTest {
         Person copy = new PersonBuilder(assignedAlice).build();
         assertEquals(assignedAlice, copy);
         assertEquals(assignedAlice.hashCode(), copy.hashCode());
+    }
+
+    @Test
+    public void equals_bothAssignments_comparesRoleAndActivityIndependently() {
+        Person assigned = new PersonBuilder(ALICE).withRole("Facilitator").withActivity("Campfire").build();
+        Person copy = new PersonBuilder(assigned).build();
+        assertEquals(assigned, copy);
+        assertEquals(assigned.hashCode(), copy.hashCode());
+        assertTrue(ALICE.isSamePerson(assigned));
+        assertFalse(assigned.equals(new PersonBuilder(assigned).withRole("Logistics Lead").build()));
+        assertFalse(assigned.equals(new PersonBuilder(assigned).withActivity("Hiking").build()));
+        assertTrue(assigned.toString().contains("role=Facilitator"));
+        assertTrue(assigned.toString().contains("activity=Optional[Campfire]"));
     }
 }

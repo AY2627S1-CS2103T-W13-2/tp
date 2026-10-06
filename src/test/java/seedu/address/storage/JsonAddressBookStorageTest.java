@@ -9,6 +9,7 @@ import static seedu.address.testutil.TypicalPersons.IDA;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -18,6 +19,8 @@ import org.junit.jupiter.api.io.TempDir;
 import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.person.Person;
+import seedu.address.testutil.PersonBuilder;
 
 public class JsonAddressBookStorageTest {
     private static final Path TEST_DATA_FOLDER = Paths.get("src", "test", "data", "JsonAddressBookStorageTest");
@@ -38,6 +41,43 @@ public class JsonAddressBookStorageTest {
         return prefsFileInTestDataFolder != null
                 ? TEST_DATA_FOLDER.resolve(prefsFileInTestDataFolder)
                 : null;
+    }
+
+    @Test
+    public void saveAndReadAddressBook_optionalAssignments_preservesEachCombination() throws Exception {
+        Path filePath = testFolder.resolve("Assignments.json");
+        AddressBook original = new AddressBook();
+        original.addPerson(new PersonBuilder().withName("Unassigned Participant").build());
+        original.addPerson(new PersonBuilder().withName("Role Participant").withRole("Facilitator").build());
+        original.addPerson(new PersonBuilder().withName("Activity Participant").withActivity("Campfire").build());
+        original.addPerson(new PersonBuilder().withName("Both Participant")
+                .withRole("Facilitator").withActivity("Campfire").build());
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(filePath);
+
+        storage.saveAddressBook(original);
+        JsonAddressBookStorage restartedStorage = new JsonAddressBookStorage(filePath);
+        assertEquals(original, new AddressBook(restartedStorage.readAddressBook().orElseThrow()));
+    }
+
+    @Test
+    public void readAddressBook_missingOptionalAssignments_preservesExistingAssignment() throws Exception {
+        Path filePath = testFolder.resolve("OlderAssignments.json");
+        Files.writeString(filePath, """
+                {"persons": [
+                  {"name": "Role Participant", "phone": "91234567", "email": "role@example.com",
+                   "address": "Kent Ridge", "tags": [], "role": "Facilitator"},
+                  {"name": "Activity Participant", "phone": "92345678", "email": "activity@example.com",
+                   "address": "Kent Ridge", "tags": [], "activity": "Campfire"}
+                ]}
+                """);
+        AddressBook expected = new AddressBook();
+        expected.addPerson(new PersonBuilder().withName("Role Participant").withPhone("91234567")
+                .withEmail("role@example.com").withAddress("Kent Ridge").withRole("Facilitator").build());
+        expected.addPerson(new PersonBuilder().withName("Activity Participant").withPhone("92345678")
+                .withEmail("activity@example.com").withAddress("Kent Ridge").withActivity("Campfire").build());
+
+        ReadOnlyAddressBook loaded = new JsonAddressBookStorage(filePath).readAddressBook().orElseThrow();
+        assertEquals(expected, new AddressBook(loaded));
     }
 
     @Test
@@ -93,6 +133,21 @@ public class JsonAddressBookStorageTest {
         readBack = jsonAddressBookStorage.readAddressBook().get(); // file path not specified
         assertEquals(original, new AddressBook(readBack));
 
+    }
+
+    @Test
+    public void saveAndReadAddressBook_personWithRole_rolePreserved() throws Exception {
+        Path filePath = testFolder.resolve("AddressBookWithRole.json");
+        Person participantWithRole = new PersonBuilder().withRole("Logistics Lead").build();
+        AddressBook original = new AddressBook();
+        original.addPerson(participantWithRole);
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(filePath);
+
+        storage.saveAddressBook(original);
+        ReadOnlyAddressBook readBack = storage.readAddressBook().get();
+
+        assertEquals(original, new AddressBook(readBack));
+        assertEquals("Logistics Lead", readBack.getPersonList().get(0).getRole().get().value);
     }
 
     @Test

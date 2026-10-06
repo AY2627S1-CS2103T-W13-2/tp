@@ -44,6 +44,15 @@ public class AssignActivityCommandTest {
     }
 
     @Test
+    public void execute_participantWithRole_preservesRoleOnAssignmentAndReplacement() {
+        Person original = model.getFilteredPersonList().get(0);
+        model.setPerson(original, new PersonBuilder(original).withRole("Facilitator").build());
+        assertAssignmentSuccess("Campfire");
+        assertAssignmentSuccess("Hiking");
+        assertEquals("Facilitator", model.getFilteredPersonList().get(0).getRole().orElseThrow().value);
+    }
+
+    @Test
     public void execute_sameActivity_success() {
         assertAssignmentSuccess("Campfire");
         assertAssignmentSuccess("Campfire");

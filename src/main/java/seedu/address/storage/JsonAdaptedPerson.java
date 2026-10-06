@@ -17,6 +17,7 @@ import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.person.Role;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -30,31 +31,42 @@ class JsonAdaptedPerson {
     private final String phone;
     private final String email;
     private final String address;
+    private final String role;
     private final String activity;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
 
     /**
      * Constructs a {@code JsonAdaptedPerson} with the given person details.
      */
-    public JsonAdaptedPerson(String name, String phone, String email, String address, List<JsonAdaptedTag> tags) {
-        this(name, phone, email, address, tags, null);
-    }
-
-    /**
-     * Constructs an adapted person. A missing or null activity represents an unassigned participant.
-     */
     @JsonCreator
     public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("address") String address,
-            @JsonProperty("tags") List<JsonAdaptedTag> tags, @JsonProperty("activity") String activity) {
+            @JsonProperty("tags") List<JsonAdaptedTag> tags, @JsonProperty("role") String role,
+            @JsonProperty("activity") String activity) {
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
+        this.role = role;
         this.activity = activity;
         if (tags != null) {
             this.tags.addAll(tags);
         }
+    }
+
+    /**
+     * Constructs an adapted person without an activity for backward compatibility.
+     */
+    public JsonAdaptedPerson(String name, String phone, String email, String address,
+            List<JsonAdaptedTag> tags, String role) {
+        this(name, phone, email, address, tags, role, null);
+    }
+
+    /**
+     * Constructs a {@code JsonAdaptedPerson} without a role for backward compatibility.
+     */
+    public JsonAdaptedPerson(String name, String phone, String email, String address, List<JsonAdaptedTag> tags) {
+        this(name, phone, email, address, tags, null);
     }
 
     /**
@@ -65,7 +77,8 @@ class JsonAdaptedPerson {
         phone = source.getPhone().value;
         email = source.getEmail().value;
         address = source.getAddress().value;
-        activity = source.getActivity().map(value -> value.value).orElse(null);
+        role = source.getRole().map(assignedRole -> assignedRole.value).orElse(null);
+        activity = source.getActivity().map(assignedActivity -> assignedActivity.value).orElse(null);
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
                 .collect(Collectors.toList()));
@@ -114,12 +127,21 @@ class JsonAdaptedPerson {
         }
         final Address modelAddress = new Address(address);
 
+        Role modelRole = null;
+        if (role != null) {
+            if (!Role.isValidRole(role)) {
+                throw new IllegalValueException(Role.MESSAGE_CONSTRAINTS);
+            }
+            modelRole = new Role(role);
+        }
+
         final Set<Tag> modelTags = new HashSet<>(personTags);
         if (activity != null && !Activity.isValidActivity(activity)) {
             throw new IllegalValueException(Activity.MESSAGE_CONSTRAINTS);
         }
         final Optional<Activity> modelActivity = Optional.ofNullable(activity).map(Activity::new);
-        return new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags, modelActivity);
+        return new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags,
+                Optional.ofNullable(modelRole), modelActivity);
     }
 
 }

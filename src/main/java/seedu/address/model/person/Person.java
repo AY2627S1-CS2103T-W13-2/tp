@@ -24,8 +24,9 @@ public class Person {
 
     // Data fields
     private final Address address;
-    private final Optional<Activity> activity;
     private final Set<Tag> tags = new HashSet<>();
+    private final Optional<Role> role;
+    private final Optional<Activity> activity;
 
     /**
      * Every field must be present and not null.
@@ -35,16 +36,32 @@ public class Person {
     }
 
     /**
-     * Constructs a person with an optional activity. Every argument must be non-null.
+     * Creates a person with an assigned role.
      */
-    public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags, Optional<Activity> activity) {
-        requireAllNonNull(name, phone, email, address, tags, activity);
+    public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags, Role role) {
+        this(name, phone, email, address, tags, Optional.of(role));
+    }
+
+    /**
+     * Creates a person with an optional assigned role.
+     */
+    public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags, Optional<Role> role) {
+        this(name, phone, email, address, tags, role, Optional.empty());
+    }
+
+    /**
+     * Creates a person with independent optional role and activity assignments.
+     */
+    public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags,
+            Optional<Role> role, Optional<Activity> activity) {
+        requireAllNonNull(name, phone, email, address, tags, role, activity);
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
-        this.activity = activity;
         this.tags.addAll(tags);
+        this.role = role;
+        this.activity = activity;
     }
 
     public Name getName() {
@@ -63,16 +80,20 @@ public class Person {
         return address;
     }
 
-    public Optional<Activity> getActivity() {
-        return activity;
-    }
-
     /**
      * Returns an immutable tag set, which throws {@code UnsupportedOperationException}
      * if modification is attempted.
      */
     public Set<Tag> getTags() {
         return Collections.unmodifiableSet(tags);
+    }
+
+    public Optional<Activity> getActivity() {
+        return activity;
+    }
+
+    public Optional<Role> getRole() {
+        return role;
     }
 
     /**
@@ -107,14 +128,15 @@ public class Person {
                 && phone.equals(otherPerson.phone)
                 && email.equals(otherPerson.email)
                 && address.equals(otherPerson.address)
-                && activity.equals(otherPerson.activity)
-                && tags.equals(otherPerson.tags);
+                && tags.equals(otherPerson.tags)
+                && role.equals(otherPerson.role)
+                && activity.equals(otherPerson.activity);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, tags, activity);
+        return Objects.hash(name, phone, email, address, tags, role, activity);
     }
 
     @Override
@@ -125,6 +147,7 @@ public class Person {
                 .add("email", email)
                 .add("address", address)
                 .add("tags", tags)
+                .add("role", role.orElse(null))
                 .add("activity", activity)
                 .toString();
     }

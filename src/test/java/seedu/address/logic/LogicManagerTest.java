@@ -73,19 +73,22 @@ public class LogicManagerTest {
     @Test
     public void execute_assignAndEditActivity_persistsAcrossReload() throws Exception {
         model.addPerson(AMY);
+        logic.execute("assign-role 1 r/Facilitator");
         logic.execute("assign-activity 1 a/Campfire");
         JsonAddressBookStorage savedStorage =
                 new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
         Model reloaded = new ModelManager(savedStorage.readAddressBook().orElseThrow(), new UserPrefs());
-        assertEquals(new PersonBuilder(AMY).withActivity("Campfire").build(),
+        assertEquals(new PersonBuilder(AMY).withRole("Facilitator").withActivity("Campfire").build(),
                 reloaded.getFilteredPersonList().get(0));
 
         Logic restartedLogic = new LogicManager(reloaded, new StorageManager(savedStorage,
                 new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"))));
         restartedLogic.execute("assign-activity 1 a/Arts & Crafts");
+        restartedLogic.execute("assign-role 1 r/Logistics Lead");
         restartedLogic.execute("edit 1 p/91234567");
         Model reloadedAgain = new ModelManager(savedStorage.readAddressBook().orElseThrow(), new UserPrefs());
-        assertEquals(new PersonBuilder(AMY).withActivity("Arts & Crafts").withPhone("91234567").build(),
+        assertEquals(new PersonBuilder(AMY).withRole("Logistics Lead").withActivity("Arts & Crafts")
+                .withPhone("91234567").build(),
                 reloadedAgain.getFilteredPersonList().get(0));
     }
 

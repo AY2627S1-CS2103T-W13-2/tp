@@ -32,6 +32,8 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
+   * `view 3` : Displays all stored details of the 3rd participant shown in the current list.
+
    * `clear` : Deletes all contacts.
 
    * `exit` : Exits the app.
@@ -93,6 +95,20 @@ Shows a list of all persons in the address book.
 
 Format: `list`
 
+### Viewing a participant: `view`
+
+Displays all stored details of a participant without changing the participant's data.
+
+Format: `view INDEX`
+
+* Displays the participant at the specified `INDEX`.
+* The index refers to the index number shown in the displayed participant list.
+* The index **must be a positive integer** 1, 2, 3, …​
+
+Examples:
+* `list` followed by `view 2` displays all stored details of the 2nd participant in the address book.
+* `find Betsy` followed by `view 1` displays all stored details of the 1st participant in the results of the `find` command.
+
 ### Editing a person: `edit`
 
 Edits an existing person in the address book.
@@ -119,12 +135,26 @@ Format: `assign-activity INDEX a/ACTIVITY`
 * Each participant can have at most one activity. Assigning another activity replaces the previous assignment.
 * `ACTIVITY` must not be blank. Names can contain spaces and punctuation; surrounding whitespace is removed.
 * Supply `a/` exactly once. In this command it means activity; in `add` and `edit`, it still means address.
-* The assignment is saved automatically and retained after restarting or editing the participant's other details.
+* The assignment is saved automatically and retained after restarting or editing the participant's other details. Assigning or replacing an activity preserves their role; assigning or replacing a role preserves their activity.
 * Existing records start without an activity. Removing an activity, multiple activities, attendance, and filtering by activity are not supported yet.
 
 Examples:
 * `assign-activity 1 a/Campfire` assigns Campfire to the first participant in the displayed list.
 * `assign-activity 1 a/Arts & Crafts` replaces that participant's activity with Arts & Crafts.
+
+### Assigning a role to a participant: `assign-role`
+
+Assigns one event role to an existing participant.
+
+Format: `assign-role INDEX r/ROLE`
+
+* Assigns the role to the participant at the specified `INDEX` in the displayed participant list.
+* The index **must be a positive integer** 1, 2, 3, …​ and refer to a displayed participant.
+* The role must contain at least one non-whitespace character.
+* Assigning another role to the same participant replaces the existing role.
+
+Example:
+* `assign-role 2 r/Logistics Lead` assigns the role `Logistics Lead` to the second displayed participant.
 
 ### Locating persons by name: `find`
 
@@ -207,10 +237,12 @@ _Details coming soon ..._
 Action | Format, Examples
 --------|------------------
 **Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Assign role** | `assign-role INDEX r/ROLE`<br> e.g., `assign-role 2 r/Logistics Lead`
 **Clear** | `clear`
 **Assign activity** | `assign-activity INDEX a/ACTIVITY`<br> e.g., `assign-activity 1 a/Campfire`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List** | `list`
+**View** | `view INDEX`<br> e.g., `view 3`
 **Help** | `help`
