@@ -109,6 +109,23 @@ Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
 
+### Assigning an activity: `assign-activity`
+
+Assigns one activity to an existing participant and displays it on their card.
+
+Format: `assign-activity INDEX a/ACTIVITY`
+
+* `INDEX` is the positive integer shown beside the participant in the current list. After `find`, use the index in the search results.
+* Each participant can have at most one activity. Assigning another activity replaces the previous assignment.
+* `ACTIVITY` must not be blank. Names can contain spaces and punctuation; surrounding whitespace is removed.
+* Supply `a/` exactly once. In this command it means activity; in `add` and `edit`, it still means address.
+* The assignment is saved automatically and retained after restarting or editing the participant's other details.
+* Existing records start without an activity. Removing an activity, multiple activities, attendance, and filtering by activity are not supported yet.
+
+Examples:
+* `assign-activity 1 a/Campfire` assigns Campfire to the first participant in the displayed list.
+* `assign-activity 1 a/Arts & Crafts` replaces that participant's activity with Arts & Crafts.
+
 ### Locating persons by name: `find`
 
 Finds persons whose names contain any of the given keywords.
@@ -191,6 +208,7 @@ Action | Format, Examples
 --------|------------------
 **Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
 **Clear** | `clear`
+**Assign activity** | `assign-activity INDEX a/ACTIVITY`<br> e.g., `assign-activity 1 a/Campfire`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`

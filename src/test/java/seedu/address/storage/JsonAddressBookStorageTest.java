@@ -46,6 +46,15 @@ public class JsonAddressBookStorageTest {
     }
 
     @Test
+    public void readAddressBook_legacyFileWithoutActivities_success() throws Exception {
+        Path legacyFile = Paths.get("src", "test", "data", "JsonSerializableAddressBookTest",
+                "typicalPersonsAddressBook.json");
+        ReadOnlyAddressBook legacy = new JsonAddressBookStorage(legacyFile).readAddressBook().orElseThrow();
+        assertEquals(getTypicalAddressBook(), new AddressBook(legacy));
+        legacy.getPersonList().forEach(person -> assertFalse(person.getActivity().isPresent()));
+    }
+
+    @Test
     public void read_notJsonFormat_exceptionThrown() {
         assertThrows(DataLoadingException.class, () -> readAddressBook("notJsonFormatAddressBook.json"));
     }

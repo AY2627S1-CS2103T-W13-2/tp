@@ -36,6 +36,21 @@ public class EditCommandTest {
     private Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
     @Test
+    public void execute_assignedParticipant_preservesActivity() {
+        Person original = model.getFilteredPersonList().get(0);
+        Person assigned = new PersonBuilder(original).withActivity("Campfire").build();
+        model.setPerson(original, assigned);
+        Person edited = new PersonBuilder(assigned).withName(VALID_NAME_BOB).withPhone(VALID_PHONE_BOB).build();
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        expectedModel.setPerson(assigned, edited);
+
+        EditCommand command = new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withName(VALID_NAME_BOB).withPhone(VALID_PHONE_BOB).build());
+        assertCommandSuccess(command, model,
+                String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(edited)), expectedModel);
+    }
+
+    @Test
     public void execute_allFieldsSpecifiedUnfilteredList_success() {
         Person editedPerson = new PersonBuilder().build();
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder(editedPerson).build();

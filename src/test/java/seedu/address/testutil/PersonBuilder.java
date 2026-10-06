@@ -1,8 +1,10 @@
 package seedu.address.testutil;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
+import seedu.address.model.person.Activity;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
@@ -26,6 +28,7 @@ public class PersonBuilder {
     private Email email;
     private Address address;
     private Set<Tag> tags;
+    private Optional<Activity> activity = Optional.empty();
 
     /**
      * Creates a {@code PersonBuilder} with the default details.
@@ -47,6 +50,7 @@ public class PersonBuilder {
         email = personToCopy.getEmail();
         address = personToCopy.getAddress();
         tags = new HashSet<>(personToCopy.getTags());
+        activity = personToCopy.getActivity();
     }
 
     /**
@@ -90,7 +94,15 @@ public class PersonBuilder {
     }
 
     public Person build() {
-        return new Person(name, phone, email, address, tags);
+        return new Person(name, phone, email, address, tags, activity);
+    }
+
+    /**
+     * Sets the activity of the person being built.
+     */
+    public PersonBuilder withActivity(String activity) {
+        this.activity = Optional.of(new Activity(activity));
+        return this;
     }
 
 }
