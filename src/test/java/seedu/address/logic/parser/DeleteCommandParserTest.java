@@ -1,5 +1,7 @@
 package seedu.address.logic.parser;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
@@ -8,6 +10,7 @@ import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.DeleteCommand;
+import seedu.address.logic.parser.exceptions.ParseException;
 
 /**
  * As we are only doing white-box testing, our test cases do not cover path variations
@@ -19,6 +22,14 @@ import seedu.address.logic.commands.DeleteCommand;
 public class DeleteCommandParserTest {
 
     private DeleteCommandParser parser = new DeleteCommandParser();
+
+    @Test
+    public void parse_invalidArgs_failureMessageUsesParticipantTerminology() {
+        ParseException exception = assertThrows(ParseException.class, () -> parser.parse("a"));
+
+        assertTrue(exception.getMessage().contains("Deletes the participant identified by the index number used in "
+                + "the displayed participant list."));
+    }
 
     @Test
     public void parse_validArgs_returnsDeleteCommand() {
