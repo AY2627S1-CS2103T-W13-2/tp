@@ -66,10 +66,6 @@ public class FilterCommandParser implements Parser<FilterCommand> {
         if (value.isBlank()) {
             throw new ParseException(MESSAGE_BLANK_VALUE);
         }
-        if (PREFIX_LIKE_ARGUMENT.matcher(value).find()) {
-            throw new ParseException(MESSAGE_UNSUPPORTED_PREFIX);
-        }
-
         AssignmentType type = suppliedPrefix.equals(PREFIX_GROUP) ? AssignmentType.GROUP
                 : suppliedPrefix.equals(PREFIX_ROLE) ? AssignmentType.ROLE
                 : AssignmentType.ACTIVITY;

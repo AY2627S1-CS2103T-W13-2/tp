@@ -211,8 +211,9 @@ Formats:
 * `filter r/ROLE`
 * `filter a/ACTIVITY`
 
-* Supply exactly one of `g/`, `r/`, or `a/`. Missing, repeated, multiple, or unsupported prefixes are rejected with a
-  specific error. Text before the assignment prefix is also rejected.
+* Begin with exactly one of `g/`, `r/`, or `a/`. Missing, repeated, or multiple supported prefixes are rejected with a
+  specific error. Text before the assignment prefix is also rejected. A slash within the assignment value is treated
+  as ordinary value text.
 * Matching is case-insensitive and ignores leading and trailing whitespace. It remains exact after that normalisation:
   `filter g/Logistics` does not match `Logistics Team`.
 * Participants without the selected assignment are excluded.

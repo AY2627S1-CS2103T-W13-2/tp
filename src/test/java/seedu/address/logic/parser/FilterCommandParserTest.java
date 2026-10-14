@@ -25,6 +25,8 @@ public class FilterCommandParserTest {
     public void parse_validGroup_returnsFilterCommand() {
         assertParseSuccess(parser, " g/  Logistics Team  ",
                 new FilterCommand(new AssignmentMatchesPredicate(GROUP, "Logistics Team")));
+        assertParseSuccess(parser, " g/Team A/B",
+                new FilterCommand(new AssignmentMatchesPredicate(GROUP, "Team A/B")));
     }
 
     @Test
@@ -63,7 +65,6 @@ public class FilterCommandParserTest {
     @Test
     public void parse_unsupportedPrefix_throwsParseException() {
         assertParseFailure(parser, " p/91234567", MESSAGE_UNSUPPORTED_PREFIX);
-        assertParseFailure(parser, " g/Logistics p/91234567", MESSAGE_UNSUPPORTED_PREFIX);
     }
 
     @Test
