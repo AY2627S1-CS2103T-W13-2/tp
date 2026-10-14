@@ -188,20 +188,20 @@ Format: `assign-role INDEX r/ROLE`
 Example:
 * `assign-role 2 r/Logistics Lead` assigns the role `Logistics Lead` to the second displayed participant.
 
-### Assigning a person to a group: `assign-group`
+### Assigning a participant to a group: `assign-group`
 
-Assigns one group to an existing person.
+Assigns one group to an existing participant.
 
 Format: `assign-group INDEX g/GROUP`
 
-* Assigns the person at the specified `INDEX` to `GROUP`.
-* The index refers to the index number shown in the displayed person list and must be a positive integer.
+* Assigns the participant at the specified `INDEX` to `GROUP`.
+* The index refers to the index number shown in the displayed participant list and must be a positive integer.
 * `GROUP` must not be blank and may contain spaces.
 * A participant can belong to at most one group. Assigning another group replaces the current group and preserves their role and activity.
 * Managing a separate list of groups is not supported yet.
 
 Example:
-* `assign-group 2 g/Logistics` assigns the second displayed person to the `Logistics` group.
+* `assign-group 2 g/Logistics` assigns the second displayed participant to the `Logistics` group.
 
 ### Clearing an assignment: `unassign`
 
