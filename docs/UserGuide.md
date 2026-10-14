@@ -61,8 +61,9 @@ ZoomAddress is a **desktop participant-management application for directors of l
 * Items followed by `…`​ can appear zero or more times.<br>
   For example, `[t/TAG]…​` may be omitted, or written as `t/friend` or `t/friend t/family`.
 
-* Parameters can be in any order.<br>
-  For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
+* For `add` and `edit`, prefixed fields can be in any order.<br>
+  For example, `p/PHONE_NUMBER n/NAME` is also acceptable when adding a participant. Commands such as `unassign`
+  require the displayed index before the assignment prefix.
 
 * Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
@@ -166,7 +167,8 @@ Format: `assign-activity INDEX a/ACTIVITY`
 * `ACTIVITY` must not be blank. Names can contain spaces and punctuation; surrounding whitespace is removed.
 * Supply `a/` exactly once. In this command it means activity; in `add` and `edit`, it still means address.
 * The assignment is saved automatically and retained after restarting or editing the participant's other details. Assigning or replacing an activity preserves their role; assigning or replacing a role preserves their activity.
-* Existing records start without an activity. Removing an activity, multiple activities, and attendance are not supported yet.
+* Records created before activity assignments were introduced start without an activity. Multiple activities and
+  attendance are not supported yet.
 
 Examples:
 * `assign-activity 1 a/Campfire` assigns Campfire to the first participant in the displayed list.
@@ -186,20 +188,55 @@ Format: `assign-role INDEX r/ROLE`
 Example:
 * `assign-role 2 r/Logistics Lead` assigns the role `Logistics Lead` to the second displayed participant.
 
-### Assigning a person to a group: `assign-group`
+### Assigning a participant to a group: `assign-group`
 
-Assigns one group to an existing person.
+Assigns one group to an existing participant.
 
 Format: `assign-group INDEX g/GROUP`
 
-* Assigns the person at the specified `INDEX` to `GROUP`.
-* The index refers to the index number shown in the displayed person list and must be a positive integer.
+* Assigns the participant at the specified `INDEX` to `GROUP`.
+* The index refers to the index number shown in the displayed participant list and must be a positive integer.
 * `GROUP` must not be blank and may contain spaces.
 * A participant can belong to at most one group. Assigning another group replaces the current group and preserves their role and activity.
-* Group removal and managing a separate list of groups are not supported yet.
+* Managing a separate list of groups is not supported yet.
 
 Example:
-* `assign-group 2 g/Logistics` assigns the second displayed person to the `Logistics` group.
+* `assign-group 2 g/Logistics` assigns the second displayed participant to the `Logistics` group.
+
+### Clearing an assignment: `unassign`
+
+Clears one group, role, or activity assignment from an existing participant.
+
+Format: `unassign INDEX g/` or `unassign INDEX r/` or `unassign INDEX a/`
+
+* `INDEX` must be a positive integer from the displayed participant list. After `find` or `sort name`, use the index
+  shown in that filtered or sorted view.
+* Supply exactly one empty prefix: `g/` for group, `r/` for role, or `a/` for activity. Do not add a value after the prefix.
+* Clearing one assignment preserves the participant's name, contact details, tags, and other assignments. The change is saved automatically.
+* You cannot clear an assignment that is already absent.
+* On success, ZoomAddress names the removed value, for example,
+  `Cleared group assignment 'Logistics' for Beth Lee.`
+
+Examples:
+* `unassign 2 g/` clears the group assigned to the second displayed participant.
+* `unassign 2 r/` clears their role.
+* `unassign 2 a/` clears their activity.
+
+Invalid examples and responses:
+
+| Command | Response |
+|---|---|
+| `unassign` | `Please provide a participant index before the assignment prefix.` |
+| `unassign abc g/` | `Index must be a positive integer.` |
+| `unassign 99 g/` | `The participant index provided is invalid.` if fewer than 99 participants are displayed. |
+| `unassign 2` | `Please specify exactly one assignment prefix: g/, r/, or a/.` |
+| `unassign 2 g/ r/` | `Specify only one assignment prefix: g/, r/, or a/.` |
+| `unassign 2 g/ g/` | `Assignment prefix must not be repeated: g/` |
+| `unassign 2 x/` | `Unsupported assignment prefix: x/ Use g/, r/, or a/.` |
+| `unassign 2 g/Logistics` | `The g/ prefix must not contain a value when clearing the group assignment.` |
+| `unassign 2 unexpected g/` | `Unexpected extra argument(s): unexpected g/` |
+
+If Beth Lee has no group assignment, `unassign 2 g/` reports `Beth Lee has no group assignment to clear.`
 
 ### Filtering participants by assignment: `filter`
 
@@ -292,16 +329,14 @@ ZoomAddress automatically saves data after every command. You do not need to sav
 
 ### Editing the data file
 
-ZoomAddress data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
+ZoomAddress data is saved automatically as a JSON file `data/addressbook.json` relative to the folder where you run
+the `java -jar` command. The Quick Start steps make that folder the JAR file's location. Advanced users can update
+data directly by editing the JSON file.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
 If your changes make the data file invalid, ZoomAddress starts with an empty participant directory at the next run. The invalid file remains on disk until you run a command (ZoomAddress saves after every command). Still, we recommend backing up the file before editing it.<br>
 Furthermore, certain edits can cause ZoomAddress to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </div>
-
-### Archiving data files `[coming in v2.0]`
-
-_Details coming soon ..._
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -328,6 +363,7 @@ Action | Format, Examples
 **Assign group** | `assign-group INDEX g/GROUP`<br> e.g., `assign-group 2 g/Logistics`
 **Clear** | `clear`
 **Assign activity** | `assign-activity INDEX a/ACTIVITY`<br> e.g., `assign-activity 1 a/Campfire`
+**Clear assignment** | `unassign INDEX g/` or `unassign INDEX r/` or `unassign INDEX a/`<br> e.g., `unassign 2 g/`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
