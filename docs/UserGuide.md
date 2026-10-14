@@ -59,8 +59,9 @@ ZoomAddress is a **desktop participant-management application for directors of l
 * Items followed by `…`​ can appear zero or more times.<br>
   For example, `[t/TAG]…​` may be omitted, or written as `t/friend` or `t/friend t/family`.
 
-* Parameters can be in any order.<br>
-  For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
+* For `add` and `edit`, prefixed fields can be in any order.<br>
+  For example, `p/PHONE_NUMBER n/NAME` is also acceptable when adding a participant. Commands such as `unassign`
+  require the displayed index before the assignment prefix.
 
 * Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
@@ -138,7 +139,8 @@ Format: `assign-activity INDEX a/ACTIVITY`
 * `ACTIVITY` must not be blank. Names can contain spaces and punctuation; surrounding whitespace is removed.
 * Supply `a/` exactly once. In this command it means activity; in `add` and `edit`, it still means address.
 * The assignment is saved automatically and retained after restarting or editing the participant's other details. Assigning or replacing an activity preserves their role; assigning or replacing a role preserves their activity.
-* Existing records start without an activity. Multiple activities, attendance, and filtering by activity are not supported yet.
+* Records created before activity assignments were introduced start without an activity. Multiple activities and
+  attendance are not supported yet.
 
 Examples:
 * `assign-activity 1 a/Campfire` assigns Campfire to the first participant in the displayed list.
@@ -272,16 +274,14 @@ ZoomAddress automatically saves data after every command. You do not need to sav
 
 ### Editing the data file
 
-ZoomAddress data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
+ZoomAddress data is saved automatically as a JSON file `data/addressbook.json` relative to the folder where you run
+the `java -jar` command. The Quick Start steps make that folder the JAR file's location. Advanced users can update
+data directly by editing the JSON file.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
 If your changes make the data file invalid, ZoomAddress starts with an empty participant directory at the next run. The invalid file remains on disk until you run a command (ZoomAddress saves after every command). Still, we recommend backing up the file before editing it.<br>
 Furthermore, certain edits can cause ZoomAddress to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </div>
-
-### Archiving data files `[coming in v2.0]`
-
-_Details coming soon ..._
 
 --------------------------------------------------------------------------------------------------------------------
 
