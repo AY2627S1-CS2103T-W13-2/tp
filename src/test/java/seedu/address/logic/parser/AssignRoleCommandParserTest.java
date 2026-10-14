@@ -50,5 +50,9 @@ public class AssignRoleCommandParserTest {
         Role role = new Role("Logistics Lead");
         assertParseSuccess(parser, "1 " + PREFIX_ROLE + "Logistics Lead",
                 new AssignRoleCommand(INDEX_FIRST_PERSON, role));
+
+        Role roleWithPrefixLikeText = new Role("Team a/ Lead");
+        assertParseSuccess(parser, "1 " + PREFIX_ROLE + "Team a/ Lead",
+                new AssignRoleCommand(INDEX_FIRST_PERSON, roleWithPrefixLikeText));
     }
 }
