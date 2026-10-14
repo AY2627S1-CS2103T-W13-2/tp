@@ -209,7 +209,8 @@ Clears one group, role, or activity assignment from an existing participant.
 
 Format: `unassign INDEX g/` or `unassign INDEX r/` or `unassign INDEX a/`
 
-* `INDEX` must be a positive integer from the displayed participant list. After `find`, use the index in the filtered results.
+* `INDEX` must be a positive integer from the displayed participant list. After `find` or `sort name`, use the index
+  shown in that filtered or sorted view.
 * Supply exactly one empty prefix: `g/` for group, `r/` for role, or `a/` for activity. Do not add a value after the prefix.
 * Clearing one assignment preserves the participant's name, contact details, tags, and other assignments. The change is saved automatically.
 * You cannot clear an assignment that is already absent.
