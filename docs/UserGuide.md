@@ -12,7 +12,7 @@ ZoomAddress is a **desktop participant-management application for directors of l
 
 ## Quick start
 
-1. Ensure that Java `25` or later is installed on your computer.<br>
+1. Ensure that Java `25` is installed on your computer.<br>
    **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 
 1. Download the latest `.jar` file from the [ZoomAddress releases page](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases).
@@ -20,8 +20,7 @@ ZoomAddress is a **desktop participant-management application for directors of l
 1. Copy the file to the folder you want to use as the _home folder_ for ZoomAddress.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar addressbook.jar`.<br>
-   A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
-   ![Ui](images/Ui.png)
+   The ZoomAddress window should appear in a few seconds with some sample data.
 
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
    Some example commands you can try:
@@ -71,11 +70,13 @@ ZoomAddress is a **desktop participant-management application for directors of l
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </div>
 
+ZoomAddress adds `view`, `assign-group`, `assign-role`, `assign-activity`, `unassign`, `sort`, `filter`, and
+`find-contact` to the original AddressBook-Level3 commands. The other commands below retain their familiar
+AddressBook workflow, with participant-focused wording.
+
 ### Viewing help: `help`
 
-Shows a message explaining how to access the help page.
-
-![help message](images/helpMessage.png)
+Opens a window with a link to this ZoomAddress User Guide.
 
 Format: `help`
 
@@ -249,8 +250,8 @@ Formats:
 * `filter a/ACTIVITY`
 
 * Begin with exactly one of `g/`, `r/`, or `a/`. Missing, repeated, or multiple supported prefixes are rejected with a
-  specific error. Text before the assignment prefix is also rejected. A slash within the assignment value is treated
-  as ordinary value text.
+  specific error. Text before the assignment prefix is also rejected. An embedded slash such as in `Tech/Media` is
+  ordinary value text, but a separate `g/`, `r/`, or `a/` token is treated as another prefix.
 * Matching is case-insensitive and ignores leading and trailing whitespace. It remains exact after that normalisation:
   `filter g/Logistics` does not match `Logistics Team`.
 * Participants without the selected assignment are excluded.
@@ -325,7 +326,7 @@ Format: `exit`
 
 ### Saving the data
 
-ZoomAddress automatically saves data after every command. You do not need to save manually.
+ZoomAddress automatically saves data after every successful command. You do not need to save manually.
 
 ### Editing the data file
 

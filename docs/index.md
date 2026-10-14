@@ -7,6 +7,8 @@ title: ZoomAddress
 
 ![Ui](images/Ui.png)
 
+_Design mockup; the current application's interface differs. A release screenshot will replace this image._
+
 **ZoomAddress is a desktop participant-management application for directors of large-scale computing events.** It
 keeps participant information and assignments to groups, roles, and activities in one local directory. Its
 keyboard-driven command interface helps experienced users retrieve and update records quickly.
