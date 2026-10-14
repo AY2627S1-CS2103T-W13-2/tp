@@ -155,6 +155,24 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Contact-based participant search
+
+The `find-contact` command locates participants using one complete phone number or email address without modifying
+the address book.
+
+1. `AddressBookParser` routes the command arguments to `FindContactCommandParser`.
+1. `FindContactCommandParser` trims surrounding whitespace and validates the value using the existing `Phone` and
+   `Email` validation rules. Blank, malformed, or multiple values are rejected before command execution.
+1. The parser creates a `ContactMatchesQueryPredicate` and places it in a `FindContactCommand`.
+1. When executed, the command passes the predicate to `Model#updateFilteredPersonList`. Phone numbers require an
+   exact match, while email addresses require an exact case-insensitive match.
+1. The observable filtered list changes, so the UI displays the matching participants while the underlying data
+   remains unchanged.
+
+The predicate is kept in the Model package because it evaluates `Person` contact fields and can be tested
+independently of command parsing and execution. Reusing the existing validators also keeps accepted search values
+consistent with values that can be stored for a participant.
+
 ### \[Proposed\] Undo/redo feature
 
 #### Proposed Implementation
