@@ -50,6 +50,10 @@ public class AssignRoleCommandParserTest {
         Role role = new Role("Logistics Lead");
         assertParseSuccess(parser, "1 " + PREFIX_ROLE + "Logistics Lead",
                 new AssignRoleCommand(INDEX_FIRST_PERSON, role));
+
+        Role roleWithUppercaseSlash = new Role("Team A/ Lead");
+        assertParseSuccess(parser, "1 " + PREFIX_ROLE + "Team A/ Lead",
+                new AssignRoleCommand(INDEX_FIRST_PERSON, roleWithUppercaseSlash));
     }
 
     @Test

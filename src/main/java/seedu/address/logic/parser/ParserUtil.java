@@ -27,7 +27,7 @@ import seedu.address.model.tag.Tag;
 public class ParserUtil {
 
     public static final String MESSAGE_INVALID_INDEX = "Index must be a positive integer.";
-    private static final Pattern PREFIX_PATTERN = Pattern.compile("(?<!\\S)([A-Za-z]+/)");
+    private static final Pattern PREFIX_PATTERN = Pattern.compile("(?<!\\S)([a-z]+/)");
 
     /**
      * Rejects prefix-shaped arguments that are not supported by the current command.
