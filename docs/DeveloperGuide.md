@@ -202,6 +202,17 @@ The predicate is kept in the Model package because it evaluates `Person` contact
 independently of command parsing and execution. Reusing the existing validators also keeps accepted search values
 consistent with values that can be stored for a participant.
 
+### Assignment filtering
+
+`FilterCommandParser` accepts exactly one of the group, role, or activity prefixes and creates one `FilterCommand`.
+The command uses the reusable `AssignmentMatchesPredicate`, parameterised by an `AssignmentType`, instead of separate
+predicates and commands for each assignment field. The predicate trims the requested value, normalises it with
+locale-independent lower-casing, and compares it with the participant's corresponding optional assignment. A missing
+assignment therefore cannot match.
+
+Executing the command updates only the model's `FilteredList`. It does not replace or reorder the `AddressBook`'s
+stored participant list. The UI observes the filtered list and assigns fresh displayed indices to the matching records.
+
 ### Inherited AB3 undo/redo design (not implemented)
 
 <div markdown="span" class="alert alert-warning">
