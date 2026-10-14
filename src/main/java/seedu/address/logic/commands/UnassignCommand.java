@@ -29,7 +29,7 @@ public class UnassignCommand extends Command {
             + "Examples: " + COMMAND_WORD + " 1 g/\n"
             + "          " + COMMAND_WORD + " 1 r/\n"
             + "          " + COMMAND_WORD + " 1 a/";
-    public static final String MESSAGE_UNASSIGN_SUCCESS = "Cleared %1$s assignment for %2$s.";
+    public static final String MESSAGE_UNASSIGN_SUCCESS = "Cleared %1$s assignment '%2$s' for %3$s.";
     public static final String MESSAGE_ASSIGNMENT_ABSENT = "%1$s has no %2$s assignment to clear.";
 
     private final Index index;
@@ -53,7 +53,8 @@ public class UnassignCommand extends Command {
         }
 
         Person personToUpdate = lastShownList.get(index.getZeroBased());
-        if (!hasAssignment(personToUpdate)) {
+        Optional<?> assignmentToClear = getAssignment(personToUpdate);
+        if (assignmentToClear.isEmpty()) {
             throw new CommandException(String.format(MESSAGE_ASSIGNMENT_ABSENT, personToUpdate.getName(),
                     assignmentType.getDisplayName()));
         }
@@ -62,14 +63,14 @@ public class UnassignCommand extends Command {
         model.setPerson(personToUpdate, updatedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
         return new CommandResult(String.format(MESSAGE_UNASSIGN_SUCCESS, assignmentType.getDisplayName(),
-                updatedPerson.getName()));
+                assignmentToClear.orElseThrow(), updatedPerson.getName()));
     }
 
-    private boolean hasAssignment(Person person) {
+    private Optional<?> getAssignment(Person person) {
         return switch (assignmentType) {
-            case GROUP -> person.getGroup().isPresent();
-            case ROLE -> person.getRole().isPresent();
-            case ACTIVITY -> person.getActivity().isPresent();
+            case GROUP -> person.getGroup();
+            case ROLE -> person.getRole();
+            case ACTIVITY -> person.getActivity();
         };
     }
 

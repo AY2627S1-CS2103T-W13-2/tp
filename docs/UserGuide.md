@@ -185,7 +185,8 @@ Format: `unassign INDEX g/` or `unassign INDEX r/` or `unassign INDEX a/`
 * Supply exactly one empty prefix: `g/` for group, `r/` for role, or `a/` for activity. Do not add a value after the prefix.
 * Clearing one assignment preserves the participant's name, contact details, tags, and other assignments. The change is saved automatically.
 * You cannot clear an assignment that is already absent.
-* On success, ZoomAddress reports `Cleared group assignment for Beth Lee.` (or `role` or `activity`, as selected).
+* On success, ZoomAddress names the removed value, for example,
+  `Cleared group assignment 'Logistics' for Beth Lee.`
 
 Examples:
 * `unassign 2 g/` clears the group assigned to the second displayed participant.

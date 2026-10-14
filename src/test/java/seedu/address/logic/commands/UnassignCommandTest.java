@@ -38,7 +38,7 @@ public class UnassignCommandTest {
         expectedModel.setPerson(assigned, expected);
 
         assertCommandSuccess(command, model, String.format(UnassignCommand.MESSAGE_UNASSIGN_SUCCESS,
-                "group", expected.getName()), expectedModel);
+                "group", "Logistics", expected.getName()), expectedModel);
     }
 
     @Test
@@ -51,14 +51,15 @@ public class UnassignCommandTest {
         Model expectedAfterRole = new ModelManager(model.getAddressBook(), new UserPrefs());
         expectedAfterRole.setPerson(assigned, withoutRole);
         assertCommandSuccess(new UnassignCommand(INDEX_FIRST_PERSON, AssignmentType.ROLE), model,
-                String.format(UnassignCommand.MESSAGE_UNASSIGN_SUCCESS, "role", assigned.getName()), expectedAfterRole);
+                String.format(UnassignCommand.MESSAGE_UNASSIGN_SUCCESS, "role", "Leader", assigned.getName()),
+                expectedAfterRole);
         assertFalse(model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased()).getRole().isPresent());
 
         Person withoutActivity = clear(withoutRole, AssignmentType.ACTIVITY);
         Model expectedAfterActivity = new ModelManager(model.getAddressBook(), new UserPrefs());
         expectedAfterActivity.setPerson(withoutRole, withoutActivity);
         assertCommandSuccess(new UnassignCommand(INDEX_FIRST_PERSON, AssignmentType.ACTIVITY), model,
-                String.format(UnassignCommand.MESSAGE_UNASSIGN_SUCCESS, "activity", assigned.getName()),
+                String.format(UnassignCommand.MESSAGE_UNASSIGN_SUCCESS, "activity", "Campfire", assigned.getName()),
                 expectedAfterActivity);
         assertFalse(model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased()).getActivity().isPresent());
     }
@@ -80,7 +81,7 @@ public class UnassignCommandTest {
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         expectedModel.setPerson(assigned, expected);
         assertCommandSuccess(command, model, String.format(UnassignCommand.MESSAGE_UNASSIGN_SUCCESS,
-                "group", assigned.getName()), expectedModel);
+                "group", "Logistics", assigned.getName()), expectedModel);
         assertTrue(model.getAddressBook().getPersonList().contains(firstPerson));
     }
 
