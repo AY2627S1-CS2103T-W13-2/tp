@@ -46,4 +46,21 @@ public class AssignmentIntegrationTest {
                 .withRole("Logistics Lead").withActivity("Arts & Crafts").withGroup("Programmes").build(),
                 reloadedAgain.getFilteredPersonList().get(0));
     }
+
+    @Test
+    public void execute_unassign_persistsClearedAssignmentsAcrossRestart() throws Exception {
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("participants.json"));
+        JsonUserPrefsStorage prefs = new JsonUserPrefsStorage(temporaryFolder.resolve("prefs.json"));
+        Model model = new ModelManager();
+        model.addPerson(new PersonBuilder().withRole("Facilitator").withActivity("Campfire")
+                .withGroup("Logistics").build());
+        Logic logic = new LogicManager(model, new StorageManager(storage, prefs));
+
+        logic.execute("unassign 1 r/");
+        logic.execute("unassign 1 a/");
+        logic.execute("unassign 1 g/");
+
+        Model reloaded = new ModelManager(storage.readAddressBook().orElseThrow(), new UserPrefs());
+        assertEquals(new PersonBuilder().build(), reloaded.getFilteredPersonList().get(0));
+    }
 }

@@ -136,7 +136,7 @@ Format: `assign-activity INDEX a/ACTIVITY`
 * `ACTIVITY` must not be blank. Names can contain spaces and punctuation; surrounding whitespace is removed.
 * Supply `a/` exactly once. In this command it means activity; in `add` and `edit`, it still means address.
 * The assignment is saved automatically and retained after restarting or editing the participant's other details. Assigning or replacing an activity preserves their role; assigning or replacing a role preserves their activity.
-* Existing records start without an activity. Removing an activity, multiple activities, attendance, and filtering by activity are not supported yet.
+* Existing records start without an activity. Multiple activities, attendance, and filtering by activity are not supported yet.
 
 Examples:
 * `assign-activity 1 a/Campfire` assigns Campfire to the first participant in the displayed list.
@@ -166,10 +166,26 @@ Format: `assign-group INDEX g/GROUP`
 * The index refers to the index number shown in the displayed person list and must be a positive integer.
 * `GROUP` must not be blank and may contain spaces.
 * A participant can belong to at most one group. Assigning another group replaces the current group and preserves their role and activity.
-* Group removal and managing a separate list of groups are not supported yet.
+* Managing a separate list of groups is not supported yet.
 
 Example:
 * `assign-group 2 g/Logistics` assigns the second displayed person to the `Logistics` group.
+
+### Clearing an assignment: `unassign`
+
+Clears one group, role, or activity assignment from an existing participant.
+
+Format: `unassign INDEX g/` or `unassign INDEX r/` or `unassign INDEX a/`
+
+* `INDEX` must be a positive integer from the displayed participant list. After `find`, use the index in the filtered results.
+* Supply exactly one empty prefix: `g/` for group, `r/` for role, or `a/` for activity. Do not add a value after the prefix.
+* Clearing one assignment preserves the participant's name, contact details, tags, and other assignments. The change is saved automatically.
+* You cannot clear an assignment that is already absent.
+
+Examples:
+* `unassign 2 g/` clears the group assigned to the second displayed participant.
+* `unassign 2 r/` clears their role.
+* `unassign 2 a/` clears their activity.
 
 ### Locating participants by name: `find`
 
@@ -256,6 +272,7 @@ Action | Format, Examples
 **Assign group** | `assign-group INDEX g/GROUP`<br> e.g., `assign-group 2 g/Logistics`
 **Clear** | `clear`
 **Assign activity** | `assign-activity INDEX a/ACTIVITY`<br> e.g., `assign-activity 1 a/Campfire`
+**Clear assignment** | `unassign INDEX g/` or `unassign INDEX r/` or `unassign INDEX a/`<br> e.g., `unassign 2 g/`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
