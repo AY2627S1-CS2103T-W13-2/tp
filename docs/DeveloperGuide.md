@@ -155,6 +155,24 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Contact-based participant search
+
+The `find-contact` command locates participants using one complete phone number or email address without modifying
+the address book.
+
+1. `AddressBookParser` routes the command arguments to `FindContactCommandParser`.
+1. `FindContactCommandParser` trims surrounding whitespace and validates the value using the existing `Phone` and
+   `Email` validation rules. Blank, malformed, or multiple values are rejected before command execution.
+1. The parser creates a `ContactMatchesQueryPredicate` and places it in a `FindContactCommand`.
+1. When executed, the command passes the predicate to `Model#updateFilteredPersonList`. Phone numbers require an
+   exact match, while email addresses require an exact case-insensitive match.
+1. The observable filtered list changes, so the UI displays the matching participants while the underlying data
+   remains unchanged.
+
+The predicate is kept in the Model package because it evaluates `Person` contact fields and can be tested
+independently of command parsing and execution. Reusing the existing validators also keeps accepted search values
+consistent with values that can be stored for a participant.
+
 ### \[Proposed\] Undo/redo feature
 
 #### Proposed Implementation
@@ -603,6 +621,27 @@ testers are expected to do more *exploratory* testing.
       Expected: Similar to previous.
 
 1. _{ more test cases …​ }_
+
+### Finding participants by contact information
+
+1. Finding by phone number or email address
+
+   1. Prerequisites: Ensure at least one participant has phone number `98765432` and email address
+      `alex@example.com`.
+
+   1. Test case: `find-contact 98765432`<br>
+      Expected: Only participants whose complete phone number is `98765432` are shown.
+
+   1. Test case: `find-contact ALEX@EXAMPLE.COM`<br>
+      Expected: Only participants whose email address is `alex@example.com` are shown. Email letter case is ignored.
+
+   1. Test case: `find-contact 9876`<br>
+      Expected: No participant is shown because partial contact values do not match.
+
+   1. Incorrect commands to try: `find-contact`, `find-contact invalid-email`,
+      `find-contact alex@example.com extra`<br>
+      Expected: No participant data is changed. The status message shows the relevant command format or invalid
+      contact error.
 
 ### Saving data
 
