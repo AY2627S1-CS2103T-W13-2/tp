@@ -138,7 +138,7 @@ Format: `assign-activity INDEX a/ACTIVITY`
 * `ACTIVITY` must not be blank. Names can contain spaces and punctuation; surrounding whitespace is removed.
 * Supply `a/` exactly once. In this command it means activity; in `add` and `edit`, it still means address.
 * The assignment is saved automatically and retained after restarting or editing the participant's other details. Assigning or replacing an activity preserves their role; assigning or replacing a role preserves their activity.
-* Existing records start without an activity. Removing an activity, multiple activities, attendance, and filtering by activity are not supported yet.
+* Existing records start without an activity. Removing an activity, multiple activities, and attendance are not supported yet.
 
 Examples:
 * `assign-activity 1 a/Campfire` assigns Campfire to the first participant in the displayed list.
@@ -172,6 +172,30 @@ Format: `assign-group INDEX g/GROUP`
 
 Example:
 * `assign-group 2 g/Logistics` assigns the second displayed person to the `Logistics` group.
+
+### Filtering participants by assignment: `filter`
+
+Filters the displayed participant list to one exact group, role, or activity. This helps event directors quickly find
+everyone sharing an assignment during event operations.
+
+Formats:
+* `filter g/GROUP`
+* `filter r/ROLE`
+* `filter a/ACTIVITY`
+
+* Supply exactly one of `g/`, `r/`, or `a/`. Missing, repeated, multiple, or unsupported prefixes are rejected with a
+  specific error. Text before the assignment prefix is also rejected.
+* Matching is case-insensitive and ignores leading and trailing whitespace. It remains exact after that normalisation:
+  `filter g/Logistics` does not match `Logistics Team`.
+* Participants without the selected assignment are excluded.
+* A successful filter displays matching participants with list indices starting from 1. If nothing matches, the list
+  is empty and ZoomAddress reports that 0 participants matched.
+* Filtering only changes the displayed list. It does not modify, remove, or reorder stored participant data.
+
+Examples:
+* `filter g/Logistics` displays all participants assigned to the Logistics group.
+* `filter r/facilitator` displays participants whose role is Facilitator, regardless of letter case.
+* `filter a/  Campfire  ` displays participants assigned to Campfire after trimming the value.
 
 ### Locating participants by name: `find`
 
@@ -279,6 +303,7 @@ Action | Format, Examples
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **Find by contact** | `find-contact PHONE_OR_EMAIL`<br> e.g., `find-contact alex@example.com`
+**Filter by assignment** | `filter g/GROUP` or `filter r/ROLE` or `filter a/ACTIVITY`<br> e.g., `filter g/Logistics`
 **List** | `list`
 **View** | `view INDEX`<br> e.g., `view 3`
 **Help** | `help`
