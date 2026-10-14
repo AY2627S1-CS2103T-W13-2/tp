@@ -28,6 +28,8 @@ ZoomAddress is a **desktop participant-management application for directors of l
 
    * `list` : Lists all participants.
 
+   * `sort name` : Sorts the currently displayed participants by name.
+
    * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a participant named `John Doe` to ZoomAddress.
 
    * `delete 3` : Deletes the 3rd participant shown in the current list.
@@ -97,6 +99,32 @@ Examples:
 Shows a list of all participants in ZoomAddress.
 
 Format: `list`
+
+### Sorting participants by name: `sort`
+
+Sorts the currently displayed participants by name without changing any participant data.
+
+Format: `sort name`
+
+* Names are sorted in ascending alphabetical order using a case-insensitive comparison.
+* If two names are equal under the case-insensitive comparison, their exact capitalization is
+  used as a deterministic secondary comparison.
+* Sorting applies to the current view. For example, after `find Alex`, `sort name` sorts only the
+  matching participants.
+* The displayed index numbers are updated to match the sorted order. Commands such as `view 1`,
+  `edit 1`, and `delete 1` therefore act on the first participant shown after sorting.
+* Sorting is a view operation: it does not rewrite participant records or modify their fields.
+* The sorted view lasts for the current application session but is not saved. After restarting
+  ZoomAddress, enter `sort name` again to restore the sorted view.
+
+Valid example:
+* `sort name` sorts `alice`, `Bob`, and `charlie` into that displayed order and shows
+  `Sorted participants by name in ascending order.`
+
+Invalid examples:
+* `sort` is rejected because the criterion is missing.
+* `sort role` is rejected because only the `name` criterion is supported.
+* `sort name descending` is rejected because extra arguments are not accepted.
 
 ### Viewing a participant: `view`
 
@@ -315,5 +343,6 @@ Action | Format, Examples
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **Find by contact** | `find-contact PHONE_OR_EMAIL`<br> e.g., `find-contact alex@example.com`
 **List** | `list`
+**Sort** | `sort name`
 **View** | `view INDEX`<br> e.g., `view 3`
 **Help** | `help`

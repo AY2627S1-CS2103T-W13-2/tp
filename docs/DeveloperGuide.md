@@ -9,7 +9,14 @@ title: Developer Guide
 
 ## **Acknowledgements**
 
-* _{List the sources of reused or adapted ideas, code, documentation, and third-party libraries here, with links to the originals.}_
+* ZoomAddress is based on
+  [AddressBook-Level3](https://github.com/se-edu/addressbook-level3) by the
+  [SE-EDU initiative](https://se-education.org/). Its architecture, build configuration,
+  testing utilities, and parts of its documentation structure were adapted from that project.
+* The desktop interface uses [JavaFX](https://openjfx.io/), and JSON persistence uses
+  [Jackson](https://github.com/FasterXML/jackson).
+* Automated tests use [JUnit 5](https://junit.org/junit5/), and diagrams are rendered with
+  [PlantUML](https://plantuml.com/).
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -36,7 +43,7 @@ The following provides a quick overview of the main components and their interac
 
 **Main components of the architecture**
 
-**`Main`** (consisting of classes [`Main`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/Main.java) and [`MainApp`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/MainApp.java)) is in charge of the app launch and shut down.
+**`Main`** (consisting of classes [`Main`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/java/seedu/address/Main.java) and [`MainApp`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/java/seedu/address/MainApp.java)) is in charge of the app launch and shut down.
 * At app launch, it initializes the other components in the correct sequence, and connects them up with each other.
 * At shut down, it shuts down the other components and invokes cleanup methods where necessary.
 
@@ -68,13 +75,13 @@ The sections below give more details of each component.
 
 ### UI component
 
-The **API** of this component is specified in [`Ui.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/Ui.java)
+The **API** of this component is specified in [`Ui.java`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/java/seedu/address/ui/Ui.java)
 
 ![Structure of the UI Component](images/UiClassDiagram.png)
 
 The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `PersonListPanel`, and `StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
 
-The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
+The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/java/seedu/address/ui/MainWindow.java).
 
 The `UI` component,
 
@@ -85,7 +92,7 @@ The `UI` component,
 
 ### Logic component
 
-**API** : [`Logic.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/logic/Logic.java)
+**API** : [`Logic.java`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/java/seedu/address/logic/Logic.java)
 
 Here's a (partial) class diagram of the `Logic` component:
 
@@ -115,7 +122,7 @@ How the parsing works:
 * All `XYZCommandParser` classes, such as `AddCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
 
 ### Model component
-**API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
+**API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/java/seedu/address/model/Model.java)
 
 <img src="images/ModelClassDiagram.png" width="450" />
 
@@ -123,7 +130,7 @@ How the parsing works:
 The `Model` component,
 
 * stores the address book data i.e., all `Person` objects (which are contained in a `UniquePersonList` object).
-* stores the `Person` objects selected by the current filter, such as search results, in a separate _filtered_ list. It exposes this list as an unmodifiable `ObservableList<Person>` that the UI can observe and bind to, so the UI updates when the list changes.
+* derives the displayed participant list by applying a `FilteredList` and then a `SortedList` to the stored participant records. The UI observes this derived list, so filtering and sorting change the view without rearranging the records in `AddressBook`.
 * stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
 
@@ -136,7 +143,7 @@ The `Model` component,
 
 ### Storage component
 
-**API** : [`Storage.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/storage/Storage.java)
+**API** : [`Storage.java`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/java/seedu/address/storage/Storage.java)
 
 <img src="images/StorageClassDiagram.png" width="550" />
 
@@ -164,6 +171,28 @@ checks that the selected assignment exists, and creates an updated `Person` with
 It replaces the participant through `Model.setPerson`; `LogicManager` then saves the model to disk. Invalid input
 or a missing assignment produces an error without modifying the participant.
 
+### Sorting participants by name
+
+The `sort name` command changes the order of the currently displayed participants without
+changing the order of records stored in `AddressBook`.
+
+![Interactions for the `sort name` command](images/SortSequenceDiagram.png)
+
+1. `AddressBookParser` delegates the argument to `SortCommandParser`, which accepts exactly
+   the `name` criterion and creates a `SortCommand`.
+2. `SortCommand` asks the `Model` to apply its single name comparator. The comparator compares
+   names case-insensitively first, then compares the exact name text to produce a deterministic
+   order when the primary comparison is equal.
+3. `ModelManager` applies the comparator to a JavaFX `SortedList` layered over the existing
+   `FilteredList`. Consequently, an active filter still determines which participants are
+   relevant, while sorting determines only their displayed order.
+4. Commands that consume displayed indices continue to read the same derived observable list,
+   so index `1` refers to the first participant in the sorted view.
+
+The comparator is view state and is not written to JSON. A newly started application therefore
+uses the stored participant order until the user enters `sort name` again. This choice avoids a
+data mutation for a display-only operation and keeps persistence focused on participant records.
+
 ### Contact-based participant search
 
 The `find-contact` command locates participants using one complete phone number or email address without modifying
@@ -182,7 +211,15 @@ The predicate is kept in the Model package because it evaluates `Person` contact
 independently of command parsing and execution. Reusing the existing validators also keeps accepted search values
 consistent with values that can be stored for a participant.
 
-### \[Proposed\] Undo/redo feature
+### Inherited AB3 undo/redo design (not implemented)
+
+<div markdown="span" class="alert alert-warning">
+
+:exclamation: **Not part of ZoomAddress v1.3:** The following subsection is inherited design
+background from AddressBook-Level3. ZoomAddress does not contain `VersionedAddressBook`,
+`undo`, or `redo`, and the diagrams below do not describe the current application.
+
+</div>
 
 #### Proposed Implementation
 
@@ -255,7 +292,7 @@ The following activity diagram summarizes what happens when a user executes a ne
 
 **Aspect: How undo & redo execute:**
 
-* **Alternative 1 (current choice):** Saves the entire address book.
+* **Alternative 1 (inherited proposal):** Saves the entire address book.
   * Pros: Easy to implement.
   * Cons: May have performance issues in terms of memory usage.
 
@@ -264,11 +301,10 @@ The following activity diagram summarizes what happens when a user executes a ne
   * Pros: Will use less memory (e.g. for `delete`, just save the person being deleted).
   * Cons: We must ensure that the implementation of each individual command is correct.
 
-_{more aspects and alternatives to be added}_
+### Future data archiving (not implemented)
 
-### \[Proposed\] Data archiving
-
-_{Explain here how the data archiving feature will be implemented}_
+ZoomAddress v1.3 does not implement data archiving. The feature remains outside the current
+product scope and is mentioned only as a possible future enhancement.
 
 
 --------------------------------------------------------------------------------------------------------------------
