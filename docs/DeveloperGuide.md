@@ -679,11 +679,11 @@ For every command below, the status area should identify the actual problem and 
 | `add` | The `add` usage message because required arguments are missing. |
 | `add n/ p/81234567 e/alice2@example.com a/COM 1` | The name constraint message because the name is blank. |
 | `add n/Alice n/Alicia p/81234567 e/alice2@example.com a/COM 1` | A duplicate `n/` prefix message. |
-| `add n/Alicia p/81234567 e/alice2@example.com a/COM 1 x/value` | `Unexpected prefix(es): x/`. |
+| `add x/value n/Alicia p/81234567 e/alice2@example.com a/COM 1` | The `add` usage message because an unknown prefix appears before the supported fields. |
 | `view 0`, `view -1`, or `view one` | The `view` usage message requiring a positive integer index. |
 | `view 999` | Reports that the participant index is invalid. |
 | `assign-role 1 r/Facilitator r/Leader` | A duplicate `r/` prefix message. |
-| `assign-role 1 r/Facilitator a/Campfire` | `Unexpected prefix(es): a/`. |
+| `assign-role x/value 1 r/Facilitator` | The `assign-role` usage message because the index contains an unknown argument. |
 | `unassign 1`, `unassign 1 g/ r/`, or `unassign 1 g/Logistics` | A specific message for the missing, conflicting, or non-empty prefix. |
 | `sort`, `sort phone`, or `sort name extra` | A specific message for the missing, unsupported, or extra criterion. |
 | `find-contact`, `find-contact 81234567 extra` | A specific message for the blank or multi-value search. |

@@ -50,9 +50,4 @@ public class AssignActivityCommandParserTest {
         assertParseFailure(parser, " 1 a/Campfire a/Hiking",
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_ACTIVITY));
     }
-
-    @Test
-    public void parse_conflictingPrefix_failure() {
-        assertParseFailure(parser, " 1 a/Campfire r/Facilitator", "Unexpected prefix(es): r/");
-    }
 }

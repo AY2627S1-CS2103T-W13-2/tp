@@ -4,14 +4,10 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.StringUtil;
-import seedu.address.logic.Messages;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.group.Group;
 import seedu.address.model.person.Address;
@@ -27,31 +23,6 @@ import seedu.address.model.tag.Tag;
 public class ParserUtil {
 
     public static final String MESSAGE_INVALID_INDEX = "Index must be a positive integer.";
-    private static final Pattern PREFIX_PATTERN = Pattern.compile("(?<!\\S)([a-z]+/)");
-
-    /**
-     * Rejects prefix-shaped arguments that are not supported by the current command.
-     */
-    public static void verifyNoUnexpectedPrefixes(String args, Prefix... expectedPrefixes) throws ParseException {
-        requireNonNull(args);
-        Set<String> expected = new HashSet<>();
-        for (Prefix prefix : expectedPrefixes) {
-            expected.add(prefix.getPrefix());
-        }
-
-        Set<String> unexpected = new LinkedHashSet<>();
-        Matcher matcher = PREFIX_PATTERN.matcher(args);
-        while (matcher.find()) {
-            String prefix = matcher.group(1);
-            if (!expected.contains(prefix)) {
-                unexpected.add(prefix);
-            }
-        }
-
-        if (!unexpected.isEmpty()) {
-            throw new ParseException(Messages.getErrorMessageForUnexpectedPrefixes(unexpected));
-        }
-    }
 
     /**
      * Parses {@code oneBasedIndex} into an {@code Index} and returns it. Leading and trailing whitespaces will be

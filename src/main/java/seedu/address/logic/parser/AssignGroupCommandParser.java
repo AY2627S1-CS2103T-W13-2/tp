@@ -21,7 +21,6 @@ public class AssignGroupCommandParser implements Parser<AssignGroupCommand> {
      */
     public AssignGroupCommand parse(String args) throws ParseException {
         requireNonNull(args);
-        ParserUtil.verifyNoUnexpectedPrefixes(args, PREFIX_GROUP);
         ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_GROUP);
 
         Index index;

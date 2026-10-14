@@ -67,9 +67,4 @@ public class AssignGroupCommandParserTest {
         assertParseFailure(parser, "1 g/" + VALID_GROUP_LOGISTICS + " g/" + VALID_GROUP_PROGRAMMES,
                 Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_GROUP));
     }
-
-    @Test
-    public void parse_conflictingPrefix_failure() {
-        assertParseFailure(parser, "1 g/Logistics a/Campfire", "Unexpected prefix(es): a/");
-    }
 }

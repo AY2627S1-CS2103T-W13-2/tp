@@ -1,6 +1,5 @@
 package seedu.address.logic;
 
-import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,7 +18,6 @@ public class Messages {
     public static final String MESSAGE_PERSONS_LISTED_OVERVIEW = "%1$d person(s) listed!";
     public static final String MESSAGE_DUPLICATE_FIELDS =
                 "Multiple values specified for the following single-valued field(s): ";
-    public static final String MESSAGE_UNEXPECTED_PREFIXES = "Unexpected prefix(es): ";
 
     /**
      * Returns an error message indicating the duplicate prefixes.
@@ -31,14 +29,6 @@ public class Messages {
                 Stream.of(duplicatePrefixes).map(Prefix::toString).collect(Collectors.toSet());
 
         return MESSAGE_DUPLICATE_FIELDS + String.join(" ", duplicateFields);
-    }
-
-    /**
-     * Returns an error message indicating prefixes that the command does not support.
-     */
-    public static String getErrorMessageForUnexpectedPrefixes(Collection<String> unexpectedPrefixes) {
-        assert !unexpectedPrefixes.isEmpty();
-        return MESSAGE_UNEXPECTED_PREFIXES + String.join(" ", unexpectedPrefixes);
     }
 
     /**

@@ -21,7 +21,6 @@ public class AssignRoleCommandParser implements Parser<AssignRoleCommand> {
      */
     public AssignRoleCommand parse(String args) throws ParseException {
         requireNonNull(args);
-        ParserUtil.verifyNoUnexpectedPrefixes(args, PREFIX_ROLE);
         ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_ROLE);
 
         Index index;

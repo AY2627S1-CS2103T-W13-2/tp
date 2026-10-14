@@ -17,7 +17,6 @@ public class AssignActivityCommandParser implements Parser<AssignActivityCommand
     @Override
     public AssignActivityCommand parse(String args) throws ParseException {
         requireNonNull(args);
-        ParserUtil.verifyNoUnexpectedPrefixes(args, PREFIX_ACTIVITY);
         ArgumentMultimap arguments = ArgumentTokenizer.tokenize(args, PREFIX_ACTIVITY);
         Index index;
         try {

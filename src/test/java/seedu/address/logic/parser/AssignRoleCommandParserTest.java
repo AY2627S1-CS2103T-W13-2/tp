@@ -51,13 +51,8 @@ public class AssignRoleCommandParserTest {
         assertParseSuccess(parser, "1 " + PREFIX_ROLE + "Logistics Lead",
                 new AssignRoleCommand(INDEX_FIRST_PERSON, role));
 
-        Role roleWithUppercaseSlash = new Role("Team A/ Lead");
-        assertParseSuccess(parser, "1 " + PREFIX_ROLE + "Team A/ Lead",
-                new AssignRoleCommand(INDEX_FIRST_PERSON, roleWithUppercaseSlash));
-    }
-
-    @Test
-    public void parse_unknownPrefix_failure() {
-        assertParseFailure(parser, "1 " + PREFIX_ROLE + "Facilitator x/unexpected", "Unexpected prefix(es): x/");
+        Role roleWithPrefixLikeText = new Role("Team a/ Lead");
+        assertParseSuccess(parser, "1 " + PREFIX_ROLE + "Team a/ Lead",
+                new AssignRoleCommand(INDEX_FIRST_PERSON, roleWithPrefixLikeText));
     }
 }
