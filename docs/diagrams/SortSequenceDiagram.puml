@@ -1,0 +1,58 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+box Logic LOGIC_COLOR_T1
+participant ":LogicManager" as LogicManager LOGIC_COLOR
+participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
+participant ":SortCommandParser" as SortCommandParser LOGIC_COLOR
+participant "command:SortCommand" as SortCommand LOGIC_COLOR
+participant "result:CommandResult" as CommandResult LOGIC_COLOR
+end box
+
+box Model MODEL_COLOR_T1
+participant "model:ModelManager" as ModelManager MODEL_COLOR
+participant "sortedPersons:SortedList<Person>" as SortedList MODEL_COLOR
+end box
+
+[-> LogicManager : execute("sort name")
+activate LogicManager
+
+LogicManager -> AddressBookParser : parseCommand("sort name")
+activate AddressBookParser
+
+create SortCommandParser
+AddressBookParser -> SortCommandParser : new SortCommandParser()
+activate SortCommandParser
+AddressBookParser -> SortCommandParser : parse(" name")
+
+create SortCommand
+SortCommandParser -> SortCommand : new SortCommand()
+SortCommand --> SortCommandParser : command
+SortCommandParser --> AddressBookParser : command
+deactivate SortCommandParser
+destroy SortCommandParser
+
+AddressBookParser --> LogicManager : command
+deactivate AddressBookParser
+
+LogicManager -> SortCommand : execute(model)
+activate SortCommand
+SortCommand -> ModelManager : updateSortedPersonList(NAME_COMPARATOR)
+activate ModelManager
+ModelManager -> SortedList : setComparator(NAME_COMPARATOR)
+activate SortedList
+SortedList --> ModelManager
+deactivate SortedList
+ModelManager --> SortCommand
+deactivate ModelManager
+
+create CommandResult
+SortCommand -> CommandResult : new CommandResult(MESSAGE_SUCCESS)
+CommandResult --> SortCommand : result
+SortCommand --> LogicManager : result
+deactivate SortCommand
+
+[<-- LogicManager : result
+deactivate LogicManager
+@enduml

@@ -14,6 +14,7 @@ remote service.
 ## Features
 
 * Create, view, find, and remove participant records.
+* Sort the currently displayed participants by name without changing stored records.
 * Assign participants to groups, roles, and activities.
 * Retrieve participant details and assignment information quickly.
 * Save and load participant data locally and automatically.
