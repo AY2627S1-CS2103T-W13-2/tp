@@ -36,6 +36,8 @@ ZoomAddress is a **desktop participant-management application for directors of l
 
    * `view 3` : Displays all stored details of the 3rd participant shown in the current list.
 
+   * `find-contact 98765432` : Finds participants with the exact phone number `98765432`.
+
    * `clear` : Deletes all participant records.
 
    * `exit` : Exits the app.
@@ -216,6 +218,23 @@ Examples:
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
 
+### Locating participants by contact information: `find-contact`
+
+Finds participants whose complete phone number or email address matches the given value.
+
+Format: `find-contact PHONE_OR_EMAIL`
+
+* Provide exactly one valid phone number or email address. Surrounding whitespace is ignored.
+* Phone numbers are matched exactly. Partial phone numbers do not match.
+* Email addresses are matched exactly and case-insensitively. For example, `ALEX@EXAMPLE.COM`
+  matches `alex@example.com`.
+* The search always considers every stored participant, even if the displayed list was previously filtered.
+* The command only filters the displayed list. It does not change or delete participant data.
+
+Examples:
+* `find-contact 98765432` finds participants whose phone number is exactly `98765432`.
+* `find-contact alex@example.com` finds participants whose email address is `alex@example.com`.
+
 ### Deleting a participant: `delete`
 
 Deletes the specified participant from ZoomAddress.
@@ -287,6 +306,7 @@ Action | Format, Examples
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
+**Find by contact** | `find-contact PHONE_OR_EMAIL`<br> e.g., `find-contact alex@example.com`
 **List** | `list`
 **Sort** | `sort name`
 **View** | `view INDEX`<br> e.g., `view 3`
