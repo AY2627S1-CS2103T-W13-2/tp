@@ -238,6 +238,31 @@ Invalid examples and responses:
 
 If Beth Lee has no group assignment, `unassign 2 g/` reports `Beth Lee has no group assignment to clear.`
 
+### Filtering participants by assignment: `filter`
+
+Filters the displayed participant list to one exact group, role, or activity. This helps event directors quickly find
+everyone sharing an assignment during event operations.
+
+Formats:
+* `filter g/GROUP`
+* `filter r/ROLE`
+* `filter a/ACTIVITY`
+
+* Begin with exactly one of `g/`, `r/`, or `a/`. Missing, repeated, or multiple supported prefixes are rejected with a
+  specific error. Text before the assignment prefix is also rejected. A slash within the assignment value is treated
+  as ordinary value text.
+* Matching is case-insensitive and ignores leading and trailing whitespace. It remains exact after that normalisation:
+  `filter g/Logistics` does not match `Logistics Team`.
+* Participants without the selected assignment are excluded.
+* A successful filter displays matching participants with list indices starting from 1. If nothing matches, the list
+  is empty and ZoomAddress reports that 0 participants matched.
+* Filtering only changes the displayed list. It does not modify, remove, or reorder stored participant data.
+
+Examples:
+* `filter g/Logistics` displays all participants assigned to the Logistics group.
+* `filter r/facilitator` displays participants whose role is Facilitator, regardless of letter case.
+* `filter a/  Campfire  ` displays participants assigned to Campfire after trimming the value.
+
 ### Locating participants by name: `find`
 
 Finds participants whose names contain any of the given keywords.
@@ -343,6 +368,7 @@ Action | Format, Examples
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **Find by contact** | `find-contact PHONE_OR_EMAIL`<br> e.g., `find-contact alex@example.com`
+**Filter by assignment** | `filter g/GROUP` or `filter r/ROLE` or `filter a/ACTIVITY`<br> e.g., `filter g/Logistics`
 **List** | `list`
 **Sort** | `sort name`
 **View** | `view INDEX`<br> e.g., `view 3`

@@ -21,6 +21,7 @@ import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
 import seedu.address.logic.commands.ExitCommand;
+import seedu.address.logic.commands.FilterCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.FindContactCommand;
 import seedu.address.logic.commands.HelpCommand;
@@ -30,6 +31,7 @@ import seedu.address.logic.commands.ViewCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.group.Group;
 import seedu.address.model.person.Activity;
+import seedu.address.model.person.AssignmentMatchesPredicate;
 import seedu.address.model.person.ContactMatchesQueryPredicate;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
 import seedu.address.model.person.Person;
@@ -112,6 +114,13 @@ public class AddressBookParserTest {
         FindContactCommand command = (FindContactCommand) parser.parseCommand(
                 FindContactCommand.COMMAND_WORD + " " + contact);
         assertEquals(new FindContactCommand(new ContactMatchesQueryPredicate(contact)), command);
+    }
+
+    @Test
+    public void parseCommand_filter() throws Exception {
+        FilterCommand command = (FilterCommand) parser.parseCommand("filter g/Logistics");
+        assertEquals(new FilterCommand(new AssignmentMatchesPredicate(
+                AssignmentMatchesPredicate.AssignmentType.GROUP, "Logistics")), command);
     }
 
     @Test
