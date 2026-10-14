@@ -22,7 +22,7 @@ LogicManager -> AddressBookParser : parseCommand("sort name")
 activate AddressBookParser
 
 create SortCommandParser
-AddressBookParser -> SortCommandParser
+AddressBookParser -> SortCommandParser : new SortCommandParser()
 activate SortCommandParser
 AddressBookParser -> SortCommandParser : parse(" name")
 
