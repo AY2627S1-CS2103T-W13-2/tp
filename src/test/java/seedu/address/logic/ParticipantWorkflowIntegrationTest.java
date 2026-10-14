@@ -42,6 +42,9 @@ public class ParticipantWorkflowIntegrationTest {
         logic.execute("list");
         assertEquals(2, logic.getFilteredPersonList().size());
 
+        logic.execute("find-contact BETH@EXAMPLE.COM");
+        assertEquals("Beth Lee", logic.getFilteredPersonList().getFirst().getName().fullName);
+
         logic.execute("find bEtH");
         assertEquals("Beth Lee", logic.getFilteredPersonList().getFirst().getName().fullName);
         assertTrue(logic.execute("view 1").getFeedbackToUser().contains("Beth Lee"));
@@ -85,6 +88,8 @@ public class ParticipantWorkflowIntegrationTest {
     public void execute_noMatchAndEmptyDisplayedList_indexedCommandsFailWithoutDataLoss() throws Exception {
         logic.execute("add n/Alice Tan p/81234567 e/alice@example.com a/1 Main Street");
         logic.execute("find Nobody");
+        assertTrue(logic.getFilteredPersonList().isEmpty());
+        logic.execute("find-contact nobody@example.com");
         assertTrue(logic.getFilteredPersonList().isEmpty());
 
         for (String command : new String[] {
