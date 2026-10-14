@@ -1,6 +1,9 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static seedu.address.logic.parser.FilterCommandParser.MESSAGE_MULTIPLE_PREFIXES;
+import static seedu.address.logic.parser.FilterCommandParser.MESSAGE_REPEATED_PREFIX;
 import static seedu.address.model.person.AssignmentMatchesPredicate.AssignmentType.ACTIVITY;
 import static seedu.address.model.person.AssignmentMatchesPredicate.AssignmentType.GROUP;
 import static seedu.address.model.person.AssignmentMatchesPredicate.AssignmentType.ROLE;
@@ -12,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.Messages;
+import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -29,6 +33,8 @@ public class FilterCommandTest {
     private final Person logisticsFacilitator = new PersonBuilder().withName("Cara Ong")
             .withGroup("Logistics").withRole("Facilitator").withActivity("Workshop").build();
     private final Person unassigned = new PersonBuilder().withName("Dev Raj").build();
+    private final Person slashGroupMember = new PersonBuilder().withName("Evan Koh")
+            .withGroup("Team A/B").build();
 
     private Model model;
     private AddressBook originalAddressBook;
@@ -36,7 +42,8 @@ public class FilterCommandTest {
     @BeforeEach
     public void setUp() {
         AddressBook addressBook = new AddressBook();
-        addressBook.setPersons(List.of(logisticsLead, programmesLead, logisticsFacilitator, unassigned));
+        addressBook.setPersons(List.of(logisticsLead, programmesLead, logisticsFacilitator, unassigned,
+                slashGroupMember));
         model = new ModelManager(addressBook, new UserPrefs());
         originalAddressBook = new AddressBook(addressBook);
     }
@@ -50,7 +57,7 @@ public class FilterCommandTest {
         assertEquals(String.format(ViewCommand.MESSAGE_VIEW_PARTICIPANT_SUCCESS,
                 Messages.format(logisticsFacilitator)),
                 new ViewCommand(Index.fromOneBased(2)).execute(model).getFeedbackToUser());
-        assertEquals(List.of(logisticsLead, programmesLead, logisticsFacilitator, unassigned),
+        assertEquals(List.of(logisticsLead, programmesLead, logisticsFacilitator, unassigned, slashGroupMember),
                 model.getAddressBook().getPersonList());
         assertEquals(originalAddressBook, model.getAddressBook());
     }
@@ -72,6 +79,39 @@ public class FilterCommandTest {
         CommandResult result = filter(GROUP, "Safety").execute(model);
         assertEquals(String.format(FilterCommand.MESSAGE_SUCCESS, 0), result.getFeedbackToUser());
         assertEquals(List.of(), model.getFilteredPersonList());
+        assertEquals(originalAddressBook, model.getAddressBook());
+    }
+
+    @Test
+    public void execute_caseInsensitiveSlashValue_returnsExactMatch() throws Exception {
+        FilterCommand command = new FilterCommand(new AssignmentMatchesPredicate(GROUP, "team a/b"),
+                MESSAGE_MULTIPLE_PREFIXES);
+
+        command.execute(model);
+
+        assertEquals(List.of(slashGroupMember), model.getFilteredPersonList());
+        assertEquals(originalAddressBook, model.getAddressBook());
+    }
+
+    @Test
+    public void execute_ambiguousMultiplePrefixWithoutStoredMatch_throwsSpecificError() {
+        FilterCommand command = new FilterCommand(
+                new AssignmentMatchesPredicate(GROUP, "Logistics r/Facilitator"), MESSAGE_MULTIPLE_PREFIXES);
+
+        CommandException exception = assertThrows(CommandException.class, () -> command.execute(model));
+
+        assertEquals(MESSAGE_MULTIPLE_PREFIXES, exception.getMessage());
+        assertEquals(originalAddressBook, model.getAddressBook());
+    }
+
+    @Test
+    public void execute_ambiguousRepeatedPrefixWithoutStoredMatch_throwsSpecificError() {
+        FilterCommand command = new FilterCommand(
+                new AssignmentMatchesPredicate(ACTIVITY, "Campfire a/Workshop"), MESSAGE_REPEATED_PREFIX);
+
+        CommandException exception = assertThrows(CommandException.class, () -> command.execute(model));
+
+        assertEquals(MESSAGE_REPEATED_PREFIX, exception.getMessage());
         assertEquals(originalAddressBook, model.getAddressBook());
     }
 

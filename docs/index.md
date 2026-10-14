@@ -5,9 +5,7 @@ title: ZoomAddress
 
 [![CI Status](https://github.com/AY2627S1-CS2103T-W13-2/tp/actions/workflows/gradle.yml/badge.svg)](https://github.com/AY2627S1-CS2103T-W13-2/tp/actions/workflows/gradle.yml)
 
-![Ui](images/Ui.png)
-
-_Design mockup; the current application's interface differs. A release screenshot will replace this image._
+![ZoomAddress showing realistic participant assignments](images/Ui.png)
 
 **ZoomAddress is a desktop participant-management application for directors of large-scale computing events.** It
 keeps participant information and assignments to groups, roles, and activities in one local directory. Its

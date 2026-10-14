@@ -27,6 +27,8 @@ public class FilterCommandParserTest {
                 new FilterCommand(new AssignmentMatchesPredicate(GROUP, "Logistics Team")));
         assertParseSuccess(parser, " g/Team A/B",
                 new FilterCommand(new AssignmentMatchesPredicate(GROUP, "Team A/B")));
+        assertParseSuccess(parser, " g/team a/b",
+                new FilterCommand(new AssignmentMatchesPredicate(GROUP, "team a/b"), MESSAGE_MULTIPLE_PREFIXES));
     }
 
     @Test
@@ -53,13 +55,17 @@ public class FilterCommandParserTest {
     }
 
     @Test
-    public void parse_multiplePrefixes_throwsParseException() {
-        assertParseFailure(parser, " g/Logistics r/Facilitator", MESSAGE_MULTIPLE_PREFIXES);
+    public void parse_multiplePrefixes_defersErrorUntilStoredValuesChecked() {
+        assertParseSuccess(parser, " g/Logistics r/Facilitator",
+                new FilterCommand(new AssignmentMatchesPredicate(GROUP, "Logistics r/Facilitator"),
+                        MESSAGE_MULTIPLE_PREFIXES));
     }
 
     @Test
-    public void parse_repeatedPrefix_throwsParseException() {
-        assertParseFailure(parser, " a/Campfire a/Workshop", MESSAGE_REPEATED_PREFIX);
+    public void parse_repeatedPrefix_defersErrorUntilStoredValuesChecked() {
+        assertParseSuccess(parser, " a/Campfire a/Workshop",
+                new FilterCommand(new AssignmentMatchesPredicate(ACTIVITY, "Campfire a/Workshop"),
+                        MESSAGE_REPEATED_PREFIX));
     }
 
     @Test

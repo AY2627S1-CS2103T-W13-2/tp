@@ -5,7 +5,9 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_ACTIVITY;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_GROUP;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ROLE;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import seedu.address.logic.commands.FilterCommand;
@@ -24,51 +26,57 @@ public class FilterCommandParser implements Parser<FilterCommand> {
     public static final String MESSAGE_UNEXPECTED_ARGUMENTS =
             "Unexpected extra arguments before the assignment prefix.";
 
-    private static final List<Prefix> PREFIXES = List.of(PREFIX_GROUP, PREFIX_ROLE, PREFIX_ACTIVITY);
+    private static final Pattern SUPPORTED_PREFIX = Pattern.compile("(?:^|\\s)(g/|r/|a/)");
     private static final Pattern PREFIX_LIKE_ARGUMENT = Pattern.compile("(?:^|\\s)\\S+/");
 
     @Override
     public FilterCommand parse(String args) throws ParseException {
         requireNonNull(args);
-        ArgumentMultimap arguments = ArgumentTokenizer.tokenize(args,
-                PREFIX_GROUP, PREFIX_ROLE, PREFIX_ACTIVITY);
-
-        int suppliedPrefixCount = PREFIXES.stream()
-                .mapToInt(prefix -> arguments.getAllValues(prefix).size())
-                .sum();
-        if (suppliedPrefixCount == 0) {
+        Matcher matcher = SUPPORTED_PREFIX.matcher(args);
+        if (!matcher.find()) {
             if (PREFIX_LIKE_ARGUMENT.matcher(args).find()) {
                 throw new ParseException(MESSAGE_UNSUPPORTED_PREFIX);
             }
             throw new ParseException(MESSAGE_MISSING_PREFIX);
         }
 
-        if (!arguments.getPreamble().isBlank()) {
-            if (PREFIX_LIKE_ARGUMENT.matcher(arguments.getPreamble()).find()) {
+        String preamble = args.substring(0, matcher.start()).strip();
+        if (!preamble.isBlank()) {
+            if (PREFIX_LIKE_ARGUMENT.matcher(preamble).find()) {
                 throw new ParseException(MESSAGE_UNSUPPORTED_PREFIX);
             }
             throw new ParseException(MESSAGE_UNEXPECTED_ARGUMENTS);
         }
 
-        boolean hasRepeatedPrefix = PREFIXES.stream()
-                .anyMatch(prefix -> arguments.getAllValues(prefix).size() > 1);
-        if (hasRepeatedPrefix) {
-            throw new ParseException(MESSAGE_REPEATED_PREFIX);
-        }
-        if (suppliedPrefixCount > 1) {
-            throw new ParseException(MESSAGE_MULTIPLE_PREFIXES);
-        }
-
-        Prefix suppliedPrefix = PREFIXES.stream()
-                .filter(prefix -> arguments.getValue(prefix).isPresent())
-                .findFirst().orElseThrow();
-        String value = arguments.getValue(suppliedPrefix).orElseThrow().strip();
+        Prefix suppliedPrefix = toPrefix(matcher.group(1));
+        int valueStart = matcher.end();
+        String value = args.substring(valueStart).strip();
         if (value.isBlank()) {
             throw new ParseException(MESSAGE_BLANK_VALUE);
         }
+
+        List<Prefix> laterPrefixes = new ArrayList<>();
+        matcher.region(valueStart, args.length());
+        while (matcher.find()) {
+            laterPrefixes.add(toPrefix(matcher.group(1)));
+        }
+
+        String noMatchErrorMessage = null;
+        if (laterPrefixes.contains(suppliedPrefix)) {
+            noMatchErrorMessage = MESSAGE_REPEATED_PREFIX;
+        } else if (!laterPrefixes.isEmpty()) {
+            noMatchErrorMessage = MESSAGE_MULTIPLE_PREFIXES;
+        }
+
         AssignmentType type = suppliedPrefix.equals(PREFIX_GROUP) ? AssignmentType.GROUP
                 : suppliedPrefix.equals(PREFIX_ROLE) ? AssignmentType.ROLE
                 : AssignmentType.ACTIVITY;
-        return new FilterCommand(new AssignmentMatchesPredicate(type, value));
+        return new FilterCommand(new AssignmentMatchesPredicate(type, value), noMatchErrorMessage);
+    }
+
+    private Prefix toPrefix(String prefix) {
+        return prefix.equals(PREFIX_GROUP.toString()) ? PREFIX_GROUP
+                : prefix.equals(PREFIX_ROLE.toString()) ? PREFIX_ROLE
+                : PREFIX_ACTIVITY;
     }
 }

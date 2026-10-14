@@ -19,7 +19,7 @@ ZoomAddress is a **desktop participant-management application for directors of l
 
 1. Copy the file to the folder you want to use as the _home folder_ for ZoomAddress.
 
-1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar addressbook.jar`.<br>
+1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar ZoomAddress-v1.3.jar`.<br>
    The ZoomAddress window should appear in a few seconds with some sample data.
 
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
@@ -254,6 +254,9 @@ Formats:
   ordinary value text, but a separate `g/`, `r/`, or `a/` token is treated as another prefix.
 * Matching is case-insensitive and ignores leading and trailing whitespace. It remains exact after that normalisation:
   `filter g/Logistics` does not match `Logistics Team`.
+  This also applies to slash-containing values: `filter g/team a/b` matches a stored group named `Team A/B`.
+  If the complete value does not match a stored assignment, a later `g/`, `r/`, or `a/` fragment is reported as a
+  repeated or additional assignment prefix.
 * Participants without the selected assignment are excluded.
 * A successful filter displays matching participants with list indices starting from 1. If nothing matches, the list
   is empty and ZoomAddress reports that 0 participants matched.
