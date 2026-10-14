@@ -560,54 +560,165 @@ participant records, each with up to 10 group, role, or activity assignments in 
 
 --------------------------------------------------------------------------------------------------------------------
 
-## **Appendix: Instructions for manual testing**
+## **Appendix: Instructions for Manual Testing**
 
-Given below are instructions to test the app manually.
+These instructions describe reproducible smoke and exploratory tests for the release JAR. Perform them in a
+temporary folder so that the test data does not replace a real `data/addressbook.json` file.
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** These instructions only provide a starting point for testers to work on;
-testers are expected to do more *exploratory* testing.
+### Launching the JAR
 
-</div>
+1. Copy `addressbook.jar` into an empty folder.
+1. Open a terminal in that folder and run `java -jar addressbook.jar`.
 
-### Launch and shutdown
+Expected output: the ZoomAddress window opens and shows the sample participants. No error dialog appears.
 
-1. Initial launch
+Expected data change: none until a command is run. ZoomAddress subsequently stores participant data at
+`data/addressbook.json`, relative to the folder from which the JAR was launched.
 
-   1. Download the JAR file and copy it into an empty folder.
+To test window preferences, resize and move the window, exit, and run `java -jar addressbook.jar` again. The window
+should reopen at the saved size and position; participant data should be unchanged.
 
-   1. Double-click the JAR file.<br>
-      Expected: The GUI opens with a set of sample contacts. The window size may not be optimal.
+### Preparing realistic participant data
 
-1. Saving window preferences
+Run the following commands in order. Each successful `add` command should report the participant that was added and
+append exactly one participant to the displayed list.
 
-   1. Resize the window to an optimal size. Move the window to a different location. Close the window.
+1. `clear`
+1. `add n/Alice Tan p/81234567 e/alice@example.com a/COM 1, 13 Computing Drive t/freshman`
+1. `add n/Beth Lee p/82345678 e/beth@example.com a/COM 2, 15 Computing Drive t/facilitator`
+1. `add n/Chen Wei p/83456789 e/chen@example.com a/COM 3, 11 Computing Drive`
+1. `add n/dana Lim p/84567890 e/dana@example.com a/COM 1, 13 Computing Drive`
 
-   1. Relaunch the app by double-clicking the JAR file.<br>
-       Expected: The most recent window size and location are retained.
+Precondition: the application is running and accepts commands.
 
-1. _{ more test cases …​ }_
+Expected output: `clear` reports that all entries were cleared. Each `add` reports `New participant added:` followed
+by that participant's details. The final list contains exactly four participants.
 
-### Deleting a person
+Expected data change: the previous participant data is removed and the four records above are saved.
 
-1. Deleting a person while all persons are being shown
+### Core participant operations
 
-   1. Prerequisites: List all persons using the `list` command, with multiple persons in the list.
+| Preconditions | Command or action | Expected output | Expected data change |
+|---|---|---|---|
+| Prepared data is loaded. | `view 2` | Details for Beth Lee, including `Unassigned` for group, role, and activity. | None. |
+| Prepared data is loaded. | `find bEtH` | One indexed result, Beth Lee; matching is case-insensitive. | None. |
+| The Beth Lee search result is displayed. | `assign-group 1 g/Logistics` | Confirms that Beth Lee was assigned to Logistics. | Beth's group becomes Logistics; other fields remain unchanged. |
+| Run `find Beth` again. | `assign-role 1 r/Facilitator` | Confirms that Beth Lee received the Facilitator role. | Beth's role becomes Facilitator; group and other fields remain unchanged. |
+| Run `find Beth` again. | `assign-activity 1 a/Campfire` | Confirms that Beth Lee received the Campfire activity. | Beth's activity becomes Campfire; group, role, and other fields remain unchanged. |
+| Run `find Beth` again. | `edit 1 p/87654321` | Reports the edited Beth Lee record. | Only Beth's phone changes; all three assignments remain. |
+| Run `find Beth` again. | `view 1` | Shows phone `87654321`, group Logistics, role Facilitator, and activity Campfire. | None. |
 
-   1. Test case: `delete 1`<br>
-      Expected: The first contact is deleted from the list. The status message shows the deleted contact's details.
+### New v1.3 workflows
 
-   1. Test case: `delete 0`<br>
-      Expected: No person is deleted. The status message shows error details.
+#### Clearing assignments
 
-   1. Other incorrect delete commands to try: `delete`, `delete x`, `...` (where x is larger than the list size)<br>
-      Expected: Similar to previous.
+| Preconditions | Command or action | Expected output | Expected data change |
+|---|---|---|---|
+| Beth has all three assignments; run `find Beth`. | `unassign 1 g/` | Confirms that Beth's group was cleared. | Group becomes unassigned; role and activity remain. |
+| Run `find Beth` again. | `unassign 1 r/` | Confirms that Beth's role was cleared. | Role becomes unassigned; group and activity remain unchanged. |
+| Run `find Beth` again. | `unassign 1 a/` | Confirms that Beth's activity was cleared. | Activity becomes unassigned; all contact fields remain unchanged. |
+| Beth's activity is already absent; run `find Beth`. | `unassign 1 a/` | Clearly reports that there is no activity to clear. | None. |
 
-1. _{ more test cases …​ }_
+#### Sorting by name
 
-### Saving data
+Precondition: the four prepared participants are displayed using `list`.
 
-1. Dealing with missing/corrupted data files
+Command: `sort name`
 
-   1. _{Explain how to simulate missing or corrupted data files and state the expected behavior.}_
+Expected output: the displayed list is ordered by name using case-insensitive ascending order. Alice Tan is followed by
+Beth Lee, Chen Wei, and dana Lim. Repeating `sort name` produces the same order.
 
-1. _{ more test cases …​ }_
+Expected data change: participant fields and the saved participant order remain unchanged. Commands such as `view 1`
+use the indices in the sorted list while it is displayed.
+
+#### Finding by contact information
+
+| Preconditions | Command or action | Expected output | Expected data change |
+|---|---|---|---|
+| Prepared data is loaded. | `find-contact 81234567` | One indexed result: Alice Tan. | None. |
+| Prepared data is loaded. | `find-contact ALICE@EXAMPLE.COM` | One indexed result: Alice Tan; email matching is case-insensitive. | None. |
+| Prepared data is loaded. | `find-contact 8123` | Zero results because phone matching requires the complete number. | None. |
+| Prepared data is loaded. | `find-contact nobody@example.com` | A clear zero-result response and an empty displayed list. | None. |
+
+#### Filtering by assignment
+
+First restore Beth's assignments with `find Beth`, `assign-group 1 g/Logistics`, `find Beth`,
+`assign-role 1 r/Facilitator`, `find Beth`, and `assign-activity 1 a/Campfire`.
+
+| Preconditions | Command or action | Expected output | Expected data change |
+|---|---|---|---|
+| Beth has group Logistics. | `filter g/logistics` | An indexed list containing Beth; matching is exact and case-insensitive. | None. |
+| Beth has role Facilitator. | `filter r/ Facilitator ` | An indexed list containing Beth; surrounding whitespace is ignored. | None. |
+| Beth has activity Campfire. | `filter a/Campfire` | An indexed list containing Beth. | None. |
+| Prepared data is loaded. | `filter g/Nonexistent` | A clear zero-result response and an empty displayed list. | None. |
+
+### Invalid input and boundary cases
+
+For every command below, the status area should identify the actual problem and no participant data should change.
+
+| Command | Expected output |
+|---|---|
+| `add` | The `add` usage message because required arguments are missing. |
+| `add n/ p/81234567 e/alice2@example.com a/COM 1` | The name constraint message because the name is blank. |
+| `add n/Alice n/Alicia p/81234567 e/alice2@example.com a/COM 1` | A duplicate `n/` prefix message. |
+| `add n/Alicia p/81234567 e/alice2@example.com a/COM 1 x/value` | `Unexpected prefix(es): x/`. |
+| `view 0`, `view -1`, or `view one` | The `view` usage message requiring a positive integer index. |
+| `view 999` | Reports that the participant index is invalid. |
+| `assign-role 1 r/Facilitator r/Leader` | A duplicate `r/` prefix message. |
+| `assign-role 1 r/Facilitator a/Campfire` | `Unexpected prefix(es): a/`. |
+| `unassign 1`, `unassign 1 g/ r/`, or `unassign 1 g/Logistics` | A specific message for the missing, conflicting, or non-empty prefix. |
+| `sort`, `sort phone`, or `sort name extra` | A specific message for the missing, unsupported, or extra criterion. |
+| `find-contact`, `find-contact 81234567 extra` | A specific message for the blank or multi-value search. |
+| `filter`, `filter g/`, or `filter g/Logistics r/Facilitator` | A specific message for the missing, blank, or conflicting assignment filter. |
+
+### Displayed-list indices
+
+1. Run `list`, followed by `find Chen`.
+1. Confirm that Chen Wei is displayed as index 1 even if Chen was not index 1 in the full list.
+1. Run `view 1`.
+
+Expected output: the details shown are Chen Wei's details.
+
+Expected data change: none.
+
+Next, run `find Chen` again followed by `assign-group 1 g/Programmes`. The success message must name Chen Wei, and
+`find Chen` followed by `view 1` must show group Programmes. No other participant's group should change.
+
+Repeat `find Nobody`, then try `view 1`, `edit 1 p/81111111`, `delete 1`, and each assignment command with index 1.
+Each indexed command should report an invalid displayed index, and the stored participants should remain unchanged.
+
+### Saving, exiting, and restarting
+
+1. Complete the core-operation and v1.3 workflow tests above.
+1. Run `exit` and wait for the window to close.
+1. From the same folder, run `java -jar addressbook.jar`.
+1. Run `find Beth`, then `view 1`.
+
+Expected output: Beth's latest contact details and assignment state are shown exactly as they were before exiting.
+
+Expected data change: none during restart; previously successful changes remain in `data/addressbook.json`.
+
+### Empty and missing data
+
+#### Empty participant list
+
+Precondition: use a disposable copy of the application data.
+
+Command: `clear`, then `list`.
+
+Expected output: the list is empty. `find Alice`, `find-contact 81234567`, and `filter g/Logistics` each show zero
+results. `view 1`, `edit 1 p/81111111`, `delete 1`, and assignment or unassignment commands using index 1 report an
+invalid displayed index.
+
+Expected data change: the empty list is saved and remains empty after exiting and restarting.
+
+#### Missing data file
+
+1. Exit ZoomAddress.
+1. If `data/addressbook.json` exists, rename it to `addressbook.backup.json`.
+1. Run `java -jar addressbook.jar` again.
+
+Expected output: ZoomAddress starts successfully with sample participants because no data file was found.
+
+Expected data change: the backup remains untouched. Exit ZoomAddress, remove any newly generated
+`data/addressbook.json`, and rename `addressbook.backup.json` back to `addressbook.json` to restore the original data.
