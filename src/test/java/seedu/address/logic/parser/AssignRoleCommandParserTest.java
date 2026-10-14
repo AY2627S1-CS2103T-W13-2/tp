@@ -51,4 +51,9 @@ public class AssignRoleCommandParserTest {
         assertParseSuccess(parser, "1 " + PREFIX_ROLE + "Logistics Lead",
                 new AssignRoleCommand(INDEX_FIRST_PERSON, role));
     }
+
+    @Test
+    public void parse_unknownPrefix_failure() {
+        assertParseFailure(parser, "1 " + PREFIX_ROLE + "Facilitator x/unexpected", "Unexpected prefix(es): x/");
+    }
 }

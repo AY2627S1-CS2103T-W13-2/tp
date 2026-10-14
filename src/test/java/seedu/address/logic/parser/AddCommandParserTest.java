@@ -203,4 +203,11 @@ public class AddCommandParserTest {
                 + ADDRESS_DESC_BOB + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE));
     }
+
+    @Test
+    public void parse_unknownPrefix_failure() {
+        String validPerson = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB;
+
+        assertParseFailure(parser, validPerson + " x/unexpected", "Unexpected prefix(es): x/");
+    }
 }
