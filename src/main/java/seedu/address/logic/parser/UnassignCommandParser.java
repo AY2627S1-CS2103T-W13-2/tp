@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,7 +17,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
 public class UnassignCommandParser implements Parser<UnassignCommand> {
 
     private static final Pattern INDEX_AND_REMAINDER = Pattern.compile("(?<index>\\S+)(?:\\s+(?<remainder>.*))?");
-    private static final Pattern PREFIX_TOKEN = Pattern.compile("(^|\\s)(?<prefix>\\S+/)");
+    private static final Pattern PREFIX_TOKEN = Pattern.compile("(?<prefix>[A-Za-z]+/)(?<value>.*)");
 
     /** Parses arguments in the context of an {@code UnassignCommand}. */
     @Override
@@ -37,20 +38,24 @@ public class UnassignCommandParser implements Parser<UnassignCommand> {
     }
 
     private AssignmentType parseAssignmentType(String remainder) throws ParseException {
-        Matcher prefixMatcher = PREFIX_TOKEN.matcher(remainder);
-        if (!prefixMatcher.find()) {
+        String[] arguments = remainder.split("\\s+");
+        Matcher firstArgument = PREFIX_TOKEN.matcher(arguments[0]);
+        if (!firstArgument.matches()) {
             throw new ParseException("Unexpected extra argument(s): " + remainder);
         }
 
-        String firstPrefix = prefixMatcher.group("prefix");
+        String firstPrefix = firstArgument.group("prefix");
         AssignmentType firstType = AssignmentType.fromPrefix(firstPrefix);
         if (firstType == null) {
             throw new ParseException("Unsupported assignment prefix: " + firstPrefix + " Use g/, r/, or a/.");
         }
 
-        String firstValue = remainder.substring(prefixMatcher.end()).trim();
-        if (prefixMatcher.find()) {
-            String nextPrefix = prefixMatcher.group("prefix");
+        for (int i = 1; i < arguments.length; i++) {
+            Matcher nextArgument = PREFIX_TOKEN.matcher(arguments[i]);
+            if (!nextArgument.matches()) {
+                continue;
+            }
+            String nextPrefix = nextArgument.group("prefix");
             AssignmentType nextType = AssignmentType.fromPrefix(nextPrefix);
             if (nextType == null) {
                 throw new ParseException("Unsupported assignment prefix: " + nextPrefix + " Use g/, r/, or a/.");
@@ -60,9 +65,13 @@ public class UnassignCommandParser implements Parser<UnassignCommand> {
             }
             throw new ParseException("Specify only one assignment prefix: g/, r/, or a/.");
         }
-        if (!firstValue.isEmpty()) {
-            throw new ParseException("The " + firstPrefix + " prefix must not contain a value when clearing a "
+        if (!firstArgument.group("value").isEmpty()) {
+            throw new ParseException("The " + firstPrefix + " prefix must not contain a value when clearing the "
                     + firstType.getDisplayName() + " assignment.");
+        }
+        if (arguments.length > 1) {
+            throw new ParseException("Unexpected extra argument(s): "
+                    + String.join(" ", Arrays.copyOfRange(arguments, 1, arguments.length)));
         }
         return firstType;
     }

@@ -18,18 +18,29 @@ public class UnassignCommandParserTest {
         assertParseSuccess(parser, "1 g/", new UnassignCommand(INDEX_FIRST_PERSON, AssignmentType.GROUP));
         assertParseSuccess(parser, "1 r/", new UnassignCommand(INDEX_FIRST_PERSON, AssignmentType.ROLE));
         assertParseSuccess(parser, "1 a/", new UnassignCommand(INDEX_FIRST_PERSON, AssignmentType.ACTIVITY));
+        assertParseSuccess(parser, "  1   g/  ", new UnassignCommand(INDEX_FIRST_PERSON, AssignmentType.GROUP));
     }
 
     @Test
     public void parse_invalidInputs_failure() {
         assertParseFailure(parser, "g/", "Please provide a participant index before the assignment prefix.");
+        assertParseFailure(parser, "", "Please provide a participant index before the assignment prefix.");
         assertParseFailure(parser, "0 g/", ParserUtil.MESSAGE_INVALID_INDEX);
+        assertParseFailure(parser, "abc g/", ParserUtil.MESSAGE_INVALID_INDEX);
         assertParseFailure(parser, "1", "Please specify exactly one assignment prefix: g/, r/, or a/.");
         assertParseFailure(parser, "1 x/", "Unsupported assignment prefix: x/ Use g/, r/, or a/.");
         assertParseFailure(parser, "1 g/ r/", "Specify only one assignment prefix: g/, r/, or a/.");
         assertParseFailure(parser, "1 g/ g/", "Assignment prefix must not be repeated: g/");
         assertParseFailure(parser, "1 g/Logistics",
-                "The g/ prefix must not contain a value when clearing a group assignment.");
+                "The g/ prefix must not contain a value when clearing the group assignment.");
+        assertParseFailure(parser, "1 g/Logistics/Team",
+                "The g/ prefix must not contain a value when clearing the group assignment.");
+        assertParseFailure(parser, "1 r/Leader",
+                "The r/ prefix must not contain a value when clearing the role assignment.");
+        assertParseFailure(parser, "1 a/Campfire",
+                "The a/ prefix must not contain a value when clearing the activity assignment.");
         assertParseFailure(parser, "1 unexpected", "Unexpected extra argument(s): unexpected");
+        assertParseFailure(parser, "1 unexpected g/", "Unexpected extra argument(s): unexpected g/");
+        assertParseFailure(parser, "1 g/ unexpected", "Unexpected extra argument(s): unexpected");
     }
 }

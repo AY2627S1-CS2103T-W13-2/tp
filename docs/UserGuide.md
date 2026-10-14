@@ -181,11 +181,28 @@ Format: `unassign INDEX g/` or `unassign INDEX r/` or `unassign INDEX a/`
 * Supply exactly one empty prefix: `g/` for group, `r/` for role, or `a/` for activity. Do not add a value after the prefix.
 * Clearing one assignment preserves the participant's name, contact details, tags, and other assignments. The change is saved automatically.
 * You cannot clear an assignment that is already absent.
+* On success, ZoomAddress reports `Cleared group assignment for Beth Lee.` (or `role` or `activity`, as selected).
 
 Examples:
 * `unassign 2 g/` clears the group assigned to the second displayed participant.
 * `unassign 2 r/` clears their role.
 * `unassign 2 a/` clears their activity.
+
+Invalid examples and responses:
+
+| Command | Response |
+|---|---|
+| `unassign` | `Please provide a participant index before the assignment prefix.` |
+| `unassign abc g/` | `Index must be a positive integer.` |
+| `unassign 99 g/` | `The participant index provided is invalid.` if fewer than 99 participants are displayed. |
+| `unassign 2` | `Please specify exactly one assignment prefix: g/, r/, or a/.` |
+| `unassign 2 g/ r/` | `Specify only one assignment prefix: g/, r/, or a/.` |
+| `unassign 2 g/ g/` | `Assignment prefix must not be repeated: g/` |
+| `unassign 2 x/` | `Unsupported assignment prefix: x/ Use g/, r/, or a/.` |
+| `unassign 2 g/Logistics` | `The g/ prefix must not contain a value when clearing the group assignment.` |
+| `unassign 2 unexpected g/` | `Unexpected extra argument(s): unexpected g/` |
+
+If Beth Lee has no group assignment, `unassign 2 g/` reports `Beth Lee has no group assignment to clear.`
 
 ### Locating participants by name: `find`
 

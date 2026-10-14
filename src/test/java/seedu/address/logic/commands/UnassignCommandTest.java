@@ -1,10 +1,13 @@
 package seedu.address.logic.commands;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static seedu.address.logic.commands.CommandTestUtil.showPersonAtIndex;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
+import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import java.util.Optional;
@@ -62,10 +65,15 @@ public class UnassignCommandTest {
 
     @Test
     public void execute_filteredList_usesDisplayedIndex() {
-        Person original = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person firstPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person original = model.getFilteredPersonList().get(INDEX_SECOND_PERSON.getZeroBased());
         Person assigned = new PersonBuilder(original).withGroup("Logistics").build();
         model.setPerson(original, assigned);
-        showPersonAtIndex(model, INDEX_FIRST_PERSON);
+        showPersonAtIndex(model, INDEX_SECOND_PERSON);
+
+        assertFalse(model.getFilteredPersonList().contains(firstPerson));
+        assertFalse(model.getFilteredPersonList().contains(original));
+        assertEquals(assigned, model.getFilteredPersonList().getFirst());
 
         UnassignCommand command = new UnassignCommand(INDEX_FIRST_PERSON, AssignmentType.GROUP);
         Person expected = clear(assigned, AssignmentType.GROUP);
@@ -73,6 +81,7 @@ public class UnassignCommandTest {
         expectedModel.setPerson(assigned, expected);
         assertCommandSuccess(command, model, String.format(UnassignCommand.MESSAGE_UNASSIGN_SUCCESS,
                 "group", assigned.getName()), expectedModel);
+        assertTrue(model.getAddressBook().getPersonList().contains(firstPerson));
     }
 
     @Test

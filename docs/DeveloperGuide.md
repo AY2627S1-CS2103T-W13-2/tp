@@ -155,6 +155,15 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Clearing a participant assignment
+
+The `unassign` command accepts a displayed participant index and exactly one empty `g/`, `r/`, or `a/` prefix.
+`UnassignCommandParser` validates the syntax and maps the prefix to `AssignmentType`, which keeps the three
+assignment categories in one place. `UnassignCommand` looks up the participant in the currently displayed list,
+checks that the selected assignment exists, and creates an updated `Person` with only that optional field empty.
+It replaces the participant through `Model.setPerson`; `LogicManager` then saves the model to disk. Invalid input
+or a missing assignment produces an error without modifying the participant.
+
 ### \[Proposed\] Undo/redo feature
 
 #### Proposed Implementation

@@ -62,5 +62,14 @@ public class AssignmentIntegrationTest {
 
         Model reloaded = new ModelManager(storage.readAddressBook().orElseThrow(), new UserPrefs());
         assertEquals(new PersonBuilder().build(), reloaded.getFilteredPersonList().get(0));
+
+        Logic restartedLogic = new LogicManager(reloaded, new StorageManager(storage, prefs));
+        restartedLogic.execute("assign-role 1 r/Lead");
+        restartedLogic.execute("assign-activity 1 a/Workshop");
+        restartedLogic.execute("assign-group 1 g/Programmes");
+
+        Model reloadedAfterReassignment = new ModelManager(storage.readAddressBook().orElseThrow(), new UserPrefs());
+        assertEquals(new PersonBuilder().withRole("Lead").withActivity("Workshop")
+                .withGroup("Programmes").build(), reloadedAfterReassignment.getFilteredPersonList().get(0));
     }
 }
