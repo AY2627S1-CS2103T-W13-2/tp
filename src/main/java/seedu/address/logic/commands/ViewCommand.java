@@ -31,7 +31,7 @@ public class ViewCommand extends Command {
     private final Index targetIndex;
 
     public ViewCommand(Index targetIndex) {
-        this.targetIndex = targetIndex;
+        this.targetIndex = requireNonNull(targetIndex);
     }
 
     @Override
