@@ -2,6 +2,7 @@ package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,6 +18,7 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
+import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.UserPrefs;
 import seedu.address.testutil.PersonBuilder;
 
@@ -55,5 +57,37 @@ public class SafeSavingIntegrationTest {
         assertEquals(model.getAddressBook(), new AddressBook(retry.readAddressBook().orElseThrow()));
         assertEquals(new PersonBuilder(original.getPersonList().getFirst()).withPhone("91234567").build(),
                 retry.readAddressBook().orElseThrow().getPersonList().getFirst());
+    }
+
+    @Test
+    public void execute_snapshotFailure_reportsSaveErrorAndPreservesExistingFile() throws Exception {
+        Path target = testFolder.resolve("participants.json");
+        AddressBook original = new AddressBook();
+        original.addPerson(new PersonBuilder().withName("Alice Tan").withGroup("Team A/B")
+                .withRole("Facilitator").withActivity("Arts & Crafts").build());
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(target);
+        storage.saveAddressBook(original);
+        byte[] originalBytes = Files.readAllBytes(target);
+        IllegalStateException snapshotFailure = new IllegalStateException("Injected snapshot failure");
+        ReadOnlyAddressBook brokenSnapshot = () -> {
+            throw snapshotFailure;
+        };
+        Model model = new ModelManager(original, new UserPrefs()) {
+            @Override
+            public ReadOnlyAddressBook getAddressBook() {
+                return brokenSnapshot;
+            }
+        };
+        LogicManager logic = new LogicManager(model,
+                new StorageManager(storage, new JsonUserPrefsStorage(testFolder.resolve("prefs.json"))));
+
+        CommandException exception = assertThrows(CommandException.class, () -> logic.execute("edit 1 p/91234567"));
+
+        assertTrue(exception.getMessage().contains("Could not serialize participant data"));
+        assertTrue(exception.getCause() instanceof IOException);
+        assertSame(snapshotFailure, exception.getCause().getCause());
+        assertArrayEquals(originalBytes, Files.readAllBytes(target));
+        assertEquals(original, new AddressBook(storage.readAddressBook().orElseThrow()));
+        assertEquals("91234567", model.getFilteredPersonList().getFirst().getPhone().value);
     }
 }

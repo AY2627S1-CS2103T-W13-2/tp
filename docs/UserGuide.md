@@ -370,6 +370,9 @@ file is replaced only through an atomic filesystem move; ZoomAddress does not fa
 if atomic replacement is unsupported. For an existing file, a temporary recovery copy is kept until replacement
 succeeds. The JSON format and assignment fields are unchanged.
 
+If preparing the participant snapshot or serializing it fails, ZoomAddress reports a save error before creating
+temporary files or replacing the saved file.
+
 If a save error appears:
 
 * Check the data folder's write permissions, available disk space, and filesystem support for atomic moves.

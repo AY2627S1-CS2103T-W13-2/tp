@@ -91,7 +91,7 @@ public class JsonAddressBookStorage {
         String content;
         try {
             content = JsonUtil.toJsonString(new JsonSerializableAddressBook(addressBook));
-        } catch (IOException exception) {
+        } catch (IOException | RuntimeException exception) {
             logger.warning("Could not serialize participant data; no file replacement attempted.");
             throw new IOException("Could not serialize participant data. The saved file was not replaced.", exception);
         }

@@ -169,6 +169,11 @@ creating any destination or temporary file. It delegates only the write step to 
 the JSON schema, public read methods, and `DataLoadingException` contract are unchanged. In particular, read failures
 are not converted into an empty address book by this save implementation.
 
+Snapshot/serialization runtime failures and checked serialization errors are wrapped as `IOException`, preserving
+the original cause and using a participant-free error message. This allows the existing Logic save-error handler
+to produce `CommandException` even when snapshot construction fails. Null method arguments still fail the explicit
+precondition checks outside this boundary; JVM errors are not caught.
+
 The writer follows these steps:
 
 1. Resolve an existing final symbolic link to its target, reject a directory destination, and prepare the parent folder.
