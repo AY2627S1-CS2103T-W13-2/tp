@@ -76,6 +76,31 @@ public class AssignmentIntegrationTest {
     }
 
     @Test
+    public void execute_assignEditThenUnassignOneField_preservesOtherDataAcrossRestart() throws Exception {
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("participants.json"));
+        JsonUserPrefsStorage prefs = new JsonUserPrefsStorage(temporaryFolder.resolve("prefs.json"));
+        Model model = new ModelManager();
+        model.addPerson(new PersonBuilder().build());
+        model.addPerson(new PersonBuilder().withName("Zoe Lee").build());
+        Logic logic = new LogicManager(model, new StorageManager(storage, prefs));
+
+        logic.execute("assign-group 1 g/Logistics");
+        logic.execute("assign-role 1 r/Facilitator");
+        logic.execute("assign-activity 1 a/Campfire");
+        logic.execute("edit 1 p/91234567");
+        logic.execute("unassign 1 r/");
+
+        Model reloaded = new ModelManager(storage.readAddressBook().orElseThrow(), new UserPrefs());
+        Person amy = reloaded.getAddressBook().getPersonList().stream()
+                .filter(person -> person.getName().fullName.equals("Amy Bee")).findFirst().orElseThrow();
+        Person zoe = reloaded.getAddressBook().getPersonList().stream()
+                .filter(person -> person.getName().fullName.equals("Zoe Lee")).findFirst().orElseThrow();
+        assertEquals(new PersonBuilder().withPhone("91234567").withGroup("Logistics")
+                .withActivity("Campfire").build(), amy);
+        assertEquals(new PersonBuilder().withName("Zoe Lee").build(), zoe);
+    }
+
+    @Test
     public void execute_unassignAfterSort_usesSortedDisplayedIndex() throws Exception {
         JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("participants.json"));
         JsonUserPrefsStorage prefs = new JsonUserPrefsStorage(temporaryFolder.resolve("prefs.json"));
