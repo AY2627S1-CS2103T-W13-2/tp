@@ -177,6 +177,34 @@ public class JsonAddressBookStorageTest {
         assertThrows(NullPointerException.class, () -> saveAddressBook(null, "SomeFile.json"));
     }
 
+    @Test
+    public void saveAddressBook_snapshotFailure_doesNotCreateDestination() {
+        Path filePath = testFolder.resolve("FailedFirstSave.json");
+        ReadOnlyAddressBook brokenSnapshot = () -> {
+            throw new IllegalStateException("Injected snapshot failure");
+        };
+
+        assertThrows(IllegalStateException.class,
+                () -> new JsonAddressBookStorage(filePath).saveAddressBook(brokenSnapshot));
+
+        assertFalse(Files.exists(filePath));
+    }
+
+    @Test
+    public void saveAddressBook_snapshotFailure_preservesExistingFile() throws Exception {
+        Path filePath = testFolder.resolve("FailedExistingSave.json");
+        String originalContent = "original participant file";
+        Files.writeString(filePath, originalContent);
+        ReadOnlyAddressBook brokenSnapshot = () -> {
+            throw new IllegalStateException("Injected snapshot failure");
+        };
+
+        assertThrows(IllegalStateException.class,
+                () -> new JsonAddressBookStorage(filePath).saveAddressBook(brokenSnapshot));
+
+        assertEquals(originalContent, Files.readString(filePath));
+    }
+
     /**
      * Saves {@code addressBook} at the specified {@code filePath}.
      */
