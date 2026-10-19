@@ -184,8 +184,8 @@ public class JsonAddressBookStorageTest {
             throw new IllegalStateException("Injected snapshot failure");
         };
 
-        assertThrows(IllegalStateException.class,
-                () -> new JsonAddressBookStorage(filePath).saveAddressBook(brokenSnapshot));
+        assertThrows(IllegalStateException.class, () ->
+                new JsonAddressBookStorage(filePath).saveAddressBook(brokenSnapshot));
 
         assertFalse(Files.exists(filePath));
     }
@@ -199,8 +199,8 @@ public class JsonAddressBookStorageTest {
             throw new IllegalStateException("Injected snapshot failure");
         };
 
-        assertThrows(IllegalStateException.class,
-                () -> new JsonAddressBookStorage(filePath).saveAddressBook(brokenSnapshot));
+        assertThrows(IllegalStateException.class, () ->
+                new JsonAddressBookStorage(filePath).saveAddressBook(brokenSnapshot));
 
         assertEquals(originalContent, Files.readString(filePath));
     }
