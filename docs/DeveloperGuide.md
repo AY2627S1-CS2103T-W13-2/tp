@@ -162,6 +162,36 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Saving participant data safely
+
+`JsonAddressBookStorage` constructs the complete `JsonSerializableAddressBook` snapshot and serializes it before
+creating any destination or temporary file. It delegates only the write step to the package-private `AtomicFileWriter`;
+the JSON schema, public read methods, and `DataLoadingException` contract are unchanged. In particular, read failures
+are not converted into an empty address book by this save implementation.
+
+The writer follows these steps:
+
+1. Resolve an existing final symbolic link to its target, reject a directory destination, and prepare the parent folder.
+2. Create a uniquely named sibling `.tmp` file, write the complete UTF-8 content, and flush its file channel.
+3. If a participant file already exists, copy its bytes to a uniquely named sibling `.bak` file. An incomplete backup
+   is never used for recovery. Failure before replacement leaves the destination untouched.
+4. Replace the destination using `Files.move` with `ATOMIC_MOVE`. No non-atomic or direct-write fallback is used.
+   Some filesystems cannot atomically replace an existing file; the save then fails rather than weakening the guarantee.
+5. On a replacement I/O failure, attempt an atomic restore from the completed backup. If restoration fails, retain
+   that backup and include its path in the thrown `IOException`. Unsupported atomic moves do not attempt a fallback.
+   Remove disposable files where possible, preserving the main exception and any cleanup errors. Cleanup failure
+   after a committed save is logged rather than incorrectly reporting that save as failed.
+
+`FileOperations` is an injectable filesystem boundary used by deterministic tests for partial writes, backup failures,
+replacement errors before and after a completed move, unsupported moves, restoration failures, cleanup, and retries.
+Tests also check first saves, byte preservation, complete assignment round trips, and the existing Logic error path.
+Save diagnostics log operation phases and recovery-file locations, without participant values or raw exception text.
+
+`LogicManager` still executes the command before attempting a save and converts write errors to `CommandException`.
+This change therefore does not roll back the in-memory model. The writer assumes one writer and does not provide
+power-loss durability, cross-process coordination, automatic startup recovery, or new guarantees for preferences.
+Retained backups are deliberately not overwritten or automatically consumed by subsequent saves.
+
 ### Clearing a participant assignment
 
 The `unassign` command accepts a displayed participant index and exactly one empty `g/`, `r/`, or `a/` prefix.
