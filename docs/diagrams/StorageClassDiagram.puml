@@ -1,36 +1,49 @@
 @startuml
 !include style.puml
+!pragma layout smetana
 skinparam arrowThickness 1.1
 skinparam arrowColor STORAGE_COLOR
 skinparam classBackgroundColor STORAGE_COLOR
+skinparam ArrowFontStyle plain
 
 package Storage as StoragePackage {
-
-Class "<<interface>>\nStorage" as Storage
-Class StorageManager
-
-package "UserPrefs Storage" #F4F6F6{
-Class JsonUserPrefsStorage
+    interface Storage <<interface>>
+    class StorageManager
+    class JsonUserPrefsStorage
+    class JsonAddressBookStorage
+    class JsonSerializableAddressBook
+    class JsonAdaptedPerson {
+        name : String
+        phone : String
+        email : String
+        address : String
+        role : String [0..1]
+        activity : String [0..1]
+        group : String [0..1]
+    }
+    class JsonAdaptedTag
 }
 
-package "AddressBook Storage" #F4F6F6{
-Class JsonAddressBookStorage
-Class JsonSerializableAddressBook
-Class JsonAdaptedPerson
-Class JsonAdaptedTag
+package Model as ModelPackage {
+    interface ReadOnlyAddressBook <<interface>> MODEL_COLOR
 }
 
-}
+StorageManager ..|> Storage
+StorageManager --> "1" JsonUserPrefsStorage : userPrefsStorage
+StorageManager --> "1" JsonAddressBookStorage : addressBookStorage
 
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> Storage
+JsonAddressBookStorage ..> JsonSerializableAddressBook : serializes / loads
+JsonAddressBookStorage ..> ReadOnlyAddressBook : accepts / returns
+JsonSerializableAddressBook --> "0..*" JsonAdaptedPerson : persons
+JsonAdaptedPerson --> "0..*" JsonAdaptedTag : tags
+JsonAdaptedTag -[hidden]down-> ReadOnlyAddressBook
 
-StorageManager .up.|> Storage
-StorageManager -down-> "1" JsonUserPrefsStorage
-StorageManager -down-> "1" JsonAddressBookStorage
+show JsonAdaptedPerson fields
 
-JsonAddressBookStorage ..> JsonSerializableAddressBook
-JsonSerializableAddressBook --> "*" JsonAdaptedPerson
-JsonAdaptedPerson --> "*" JsonAdaptedTag
+legend bottom
+  Selected storage contracts and JSON adapters.
+  Optional assignments are nullable JSON strings.
+  Low-level I/O helpers and model conversions are omitted.
+endlegend
 
 @enduml
