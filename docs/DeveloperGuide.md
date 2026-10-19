@@ -152,6 +152,11 @@ The `Storage` component,
 * is implemented by `StorageManager`, which delegates the actual JSON file access to `JsonAddressBookStorage` and `JsonUserPrefsStorage` (one class per data file).
 * depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`)
 
+The class diagram shows the stable storage contracts and JSON adapters rather than low-level I/O helpers.
+`StorageManager` implements the `Storage` interface and holds one storage object for each file. Each serialized
+participant contains its own nullable group, role, and activity strings and a list of tag adapters; there is no
+separate persisted group, role, or activity directory. The `0..*` multiplicities allow an empty directory or no tags.
+
 ### Common classes
 
 Classes used by multiple components are in the `seedu.address.commons` package.
