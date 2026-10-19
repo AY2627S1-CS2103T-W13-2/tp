@@ -222,6 +222,35 @@ assignment therefore cannot match.
 Executing the command updates only the model's `FilteredList`. It does not replace or reorder the `AddressBook`'s
 stored participant list. The UI observes the filtered list and assigns fresh displayed indices to the matching records.
 
+### Finding incomplete allocations
+
+`unassigned` accepts exactly one empty `g/`, `r/`, or `a/` prefix. `AddressBookParser` delegates to
+`UnassignedCommandParser`, which validates the complete argument before creating a command. Missing, unsupported,
+repeated or multiple prefixes, non-empty values and stray text produce distinct parse errors without execution.
+
+`UnassignedCommand` uses `AssignmentMissingPredicate` in the Model package. It reuses the assignment-category enum
+from `AssignmentMatchesPredicate`, keeping the new predicate independent of Logic-layer types. The predicate checks
+whether the selected `Optional` is empty, not whether its label equals a display placeholder. A participant can
+therefore match a missing-group query while still having a role and activity.
+
+The sequence below focuses on command execution after parsing has created `command` and `predicate`.
+
+![Execution of an unassigned-group query](images/UnassignedSequenceDiagram.png)
+
+1. `LogicManager` executes the parsed `UnassignedCommand` against the current model.
+1. The command replaces the `FilteredList` predicate through `Model.updateFilteredPersonList`. Because that list is
+   backed by all stored participants, previous searches do not restrict the new query.
+1. The existing `SortedList` comparator remains active. Index-based commands read this same derived view.
+1. The command returns the match count and category. Its diagnostic log records only those two values, not records
+   or assignment labels.
+1. The existing `LogicManager` successful-command path saves the unchanged address book. The query does not skip
+   that save or guarantee that the file is never rewritten; its guarantee is unchanged participant fields/order.
+   The query predicate and sort comparator are session-only view state, not additional JSON fields.
+
+Tests cover each category independently, prior empty filters, sort/view indices, zero/all matches, rejected syntax,
+and byte-for-byte JSON content plus participant-field preservation through the real save/reload path. No storage
+schema or assignment cardinality changes are required.
+
 ### Inherited AB3 undo/redo design (not implemented)
 
 <div markdown="span" class="alert alert-warning">
@@ -726,6 +755,15 @@ First restore Beth's assignments with `find Beth`, `assign-group 1 g/Logistics`,
 | Beth has activity Campfire. | `filter a/Campfire` | An indexed list containing Beth. | None. |
 | Prepared data is loaded. | `filter g/Nonexistent` | A clear zero-result response and an empty displayed list. | None. |
 
+#### Finding incomplete allocations
+
+After restoring Beth's three assignments as above, `unassigned g/`, `unassigned r/`, and `unassigned a/` each
+display Alice, Chen and dana, not Beth. All four stored records remain unchanged. Run `filter g/Nonexistent`, then
+`unassigned g/`: the same three participants must reappear because the query starts from all stored records.
+
+Run `sort name`, then `unassigned r/` and `view 2`: Chen Wei is the second displayed participant. Run `list` to
+restore the full sorted view. Restarting restores stored order and clears these view-only queries.
+
 ### Invalid input and boundary cases
 
 For every command below, the status area should identify the actual problem and no participant data should change.
@@ -744,6 +782,7 @@ For every command below, the status area should identify the actual problem and 
 | `sort`, `sort phone`, or `sort name extra` | A specific message for the missing, unsupported, or extra criterion. |
 | `find-contact`, `find-contact 81234567 extra` | A specific message for the blank or multi-value search. |
 | `filter`, `filter g/`, or `filter g/Logistics r/Facilitator` | A specific message for the missing, blank, or conflicting assignment filter. |
+| `unassigned`, `unassigned g/ g/`, `unassigned g/ r/`, `unassigned g/Logistics`, or `unassigned g/ extra` | A specific message for the missing, repeated, conflicting, non-empty prefix or extra text; the current view and records remain unchanged. |
 
 ### Displayed-list indices
 

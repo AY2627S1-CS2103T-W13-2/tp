@@ -1,0 +1,54 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+box Logic LOGIC_COLOR_T1
+participant ":LogicManager" as Logic LOGIC_COLOR
+participant "command:UnassignedCommand" as Command LOGIC_COLOR
+end box
+box Model MODEL_COLOR_T1
+participant "model:ModelManager" as Model MODEL_COLOR
+participant "filteredPersons:FilteredList" as Filtered MODEL_COLOR
+participant "predicate:AssignmentMissingPredicate" as Predicate MODEL_COLOR
+end box
+box Storage STORAGE_COLOR_T1
+participant ":StorageManager" as Storage STORAGE_COLOR
+end box
+
+note over Logic, Command : Parsing has created command and predicate for GROUP.
+[-> Logic : execute("unassigned g/")
+activate Logic
+Logic -> Command : execute(model)
+activate Command
+Command -> Model : updateFilteredPersonList(predicate)
+activate Model
+Model -> Filtered : setPredicate(predicate)
+activate Filtered
+loop each stored participant
+    Filtered -> Predicate : test(person)
+    activate Predicate
+    Predicate --> Filtered : person.getGroup().isEmpty()
+    deactivate Predicate
+end
+Filtered --> Model
+deactivate Filtered
+Model --> Command
+deactivate Model
+Command -> Model : getFilteredPersonList()
+activate Model
+Model --> Command : sorted view
+deactivate Model
+note over Command, Model : Read size; log category and count only.\nExisting sort comparator is unchanged.
+Command --> Logic : CommandResult(count and category)
+deactivate Command
+Logic -> Model : getAddressBook()
+activate Model
+Model --> Logic : unchanged records
+deactivate Model
+Logic -> Storage : saveAddressBook(unchanged records)
+activate Storage
+Storage --> Logic
+deactivate Storage
+[<-- Logic : result
+deactivate Logic
+@enduml

@@ -70,7 +70,7 @@ ZoomAddress is a **desktop participant-management application for directors of l
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </div>
 
-ZoomAddress adds `view`, `assign-group`, `assign-role`, `assign-activity`, `unassign`, `sort`, `filter`, and
+ZoomAddress adds `view`, `assign-group`, `assign-role`, `assign-activity`, `unassign`, `unassigned`, `sort`, `filter`, and
 `find-contact` to the original AddressBook-Level3 commands. The other commands below retain their familiar
 AddressBook workflow, with participant-focused wording.
 
@@ -267,6 +267,40 @@ Examples:
 * `filter r/facilitator` displays participants whose role is Facilitator, regardless of letter case.
 * `filter a/  Campfire  ` displays participants assigned to Campfire after trimming the value.
 
+### Finding incomplete allocations: `unassigned`
+
+Shows participants who have no group, role, or activity assignment in one selected category.
+
+Formats: `unassigned g/`, `unassigned r/`, or `unassigned a/`.
+
+* Use exactly one empty, lowercase prefix. Do not include an index, assignment value, quotes, or other arguments.
+  For this command, `a/` means activity, not address.
+* The query considers **all stored participants**, even after another search or filter. It replaces the previous
+  filter rather than narrowing it. An active `sort name` order is preserved, and displayed indices start from 1.
+* Only the selected field must be absent; other assignments do not affect the result. A stored label literally
+  named `Unassigned` is still an assignment and is not treated as missing.
+* No participant fields or stored ordering change. The view itself is not saved; use `list` to show everyone again.
+* If nobody matches (including an empty directory), the displayed list is empty and the response is
+  `0 participant(s) have no group assignment.` for `unassigned g/` (or the selected role/activity category).
+
+Examples:
+
+* `unassigned g/` shows everyone who still needs a group allocation.
+* `unassigned r/` shows everyone without a role, regardless of their group or activity.
+* `unassigned a/` shows everyone without an activity. Use the resulting displayed index for `view`, `assign-activity`,
+  `edit`, or other index-based commands.
+
+Common invalid inputs:
+
+| Input | Error and correction |
+|---|---|
+| `unassigned` | `Please specify exactly one empty assignment prefix: g/, r/, or a/.` Choose one category. |
+| `unassigned g/ r/` | `Specify only one assignment prefix: g/, r/, or a/.` Run separate queries instead. |
+| `unassigned g/ g/` | `Assignment prefix must not be repeated: g/` Remove the duplicate. |
+| `unassigned g/Logistics` | `The g/ prefix must not contain a value for an unassigned query.` Use `unassigned g/` (or `filter g/Logistics` to find assigned participants). |
+| `unassigned G/` | `Unsupported assignment prefix: G/ Use g/, r/, or a/.` Use lowercase `g/`. |
+| `unassigned g/ extra` | `Unexpected extra argument(s). Use unassigned g/, unassigned r/, or unassigned a/.` Remove the extra text. |
+
 ### Locating participants by name: `find`
 
 Finds participants whose names contain any of the given keywords.
@@ -373,6 +407,7 @@ Action | Format, Examples
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **Find by contact** | `find-contact PHONE_OR_EMAIL`<br> e.g., `find-contact alex@example.com`
 **Filter by assignment** | `filter g/GROUP` or `filter r/ROLE` or `filter a/ACTIVITY`<br> e.g., `filter g/Logistics`
+**Find incomplete allocations** | `unassigned g/` or `unassigned r/` or `unassigned a/`
 **List** | `list`
 **Sort** | `sort name`
 **View** | `view INDEX`<br> e.g., `view 3`
