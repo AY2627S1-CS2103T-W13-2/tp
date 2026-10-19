@@ -70,7 +70,7 @@ ZoomAddress is a **desktop participant-management application for directors of l
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </div>
 
-ZoomAddress adds `view`, `assign-group`, `assign-role`, `assign-activity`, `unassign`, `unassigned`, `sort`, `filter`, and
+ZoomAddress adds `view`, `assign-group`, `assign-role`, `assign-activity`, `unassign`, `unassigned`, `sort`, `filter`, `filter-all`, and
 `find-contact` to the original AddressBook-Level3 commands. The other commands below retain their familiar
 AddressBook workflow, with participant-focused wording.
 
@@ -267,6 +267,61 @@ Examples:
 * `filter r/facilitator` displays participants whose role is Facilitator, regardless of letter case.
 * `filter a/  Campfire  ` displays participants assigned to Campfire after trimming the value.
 
+### Filtering by combined assignments: `filter-all`
+
+Shows participants matching **all** of two or three assignment criteria (AND).
+
+Formats:
+* `filter-all g/GROUP r/ROLE`
+* `filter-all g/GROUP a/ACTIVITY`
+* `filter-all r/ROLE a/ACTIVITY`
+* `filter-all g/GROUP r/ROLE a/ACTIVITY`
+
+* Criteria may appear in any order. Use two or three distinct lowercase prefixes, each with a non-blank value.
+  For this command, `a/` means activity. Use `filter` for one criterion.
+* Each selected assignment must match exactly, ignoring letter case and surrounding whitespace. An absent selected
+  assignment does not match. Unspecified categories do not restrict the results.
+* Searches start from **all stored participants**, replacing earlier searches and filters. `sort name` remains active;
+  displayed indices start from 1 and apply to `view`, `edit`, assignment commands, and other index-based commands.
+* No matches (including an empty directory) gives an empty list and `0 participant(s) matched all assignments.`
+* Participant fields and stored order are unchanged. The filter is session-only; `list` restores the full sorted view,
+  while restarting restores stored order.
+
+**Values and quoting:**
+
+* Unquoted values can contain spaces and embedded slashes, for example `g/Logistics Team` or `g/Tech/Media`.
+* Outside quotes, a token beginning with letters followed by `/` after whitespace starts a new prefix. Quote the
+  **whole value** when such text belongs to the label: `g/"Team A/B"` or `g/"Team r/Lead"`. This rule applies regardless
+  of case; an unsupported prefix such as `A/`, `R/`, or `p/` produces an error.
+* Inside double quotes, prefix-like text is literal. Use `\"` for a literal double quote and `\\` for a literal
+  backslash. Other escapes are rejected. Unquoted backslashes are literal.
+* Close every quoted value, then use whitespace before the next prefix. Partial quoting and text after a closing
+  quote are rejected. Quotes are query syntax and are not part of the matched label.
+* These quoting rules apply to `filter-all`. Existing `filter` syntax is unchanged:
+  `filter g/team a/b` still matches a stored group named `Team A/B`.
+
+Examples:
+* `filter-all g/Logistics r/Facilitator` matches participants who are both in Logistics and Facilitators.
+* `filter-all a/campfire r/FACILITATOR g/logistics` also requires the Campfire activity.
+* `filter-all g/"Team A/B" r/Facilitator` matches the literal group label `Team A/B` and role Facilitator.
+* `filter-all g/"Team r/Lead" r/"Say \"Hi\" \\ Lead"` matches group `Team r/Lead` and role `Say "Hi" \ Lead`.
+
+Common invalid inputs:
+
+| Input | Error and correction |
+|---|---|
+| `filter-all g/Logistics` | `Specify two or three distinct assignment prefixes: g/, r/, a/.` Add another criterion or use `filter`. |
+| `filter-all g/Logistics g/Other` | `Assignment prefix must not be repeated: g/` Use each category once. |
+| `filter-all g/ r/Lead` | `Assignment values must not be blank.` Supply a value for every prefix. |
+| `filter-all g/Logistics R/Lead` | `Unsupported assignment prefix: R/ Use g/, r/, or a/.` Use lowercase prefixes. |
+| `filter-all extra g/Logistics r/Lead` | `Expected an assignment prefix: g/, r/, or a/.` Remove the preamble. |
+| `filter-all g/"Team r/Lead` | `Unfinished quoted value. Close the double quote.` Close the value and supply another criterion. |
+| `filter-all g/"Team\q" r/Lead` | `Unsupported escape.` Use only escaped quotes or backslashes inside quotes. |
+| `filter-all g/Team"X" r/Lead` | `Quote the entire assignment value, not just part of it.` Enclose the whole value. |
+| `filter-all g/"Team"r/Lead` | `Expected whitespace or end of input after a quoted value.` Add a space between criteria. |
+
+Invalid queries leave the current view and participant data unchanged.
+
 ### Finding incomplete allocations: `unassigned`
 
 Shows participants who have no group, role, or activity assignment in one selected category.
@@ -407,6 +462,7 @@ Action | Format, Examples
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **Find by contact** | `find-contact PHONE_OR_EMAIL`<br> e.g., `find-contact alex@example.com`
 **Filter by assignment** | `filter g/GROUP` or `filter r/ROLE` or `filter a/ACTIVITY`<br> e.g., `filter g/Logistics`
+**Filter by combined assignments** | `filter-all g/GROUP r/ROLE [a/ACTIVITY]` (any two or three categories)<br> e.g., `filter-all g/Logistics r/Facilitator`
 **Find incomplete allocations** | `unassigned g/` or `unassigned r/` or `unassigned a/`
 **List** | `list`
 **Sort** | `sort name`
