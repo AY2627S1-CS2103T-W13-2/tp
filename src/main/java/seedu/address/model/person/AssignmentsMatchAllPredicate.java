@@ -9,11 +9,15 @@ import java.util.function.Predicate;
 
 import seedu.address.model.person.AssignmentMatchesPredicate.AssignmentType;
 
-/** Tests whether a participant matches every selected assignment, ignoring case and surrounding whitespace. */
+/**
+ * Tests whether a participant matches every selected assignment, ignoring case and surrounding whitespace.
+ */
 public class AssignmentsMatchAllPredicate implements Predicate<Person> {
     private final Map<AssignmentType, AssignmentMatchesPredicate> criteria;
 
-    /** Creates an immutable query with two or three distinct, non-blank assignment criteria. */
+    /**
+     * Creates an immutable query with two or three distinct, non-blank assignment criteria.
+     */
     public AssignmentsMatchAllPredicate(Map<AssignmentType, String> values) {
         requireNonNull(values);
         checkArgument(values.size() >= 2 && values.size() <= 3, "Expected two or three assignment criteria.");

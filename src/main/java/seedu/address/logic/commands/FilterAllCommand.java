@@ -5,7 +5,9 @@ import static java.util.Objects.requireNonNull;
 import seedu.address.model.Model;
 import seedu.address.model.person.AssignmentsMatchAllPredicate;
 
-/** Shows participants matching all selected assignments without modifying their records or sort order. */
+/**
+ * Shows participants matching all selected assignments without modifying their records or sort order.
+ */
 public class FilterAllCommand extends Command {
     public static final String COMMAND_WORD = "filter-all";
     public static final String MESSAGE_USAGE = COMMAND_WORD
@@ -16,7 +18,9 @@ public class FilterAllCommand extends Command {
 
     private final AssignmentsMatchAllPredicate predicate;
 
-    /** Creates a command for the supplied non-null combined assignment predicate. */
+    /**
+     * Creates a command for the supplied non-null combined assignment predicate.
+     */
     public FilterAllCommand(AssignmentsMatchAllPredicate predicate) {
         this.predicate = requireNonNull(predicate);
     }

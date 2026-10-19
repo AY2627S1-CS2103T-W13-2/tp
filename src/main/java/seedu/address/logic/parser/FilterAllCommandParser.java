@@ -12,7 +12,9 @@ import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.AssignmentMatchesPredicate.AssignmentType;
 import seedu.address.model.person.AssignmentsMatchAllPredicate;
 
-/** Parses two or three assignment criteria, with quoted values protecting embedded prefix-like text. */
+/**
+ * Parses two or three assignment criteria, with quoted values protecting embedded prefix-like text.
+ */
 public class FilterAllCommandParser implements Parser<FilterAllCommand> {
     public static final String MESSAGE_CRITERIA_COUNT =
             "Specify two or three distinct assignment prefixes: g/, r/, a/.";
@@ -110,7 +112,9 @@ public class FilterAllCommandParser implements Parser<FilterAllCommand> {
         return position;
     }
 
-    /** A decoded value and the position immediately after it in the input. */
+    /**
+     * A decoded value and the position immediately after it in the input.
+     */
     private record ParsedValue(String text, int end) {
     }
 }
