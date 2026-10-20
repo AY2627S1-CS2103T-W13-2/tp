@@ -420,6 +420,29 @@ Format: `exit`
 
 ZoomAddress automatically saves data after every successful command. You do not need to save manually.
 
+Participant saves first prepare the complete JSON and write it to a temporary file in the data folder. The previous
+file is replaced only through an atomic filesystem move; ZoomAddress does not fall back to truncating the data file
+if atomic replacement is unsupported. For an existing file, a temporary recovery copy is kept until replacement
+succeeds. The JSON format and assignment fields are unchanged.
+
+If preparing the participant snapshot or serializing it fails, ZoomAddress reports a save error before creating
+temporary files or replacing the saved file.
+
+If a save error appears:
+
+* Check the data folder's write permissions, available disk space, and filesystem support for atomic moves.
+* A command may already have changed the displayed data before saving failed. The error does **not** mean the
+  in-memory change was undone or saved. Keep the application open while investigating the error.
+* If replacement fails, ZoomAddress attempts to restore the previous file atomically. If restoration also fails,
+  the error identifies a `.zoomaddress-save-*.bak` recovery file containing the previous saved bytes. Preserve that
+  file before retrying or restarting; automatic restoration is not guaranteed in this case.
+* Temporary files are normally removed. If cleanup fails, their locations are recorded in the application log.
+  A `.tmp` file may contain incomplete data and must not be used as a recovery copy. Treat `.bak` files as private
+  participant data. A retained recovery copy is not automatically loaded or removed on a later save.
+
+These guarantees apply to participant saves with one application writing the data file. They do not cover
+simultaneous external edits, power loss, filesystem corruption, or user-preference saves.
+
 ### Editing the data file
 
 ZoomAddress data is saved automatically as a JSON file `data/addressbook.json` relative to the folder where you run

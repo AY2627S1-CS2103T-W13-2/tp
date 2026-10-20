@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.commons.exceptions.IllegalValueException;
-import seedu.address.commons.util.FileUtil;
 import seedu.address.commons.util.JsonUtil;
 import seedu.address.model.ReadOnlyAddressBook;
 
@@ -21,10 +20,17 @@ public class JsonAddressBookStorage {
 
     private static final Logger logger = LogsCenter.getLogger(JsonAddressBookStorage.class);
 
-    private Path filePath;
+    private final Path filePath;
+    private final AtomicFileWriter fileWriter;
 
     public JsonAddressBookStorage(Path filePath) {
-        this.filePath = filePath;
+        this(filePath, new AtomicFileWriter());
+    }
+
+    /** Creates storage with an injectable write boundary; the public read contract is unchanged. */
+    JsonAddressBookStorage(Path filePath, AtomicFileWriter fileWriter) {
+        this.filePath = requireNonNull(filePath);
+        this.fileWriter = requireNonNull(fileWriter);
     }
 
     public Path getAddressBookFilePath() {
@@ -82,8 +88,14 @@ public class JsonAddressBookStorage {
         requireNonNull(addressBook);
         requireNonNull(filePath);
 
-        FileUtil.createIfMissing(filePath);
-        JsonUtil.saveJsonFile(new JsonSerializableAddressBook(addressBook), filePath);
+        String content;
+        try {
+            content = JsonUtil.toJsonString(new JsonSerializableAddressBook(addressBook));
+        } catch (IOException | RuntimeException exception) {
+            logger.warning("Could not serialize participant data; no file replacement attempted.");
+            throw new IOException("Could not serialize participant data. The saved file was not replaced.", exception);
+        }
+        fileWriter.write(filePath, content);
     }
 
 }
