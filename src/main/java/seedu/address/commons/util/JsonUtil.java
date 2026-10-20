@@ -62,8 +62,13 @@ public class JsonUtil {
         try {
             jsonFile = deserializeObjectFromJsonFile(filePath, classOfObjectToDeserialize);
         } catch (IOException e) {
-            logger.warning("Error reading from jsonFile file " + filePath + ": " + e);
+            logger.warning("Error reading JSON file " + filePath + " (" + e.getClass().getSimpleName() + ").");
             throw new DataLoadingException(e);
+        }
+
+        if (jsonFile == null) {
+            logger.warning("JSON file " + filePath + " contains no object.");
+            throw new DataLoadingException(new IOException("JSON file contains no object."));
         }
 
         return Optional.of(jsonFile);

@@ -162,6 +162,26 @@ The class diagram shows the stable storage contracts and JSON adapters rather th
 participant contains its own nullable group, role, and activity strings and a list of tag adapters; there is no
 separate persisted group, role, or activity directory. The `0..*` multiplicities allow an empty directory or no tags.
 
+### Participant data at startup
+
+`MainApp` creates the editable model, logic and UI only after participant data loads. `JsonAddressBookStorage`
+checks the data path without following the final symbolic link. A genuinely absent file produces `Optional.empty()`
+and the existing sample-data first launch. An existing malformed file, invalid stored value, unreadable path or
+dangling final symbolic link produces `DataLoadingException` instead. The extra existence check prevents
+`JsonUtil`'s following-link `Files.exists` check from treating a dangling link as a missing first-run file.
+`JsonUtil` also rejects a top-level JSON `null` as a load failure. The JSON adapters reject null person and tag
+entries with `IllegalValueException`; storage translates that checked validation failure to `DataLoadingException`
+without masking unrelated runtime errors during model conversion.
+
+On a load failure, `MainApp` retains an actionable error containing the absolute data path and does not construct
+`ModelManager`, `LogicManager` or `UiManager`. Its `start` method shows an error dialog, then exits when the user
+closes it. The participant file is not modified, and `stop` skips preference saving when initialization did not
+produce a model. This is a startup fail-safe, not automatic repair or backup recovery; the user must back up and
+correct the input or restore a known-good copy before restarting.
+Read failures log the file path and exception type, not the malformed JSON or participant values.
+
+![Participant startup and load failure](images/StartupDataSequenceDiagram.png)
+
 ### Common classes
 
 Classes used by multiple components are in the `seedu.address.commons` package.
@@ -918,3 +938,15 @@ Expected output: ZoomAddress starts successfully with sample participants becaus
 
 Expected data change: the backup remains untouched. Exit ZoomAddress, remove any newly generated
 `data/addressbook.json`, and rename `addressbook.backup.json` back to `addressbook.json` to restore the original data.
+
+#### Existing invalid or unreadable data file
+
+Use only a disposable test folder, never your real participant data. Close ZoomAddress and put malformed text such as
+`not valid JSON` in `data/addressbook.json`; keep a separate byte-for-byte copy. Launch the JAR twice from that folder.
+On both attempts, an error dialog should identify the absolute file path, explain that no editable directory opened,
+and advise backing up and correcting the file or restoring a valid copy. The normal participant window must not open.
+The file bytes must match the copy after each attempt. Repeat with parseable JSON containing an invalid participant
+value (for example, an invalid phone number) and with a directory at the data-file path. Restore the valid copy
+afterward. Permission failures vary by OS; the automated startup tests inject a deterministic read failure and verify
+the same blocked behavior without relying on `chmod`.
+Automated tests also cover a top-level JSON `null`, null person and tag entries, and unchanged file bytes.
