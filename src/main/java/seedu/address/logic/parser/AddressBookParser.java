@@ -68,18 +68,22 @@ public class AddressBookParser {
             case AssignRoleCommand.COMMAND_WORD -> new AssignRoleCommandParser().parse(arguments);
             case EditCommand.COMMAND_WORD -> new EditCommandParser().parse(arguments);
             case DeleteCommand.COMMAND_WORD -> new DeleteCommandParser().parse(arguments);
-            case ClearCommand.COMMAND_WORD -> new ClearCommand();
+            case ClearCommand.COMMAND_WORD -> new NoArgumentsCommandParser<>(
+                    ClearCommand::new, ClearCommand.MESSAGE_USAGE).parse(arguments);
             case FindCommand.COMMAND_WORD -> new FindCommandParser().parse(arguments);
             case FindContactCommand.COMMAND_WORD -> new FindContactCommandParser().parse(arguments);
             case FilterAllCommand.COMMAND_WORD -> new FilterAllCommandParser().parse(arguments);
             case FilterCommand.COMMAND_WORD -> new FilterCommandParser().parse(arguments);
-            case ListCommand.COMMAND_WORD -> new ListCommand();
+            case ListCommand.COMMAND_WORD -> new NoArgumentsCommandParser<>(
+                    ListCommand::new, ListCommand.MESSAGE_USAGE).parse(arguments);
             case SortCommand.COMMAND_WORD -> new SortCommandParser().parse(arguments);
             case UnassignCommand.COMMAND_WORD -> new UnassignCommandParser().parse(arguments);
             case UnassignedCommand.COMMAND_WORD -> new UnassignedCommandParser().parse(arguments);
             case ViewCommand.COMMAND_WORD -> new ViewCommandParser().parse(arguments);
-            case ExitCommand.COMMAND_WORD -> new ExitCommand();
-            case HelpCommand.COMMAND_WORD -> new HelpCommand();
+            case ExitCommand.COMMAND_WORD -> new NoArgumentsCommandParser<>(
+                    ExitCommand::new, ExitCommand.MESSAGE_USAGE).parse(arguments);
+            case HelpCommand.COMMAND_WORD -> new NoArgumentsCommandParser<>(
+                    HelpCommand::new, HelpCommand.MESSAGE_USAGE).parse(arguments);
             default -> {
                 logger.finer("This user input caused a ParseException: " + userInput);
                 throw new ParseException(MESSAGE_UNKNOWN_COMMAND);

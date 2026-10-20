@@ -119,7 +119,12 @@ Here are the other classes in `Logic` (omitted from the class diagram above) tha
 
 How the parsing works:
 * When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddCommand`). The `AddressBookParser` returns that object as a `Command` object.
+* For `list`, `clear`, `help`, and `exit`, `AddressBookParser` creates a `NoArgumentsCommandParser`. This parser
+  accepts only empty or whitespace-only arguments, reports the command-specific usage message for extraneous input,
+  and creates the corresponding command through its command factory.
 * All `XYZCommandParser` classes, such as `AddCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
+  `NoArgumentsCommandParser` implements the same interface, allowing `AddressBookParser` to use a consistent parsing
+  contract for commands with and without arguments.
 
 ### Model component
 **API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/java/seedu/address/model/Model.java)
