@@ -19,7 +19,7 @@ ZoomAddress is a **desktop participant-management application for directors of l
 
 1. Copy the file to the folder you want to use as the _home folder_ for ZoomAddress.
 
-1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar ZoomAddress-v1.3.jar`.<br>
+1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar ZoomAddress-v1.4.jar`.<br>
    The ZoomAddress window should appear in a few seconds with some sample data.
 
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
