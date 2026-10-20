@@ -34,3 +34,26 @@ This project has three types of tests:
    For example: `seedu.address.storage.StorageManagerTest`
 1. *Hybrid tests* combine unit and integration testing. These tests check both the individual units and how they work together.<br>
    For example: `seedu.address.logic.LogicManagerTest`
+
+--------------------------------------------------------------------------------------------------------------------
+
+## Command validation and workflow tests
+
+`NoArgumentsCommandParserTest` checks the shared parser used by `list`, `clear`, `help`, and `exit` at the unit level.
+`AddressBookParserTest` checks that each command is dispatched correctly and rejects extraneous arguments with its
+own usage message. `NoArgumentsCommandIntegrationTest` then exercises the complete parser-command-model-storage path,
+including persistence after `clear` and recovery with a valid command after invalid input.
+
+--------------------------------------------------------------------------------------------------------------------
+
+## Performance regression test
+
+`LogicPerformanceTest` provides an automated regression check for the response-time target in the Developer Guide.
+It starts with 1,000 participant records and times 100 valid commands spanning add, list, find, edit, delete, view,
+and group, role, and activity assignment. At least 95 commands must complete within two seconds each. Each measurement
+includes parsing, model updates, and JSON persistence.
+
+The test deliberately excludes JavaFX rendering and therefore complements, rather than replaces, a manual release-JAR
+trial on the target operating systems. Run it alone with:
+
+`./gradlew test --tests seedu.address.logic.LogicPerformanceTest`
