@@ -450,11 +450,11 @@ the `java -jar` command. The Quick Start steps make that folder the JAR file's l
 data directly by editing the JSON file.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
-If the existing participant file contains malformed JSON or invalid values, or cannot be read, ZoomAddress shows a
-startup error instead of opening an editable empty directory. The error identifies the data-file path and explains
-how to recover. ZoomAddress does not change the participant file on a failed start. Back up the file first, then
-correct the JSON or read permissions, or restore a known-good copy before restarting. Do not run commands against
-an assumed empty directory or delete the original file as a recovery step.<br>
+If the existing participant file is unreadable or contains malformed JSON, a `null` document, or invalid values,
+ZoomAddress shows a startup error instead of opening an editable empty directory. The error identifies the data-file
+path and explains how to recover. ZoomAddress does not change the participant file on a failed start. Back up the
+file first, then correct the JSON or read permissions, or restore a known-good copy before restarting. Do not run
+commands against an assumed empty directory or delete the original file as a recovery step.<br>
 If the data file is genuinely absent on first launch, ZoomAddress still opens with sample participants. Editing JSON
 directly can also cause unexpected behavior when values fall outside the supported range; edit it only if you are
 confident you can restore a valid copy.

@@ -96,6 +96,22 @@ public class MainAppTest {
     }
 
     @Test
+    public void initializeFromStorage_nullRoot_blocksStartupAndPreservesBytes() throws Exception {
+        Path dataFile = testFolder.resolve("participants.json");
+        Files.writeString(dataFile, "null");
+        byte[] originalBytes = Files.readAllBytes(dataFile);
+        MainApp app = new MainApp();
+
+        app.initializeFromStorage(storage(dataFile), new UserPrefs());
+
+        assertNull(app.model);
+        assertNull(app.logic);
+        assertNull(app.ui);
+        assertNotNull(app.getStartupError());
+        assertArrayEquals(originalBytes, Files.readAllBytes(dataFile));
+    }
+
+    @Test
     public void initializeFromStorage_nullStoredPerson_blocksStartupAndPreservesBytes() throws Exception {
         Path dataFile = testFolder.resolve("participants.json");
         Files.writeString(dataFile, "{\"persons\":[null]}");

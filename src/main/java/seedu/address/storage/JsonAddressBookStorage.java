@@ -76,7 +76,7 @@ public class JsonAddressBookStorage {
 
         try {
             return Optional.of(jsonAddressBook.get().toModelType());
-        } catch (IllegalValueException | RuntimeException e) {
+        } catch (IllegalValueException e) {
             logger.warning("Invalid participant data found in " + filePath);
             throw new DataLoadingException(e);
         }

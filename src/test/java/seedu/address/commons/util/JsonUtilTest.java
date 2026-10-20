@@ -83,6 +83,15 @@ public class JsonUtilTest {
                 || record.getThrown() != null));
     }
 
+    @Test
+    public void readJsonFile_nullRoot_throwsDataLoadingException() throws Exception {
+        Path file = testFolder.resolve("participants.json");
+        Files.writeString(file, "null");
+
+        assertThrows(DataLoadingException.class, () -> JsonUtil.readJsonFile(file, SerializableTestClass.class));
+        assertEquals("null", Files.readString(file));
+    }
+
     //TODO: @Test jsonUtil_readJsonStringToObjectInstance_correctObject()
 
     //TODO: @Test jsonUtil_writeThenReadObjectToJson_correctObject()

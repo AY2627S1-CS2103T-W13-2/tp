@@ -66,6 +66,11 @@ public class JsonUtil {
             throw new DataLoadingException(e);
         }
 
+        if (jsonFile == null) {
+            logger.warning("JSON file " + filePath + " contains no object.");
+            throw new DataLoadingException(new IOException("JSON file contains no object."));
+        }
+
         return Optional.of(jsonFile);
     }
 

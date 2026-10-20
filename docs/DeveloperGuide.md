@@ -169,6 +169,9 @@ checks the data path without following the final symbolic link. A genuinely abse
 and the existing sample-data first launch. An existing malformed file, invalid stored value, unreadable path or
 dangling final symbolic link produces `DataLoadingException` instead. The extra existence check prevents
 `JsonUtil`'s following-link `Files.exists` check from treating a dangling link as a missing first-run file.
+`JsonUtil` also rejects a top-level JSON `null` as a load failure. The JSON adapters reject null person and tag
+entries with `IllegalValueException`; storage translates that checked validation failure to `DataLoadingException`
+without masking unrelated runtime errors during model conversion.
 
 On a load failure, `MainApp` retains an actionable error containing the absolute data path and does not construct
 `ModelManager`, `LogicManager` or `UiManager`. Its `start` method shows an error dialog, then exits when the user
@@ -946,3 +949,4 @@ The file bytes must match the copy after each attempt. Repeat with parseable JSO
 value (for example, an invalid phone number) and with a directory at the data-file path. Restore the valid copy
 afterward. Permission failures vary by OS; the automated startup tests inject a deterministic read failure and verify
 the same blocked behavior without relying on `chmod`.
+Automated tests also cover a top-level JSON `null`, null person and tag entries, and unchanged file bytes.
