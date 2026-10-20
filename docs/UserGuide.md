@@ -64,8 +64,8 @@ ZoomAddress is a **desktop participant-management application for directors of l
   For example, `p/PHONE_NUMBER n/NAME` is also acceptable when adding a participant. Commands such as `unassign`
   require the displayed index before the assignment prefix.
 
-* Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, are ignored.<br>
-  For example, `help 123` is interpreted as `help`.
+* Commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, reject extraneous parameters.<br>
+  For example, `help 123` is invalid and the application displays the correct `help` command format.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </div>
