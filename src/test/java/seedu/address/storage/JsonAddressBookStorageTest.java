@@ -2,6 +2,7 @@ package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.HOON;
@@ -9,6 +10,7 @@ import static seedu.address.testutil.TypicalPersons.IDA;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import java.io.IOException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -90,6 +92,29 @@ public class JsonAddressBookStorageTest {
     @Test
     public void read_missingFile_emptyResult() throws Exception {
         assertFalse(readAddressBook("NonExistentFile.json").isPresent());
+    }
+
+    @Test
+    public void read_danglingSymbolicLink_throwsDataLoadingException() throws Exception {
+        Path link = testFolder.resolve("participants.json");
+        try {
+            Files.createSymbolicLink(link, testFolder.resolve("missing.json"));
+        } catch (UnsupportedOperationException | FileSystemException | SecurityException e) {
+            assumeTrue(false, "Symbolic links are unavailable on this test platform");
+        }
+
+        assertThrows(DataLoadingException.class, () -> new JsonAddressBookStorage(link).readAddressBook());
+        assertFalse(Files.exists(testFolder.resolve("missing.json")));
+    }
+
+    @Test
+    public void read_directoryAtDataPath_throwsDataLoadingException() throws Exception {
+        Path directory = Files.createDirectory(testFolder.resolve("participants.json"));
+
+        assertThrows(DataLoadingException.class, () -> new JsonAddressBookStorage(directory).readAddressBook());
+        try (var files = Files.list(directory)) {
+            assertEquals(0, files.count());
+        }
     }
 
     @Test

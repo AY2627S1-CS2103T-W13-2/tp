@@ -7,13 +7,15 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.Logic;
 import seedu.address.logic.LogicManager;
-import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyAddressBook;
@@ -42,6 +44,7 @@ public class MainApp extends Application {
     protected Logic logic;
     protected Storage storage;
     protected Model model;
+    private String startupError;
 
     @Override
     public void init() throws Exception {
@@ -51,37 +54,47 @@ public class MainApp extends Application {
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(USER_PREFS_FILE_PATH);
         UserPrefs userPrefs = initPrefs(userPrefsStorage);
         JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(ADDRESS_BOOK_FILE_PATH);
-        storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        initializeFromStorage(new StorageManager(addressBookStorage, userPrefsStorage), userPrefs);
+    }
 
-        model = initModelManager(storage, userPrefs);
+    /**
+     * Creates an editable model and UI only after participant data loads successfully.
+     */
+    void initializeFromStorage(Storage storage, ReadOnlyUserPrefs userPrefs) {
+        this.storage = storage;
+        model = null;
+        logic = null;
+        ui = null;
+        startupError = null;
+
+        try {
+            model = initModelManager(storage, userPrefs);
+        } catch (DataLoadingException e) {
+            Path dataFile = storage.getAddressBookFilePath().toAbsolutePath().normalize();
+            startupError = "Could not load participant data from " + dataFile + ". The file was not changed, and "
+                    + "no editable participant directory was opened. Back up the file, then correct its JSON or "
+                    + "read permissions, or restore a known-good copy before restarting ZoomAddress.";
+            logger.severe("Participant data could not be loaded from " + dataFile + ". Startup was blocked.");
+            return;
+        }
 
         logic = new LogicManager(model, storage);
-
         ui = new UiManager(logic, storage.getAddressBookFilePath());
     }
 
     /**
-     * Returns a {@code ModelManager} with the data from {@code storage}'s address book and {@code userPrefs}. <br>
-     * The data from the sample address book will be used instead if {@code storage}'s address book is not found,
-     * or an empty address book will be used instead if errors occur when reading {@code storage}'s address book.
+     * Returns a model using stored participant data, or sample data only when the file is genuinely absent.
+     * A load failure must reach the startup blocker rather than becoming an editable empty directory.
      */
-    private Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs) {
+    Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs) throws DataLoadingException {
         logger.info("Using data file : " + storage.getAddressBookFilePath());
 
-        Optional<ReadOnlyAddressBook> addressBookOptional;
-        ReadOnlyAddressBook initialData;
-        try {
-            addressBookOptional = storage.readAddressBook();
-            if (addressBookOptional.isEmpty()) {
-                logger.info("Creating a new data file " + storage.getAddressBookFilePath()
-                        + " populated with a sample AddressBook.");
-            }
-            initialData = addressBookOptional.orElseGet(SampleDataUtil::getSampleAddressBook);
-        } catch (DataLoadingException e) {
-            logger.warning("Data file at " + storage.getAddressBookFilePath() + " could not be loaded."
-                    + " Will be starting with an empty AddressBook.");
-            initialData = new AddressBook();
+        Optional<ReadOnlyAddressBook> addressBookOptional = storage.readAddressBook();
+        if (addressBookOptional.isEmpty()) {
+            logger.info("Creating a new data file " + storage.getAddressBookFilePath()
+                    + " populated with a sample AddressBook.");
         }
+        ReadOnlyAddressBook initialData = addressBookOptional.orElseGet(SampleDataUtil::getSampleAddressBook);
 
         return new ModelManager(initialData, userPrefs);
     }
@@ -121,16 +134,32 @@ public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         logger.info("Starting AddressBook " + MainApp.VERSION);
+        if (startupError != null) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("ZoomAddress could not start");
+            alert.setHeaderText("Participant data could not be loaded");
+            alert.setContentText(startupError);
+            alert.showAndWait();
+            Platform.exit();
+            return;
+        }
         ui.start(primaryStage);
     }
 
     @Override
     public void stop() {
         logger.info("============================ [ Stopping AddressBook ] =============================");
+        if (storage == null || model == null) {
+            return;
+        }
         try {
             storage.saveUserPrefs(model.getUserPrefs());
         } catch (IOException e) {
             logger.severe("Failed to save preferences " + StringUtil.getDetails(e));
         }
+    }
+
+    String getStartupError() {
+        return startupError;
     }
 }

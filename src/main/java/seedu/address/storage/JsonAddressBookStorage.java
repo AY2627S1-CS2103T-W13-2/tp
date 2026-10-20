@@ -3,7 +3,11 @@ package seedu.address.storage;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -56,17 +60,40 @@ public class JsonAddressBookStorage {
     public Optional<ReadOnlyAddressBook> readAddressBook(Path filePath) throws DataLoadingException {
         requireNonNull(filePath);
 
-        Optional<JsonSerializableAddressBook> jsonAddressBook = JsonUtil.readJsonFile(
-                filePath, JsonSerializableAddressBook.class);
-        if (!jsonAddressBook.isPresent()) {
+        if (!dataPathExists(filePath)) {
             return Optional.empty();
+        }
+        Optional<JsonSerializableAddressBook> jsonAddressBook;
+        try {
+            jsonAddressBook = JsonUtil.readJsonFile(filePath, JsonSerializableAddressBook.class);
+        } catch (SecurityException e) {
+            logger.warning("Participant data could not be read from " + filePath);
+            throw new DataLoadingException(e);
+        }
+        if (jsonAddressBook.isEmpty()) {
+            throw new DataLoadingException(new IOException("Existing participant data could not be read."));
         }
 
         try {
             return Optional.of(jsonAddressBook.get().toModelType());
-        } catch (IllegalValueException ive) {
-            logger.info("Illegal values found in " + filePath + ": " + ive.getMessage());
-            throw new DataLoadingException(ive);
+        } catch (IllegalValueException | RuntimeException e) {
+            logger.warning("Invalid participant data found in " + filePath);
+            throw new DataLoadingException(e);
+        }
+    }
+
+    /**
+     * Distinguishes an absent first-run file from an existing path that cannot be loaded.
+     */
+    private boolean dataPathExists(Path filePath) throws DataLoadingException {
+        try {
+            Files.readAttributes(filePath, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+            return true;
+        } catch (NoSuchFileException e) {
+            return false;
+        } catch (IOException | SecurityException e) {
+            logger.warning("Could not inspect participant data path " + filePath);
+            throw new DataLoadingException(e);
         }
     }
 
