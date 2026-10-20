@@ -1,0 +1,40 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+start
+:Receive filter-all arguments;
+:Parse prefixes and values;
+note right
+  Quoted values protect prefix-like text.
+  Decode escaped quotes and backslashes.
+end note
+if (Valid syntax and two or three\ndistinct, non-blank criteria?) then (yes)
+    :Build immutable AND predicate\nfrom assignment predicates;
+    :Replace filter over all stored participants;
+    note right
+      Keep the existing sort comparator.
+      Match every selected assignment exactly,
+      ignoring case and surrounding whitespace.
+      Missing selected assignments do not match.
+    end note
+    :Expose matching participants\nwith sorted displayed indices;
+    :Create result with match count;
+    :LogicManager attempts to save\nunchanged participant data;
+    if (Save succeeds?) then (yes)
+        :Return match-count result;
+    else (no)
+        :Report save error;
+        note right
+          The updated view is not rolled back
+          by the inherited save-error path.
+        end note
+    endif
+else (no)
+    :Report specific parse error;
+    note right
+      Do not execute a command.
+      Preserve the current view and data.
+    end note
+endif
+stop
+@enduml

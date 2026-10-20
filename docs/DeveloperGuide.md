@@ -152,6 +152,11 @@ The `Storage` component,
 * is implemented by `StorageManager`, which delegates the actual JSON file access to `JsonAddressBookStorage` and `JsonUserPrefsStorage` (one class per data file).
 * depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`)
 
+The class diagram shows the stable storage contracts and JSON adapters rather than low-level I/O helpers.
+`StorageManager` implements the `Storage` interface and holds one storage object for each file. Each serialized
+participant contains its own nullable group, role, and activity strings and a list of tag adapters; there is no
+separate persisted group, role, or activity directory. The `0..*` multiplicities allow an empty directory or no tags.
+
 ### Common classes
 
 Classes used by multiple components are in the `seedu.address.commons` package.
@@ -256,6 +261,31 @@ assignment therefore cannot match.
 
 Executing the command updates only the model's `FilteredList`. It does not replace or reorder the `AddressBook`'s
 stored participant list. The UI observes the filtered list and assigns fresh displayed indices to the matching records.
+
+### Combined assignment filtering
+
+`AddressBookParser` routes `filter-all` to `FilterAllCommandParser`. The parser walks the input from left to right,
+collecting an `EnumMap<AssignmentType, String>`. It requires two or three distinct supported categories and rejects
+blank values. Unquoted values end at the next whitespace-delimited letters-plus-slash prefix; unsupported prefixes
+are rejected rather than silently absorbed. Embedded slashes within a token remain literal. Entire quoted values
+protect prefix-like text and decode only escaped double quotes/backslashes. Unterminated quotes, invalid escapes,
+partial quoting and missing separators are parse errors before any model update.
+
+The parser constructs `AssignmentsMatchAllPredicate`, which defensively validates and copies the criteria and
+composes the existing `AssignmentMatchesPredicate` instances with `allMatch` (AND). This keeps matching in Model
+and shares exact, locale-independent case-insensitive matching and absent-assignment semantics with `filter`.
+Criterion order is immaterial. `FilterCommandParser` and `FilterCommand` are unchanged, including their handling of
+existing case-insensitive slash-containing labels.
+
+`FilterAllCommand` replaces the model's filter predicate over all stored participants. It never filters an already
+filtered snapshot, changes the sorted-view comparator, or mutates participant records. Index-based commands read
+the same derived sorted view. The inherited `LogicManager` path still saves after a successful query; this feature
+promises unchanged data and order, not a no-write path or rollback on save failure. No JSON/schema changes are made.
+
+![Combined assignment filtering activity](images/FilterAllActivityDiagram.png)
+
+Tests exercise all criterion pairs and triples, AND versus OR, missing assignments, full-list queries after an empty
+filter, sorted indices, quote/escape boundaries, and byte-for-byte JSON preservation through real save/reload.
 
 ### Finding incomplete allocations
 
@@ -798,6 +828,19 @@ display Alice, Chen and dana, not Beth. All four stored records remain unchanged
 
 Run `sort name`, then `unassigned r/` and `view 2`: Chen Wei is the second displayed participant. Run `list` to
 restore the full sorted view. Restarting restores stored order and clears these view-only queries.
+
+#### Combined assignment filtering
+
+Using the participants and restored Beth assignments above, run `filter-all g/Logistics r/Facilitator`: only Beth
+should appear. Adding `a/Campfire` should retain Beth; replacing it with `a/Nonexistent` should show zero matches.
+Run `filter g/Nonexistent`, then `filter-all r/facilitator g/logistics`: Beth should reappear. After `sort name`,
+run the combined query and `view 1` to verify the displayed index points to Beth. `list` restores everyone in sorted
+order. Save/restart and check that all original participant fields and stored order remain unchanged.
+
+For quote boundaries, assign Beth to group `Team A/B`, then query `filter-all g/"team a/b" r/Facilitator` and confirm
+Beth matches. `filter g/team a/b` must still work. Restore Beth's group to Logistics afterward.
+Try a repeated category, `g/""`, an uppercase prefix, an unfinished quote and an invalid quoted escape; each should
+report its specific parser error while preserving the current list and records. See the UG error table for inputs.
 
 ### Invalid input and boundary cases
 
