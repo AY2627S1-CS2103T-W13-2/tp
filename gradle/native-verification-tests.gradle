@@ -1,0 +1,95 @@
+// Exercise the same verifier used by check with real payloads and damaged archives.
+tasks.register('testNativeVerifier') {
+    dependsOn shadowJar
+    doLast {
+        def directory = layout.buildDirectory.dir('native-verifier-tests').get().asFile
+        directory.mkdirs()
+        def baseline = [:]
+        new java.util.zip.ZipFile(shadowJar.archiveFile.get().asFile).withCloseable { zip ->
+            zip.entries().toList().findAll { it.name ==~ /.*\.(dylib|dll|so)/ }.each { entry ->
+                baseline[entry.name] = zip.getInputStream(entry).withCloseable { it.readAllBytes() }
+            }
+        }
+        def failures = []
+        int cases = 0
+        def exercise = { String label, Map entries, String target, String expected ->
+            def fixture = new File(directory, 'fixture.jar')
+            new java.util.zip.ZipOutputStream(new FileOutputStream(fixture)).withCloseable { zip ->
+                zip.setLevel(0)
+                entries.each { name, bytes ->
+                    zip.putNextEntry(new java.util.zip.ZipEntry(name))
+                    zip.write(bytes)
+                    zip.closeEntry()
+                }
+            }
+            if (label == 'Duplicate native resource') {
+                // ZipOutputStream prevents duplicates, so replace an equal-length
+                // placeholder in both local and central-directory filenames.
+                byte[] archive = fixture.bytes
+                byte[] placeholder = 'xibglass.dylib'.getBytes('UTF-8')
+                for (int offset = 0; offset <= archive.length - placeholder.length; offset++) {
+                    if (Arrays.equals(Arrays.copyOfRange(archive, offset, offset + placeholder.length), placeholder)) {
+                        archive[offset] = (byte) 'l'.charAt(0)
+                    }
+                }
+                fixture.bytes = archive
+            }
+            try {
+                project.ext.verifyNativeArchive(fixture, target)
+                if (expected != null) {
+                    failures << "${label}: accepted invalid archive"
+                }
+            } catch (GradleException exception) {
+                if (expected == null || !exception.message.contains(expected)) {
+                    failures << "${label}: unexpected failure: ${exception.message}"
+                }
+            }
+            cases++
+        }
+        def target = project.ext.javafxMacPlatform
+        exercise('Valid payloads', baseline, target, null)
+        baseline.keySet().each { name ->
+            def missing = new LinkedHashMap(baseline)
+            missing.remove(name)
+            exercise("Missing ${name}", missing, target, 'Missing')
+        }
+        [0, 7, 8, 32].each { length ->
+            def truncated = new LinkedHashMap(baseline)
+            truncated['libglass.dylib'] = Arrays.copyOf(baseline['libglass.dylib'], length)
+            exercise("Truncated to ${length} bytes", truncated, target, 'Truncated')
+        }
+        ['libglass.dylib', 'glass.dll', 'libglass.so'].each { name ->
+            def corrupted = new LinkedHashMap(baseline)
+            byte[] bytes = baseline[name].clone()
+            bytes[bytes.length - 1] = (byte) (bytes[bytes.length - 1] ^ 1)
+            corrupted[name] = bytes
+            exercise("Corrupted ${name}", corrupted, target, 'Payload mismatch')
+        }
+        def wrongCpu = new LinkedHashMap(baseline)
+        byte[] bytes = baseline['libglass.dylib'].clone()
+        java.nio.ByteBuffer.wrap(bytes).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                .putInt(4, target == 'mac-aarch64' ? 0x01000007 : 0x0100000c)
+        wrongCpu['libglass.dylib'] = bytes
+        exercise('Opposite CPU header', wrongCpu, target, 'Wrong native architecture')
+        def wrongMagic = new LinkedHashMap(baseline)
+        bytes = baseline['libglass.dylib'].clone()
+        bytes[0] = 0
+        wrongMagic['libglass.dylib'] = bytes
+        exercise('Invalid Mach-O magic', wrongMagic, target, 'Wrong native architecture')
+        def unexpected = new LinkedHashMap(baseline)
+        unexpected['unexpected.dylib'] = baseline['libglass.dylib']
+        exercise('Unexpected native resource', unexpected, target, 'Unexpected')
+        def duplicate = new LinkedHashMap(baseline)
+        duplicate['xibglass.dylib'] = baseline['libglass.dylib']
+        exercise('Duplicate native resource', duplicate, target, 'Duplicated')
+        def oversized = new LinkedHashMap(baseline)
+        oversized['libglass.dylib'] = Arrays.copyOf(baseline['libglass.dylib'], baseline['libglass.dylib'].length + 1)
+        exercise('Appended native payload', oversized, target, 'Payload mismatch')
+        if (!failures.isEmpty()) {
+            throw new GradleException("Native verifier regression failures:\n" + failures.join('\n'))
+        }
+        logger.lifecycle("Passed ${cases} native verifier regression cases (${target})")
+    }
+}
+
+check.dependsOn tasks.named('testNativeVerifier')

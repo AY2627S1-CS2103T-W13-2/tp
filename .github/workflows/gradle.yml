@@ -26,7 +26,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '25'
-          java-package: jdk+fx
+          java-package: jdk
 
       - name: Build and check with Gradle
         run: ./gradlew check coverage
@@ -36,3 +36,32 @@ jobs:
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  packaging:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mac-platform: [mac, mac-aarch64]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '25'
+          java-package: jdk
+      - name: Verify packaged native payloads and rejection cases
+        run: ./gradlew clean shadowJar verifyMacNatives testNativeVerifier -PjavafxMacPlatform=${{ matrix.mac-platform }}
+      - name: Check external inspection cannot override build verification
+        shell: bash
+        run: |
+          artifact=build/libs/addressbook.jar
+          if [ '${{ matrix.mac-platform }}' = mac-aarch64 ]; then
+            artifact=build/libs/addressbook-mac-aarch64.jar
+          fi
+          ./gradlew verifyExternalMacNatives -PjavafxMacPlatform=${{ matrix.mac-platform }} -PjavafxVerificationJar="$artifact"
+          if ./gradlew verifyMacNatives -PjavafxMacPlatform=${{ matrix.mac-platform }} -PjavafxVerificationJar="$artifact" > override.log 2>&1; then
+            echo 'ERROR: Build verification accepted an external artifact override'
+            exit 1
+          fi
+          cat override.log
+          grep -F 'verifyMacNatives always checks shadowJar' override.log
