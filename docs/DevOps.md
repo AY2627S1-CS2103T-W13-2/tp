@@ -28,6 +28,8 @@ The following commands perform common Gradle tasks.
 * **`checkstyleMain`**: Runs the code style check for the main code base.<br>
   **`checkstyleTest`**: Runs the code style check for the test code base.
 
+* **`check`**: Runs tests and Checkstyle; use `./gradlew check coverage` to generate coverage evidence too.
+
 * **`test`**
   * `./gradlew test`: Runs all tests.
   * `./gradlew clean test`: Cleans the project before running all tests
@@ -71,9 +73,25 @@ Any warnings or errors will be printed out to the console.
 
 ## Making a release
 
-Here are the steps to create a new release.
+Release an **audited artifact**, not just a passing source tree:
 
-1. Update the version number in [`MainApp.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/MainApp.java).
-1. Generate a fat JAR file using Gradle (i.e., `./gradlew shadowJar`).
-1. Tag the repo with the version number. e.g. `v0.1`
-1. [Create a new release using GitHub](https://help.github.com/articles/creating-releases/). Upload the JAR file you created.
+1. Merge all intended code, documentation, and version changes. Confirm the release issue, milestone, and approvals
+   refer to the same final commit. Update the version in [`MainApp.java`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/java/seedu/address/MainApp.java).
+1. Run `./gradlew check coverage` and `./.github/run-checks.sh` from that commit; inspect hosted CI. Record failures and
+   the exact commands used to resolve them.
+1. Build each required platform package from that commit using the commands documented in the release issue and
+   [Developer Guide](DeveloperGuide.md), after the corresponding build changes have merged. Preserve each output
+   before a subsequent `clean`.
+1. Record the SHA-256 of **each** packaged JAR. In a clean temporary folder, launch and smoke-test the exact candidate
+   on the operating systems and Java architectures available. Test core commands, save/reopen, and the User Guide's
+   examples; explicitly record any platform that was **not** tested. Review screenshots against that same candidate.
+1. Have another team member audit the User Guide, Developer Guide, release notes, and assets. Fix discrepancies
+   before publication. Any rebuild or code change produces a new artifact identity and requires renewed relevant
+   tests, documentation audit, and approval.
+1. After explicit approval of the exact candidates, create or update the [GitHub release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases).
+   Upload the correctly named JARs and current screenshots, list the tested commit and checksums, and state actual
+   platform coverage and known limitations. Verify the public downloads before closing the release issue and milestone.
+
+The standard `shadowJar` build currently produces `build/libs/addressbook.jar`. A platform-specific packaging change
+must be merged and tested before its additional artifact is described as a published download. Never reuse a checksum
+or approval from an earlier candidate for a rebuilt JAR.

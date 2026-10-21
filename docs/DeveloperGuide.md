@@ -341,95 +341,11 @@ Tests cover each category independently, prior empty filters, sort/view indices,
 and byte-for-byte JSON content plus participant-field preservation through the real save/reload path. No storage
 schema or assignment cardinality changes are required.
 
-### Inherited AB3 undo/redo design (not implemented)
+### Unsupported undo and redo
 
-<div markdown="span" class="alert alert-warning">
-
-:exclamation: **Not implemented in ZoomAddress:** The following subsection is inherited design
-background from AddressBook-Level3. ZoomAddress does not contain `VersionedAddressBook`,
-`undo`, or `redo`, and the diagrams below do not describe the current application.
-
-</div>
-
-#### Proposed Implementation
-
-The proposed undo/redo mechanism is facilitated by `VersionedAddressBook`. It extends `AddressBook` with an undo/redo history, stored internally as an `addressBookStateList` and `currentStatePointer`. Additionally, it implements the following operations:
-
-* `VersionedAddressBook#commit()` — Saves the current address book state in its history.
-* `VersionedAddressBook#undo()` — Restores the previous address book state from its history.
-* `VersionedAddressBook#redo()` — Restores a previously undone address book state from its history.
-
-These operations are exposed in the `Model` interface as `Model#commitAddressBook()`, `Model#undoAddressBook()` and `Model#redoAddressBook()` respectively.
-
-Given below is an example usage scenario and how the undo/redo mechanism behaves at each step.
-
-Step 1. The user launches the application for the first time. The `VersionedAddressBook` will be initialized with the initial address book state, and the `currentStatePointer` pointing to that single address book state.
-
-![UndoRedoState0](images/UndoRedoState0.png)
-
-Step 2. The user executes `delete 5` command to delete the 5th person in the address book. The `delete` command calls `Model#commitAddressBook()`, causing the modified state of the address book after the `delete 5` command executes to be saved in the `addressBookStateList`, and the `currentStatePointer` is shifted to the newly inserted address book state.
-
-![UndoRedoState1](images/UndoRedoState1.png)
-
-Step 3. The user executes `add n/David …​` to add a new person. The `add` command also calls `Model#commitAddressBook()`, causing another modified address book state to be saved into the `addressBookStateList`.
-
-![UndoRedoState2](images/UndoRedoState2.png)
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If a command fails its execution, it will not call `Model#commitAddressBook()`, so the address book state will not be saved into the `addressBookStateList`.
-
-</div>
-
-Step 4. The user now decides that adding the person was a mistake, and decides to undo that action by executing the `undo` command. The `undo` command will call `Model#undoAddressBook()`, which will shift the `currentStatePointer` once to the left, pointing it to the previous address book state, and restores the address book to that state.
-
-![UndoRedoState3](images/UndoRedoState3.png)
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index 0, pointing to the initial AddressBook state, then there are no previous AddressBook states to restore. The `undo` command uses `Model#canUndoAddressBook()` to check if this is the case. If so, it will return an error to the user rather
-than attempting to perform the undo.
-
-</div>
-
-The following sequence diagram shows how an undo operation goes through the `Logic` component:
-
-![UndoSequenceDiagram](images/UndoSequenceDiagram-Logic.png)
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `UndoCommand` should end at the destroy marker (X), but due to a limitation of PlantUML, it continues to the end of the diagram.
-
-</div>
-
-Similarly, how an undo operation goes through the `Model` component is shown below:
-
-![UndoSequenceDiagram](images/UndoSequenceDiagram-Model.png)
-
-The `redo` command does the opposite — it calls `Model#redoAddressBook()`, which shifts the `currentStatePointer` once to the right, pointing to the previously undone state, and restores the address book to that state.
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index `addressBookStateList.size() - 1`, pointing to the latest address book state, then there are no undone AddressBook states to restore. The `redo` command uses `Model#canRedoAddressBook()` to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
-
-</div>
-
-Step 5. The user then decides to execute the command `list`. Commands that do not modify the address book, such as `list`, will usually not call `Model#commitAddressBook()`, `Model#undoAddressBook()` or `Model#redoAddressBook()`. Thus, the `addressBookStateList` remains unchanged.
-
-![UndoRedoState4](images/UndoRedoState4.png)
-
-Step 6. The user executes `clear`, which calls `Model#commitAddressBook()`. Since the `currentStatePointer` is not pointing at the end of the `addressBookStateList`, all address book states after the `currentStatePointer` will be purged. Reason: It no longer makes sense to redo the `add n/David …​` command. This is the behavior that most modern desktop applications follow.
-
-![UndoRedoState5](images/UndoRedoState5.png)
-
-The following activity diagram summarizes what happens when a user executes a new command:
-
-<img src="images/CommitActivityDiagram.png" width="250" />
-
-#### Design considerations:
-
-**Aspect: How undo & redo execute:**
-
-* **Alternative 1 (inherited proposal):** Saves the entire address book.
-  * Pros: Easy to implement.
-  * Cons: May have performance issues in terms of memory usage.
-
-* **Alternative 2:** Individual command knows how to undo/redo by
-  itself.
-  * Pros: Will use less memory (e.g. for `delete`, just save the person being deleted).
-  * Cons: We must ensure that the implementation of each individual command is correct.
+ZoomAddress does not implement `undo` or `redo`, and it does not keep a `VersionedAddressBook` history.
+The inherited AddressBook-Level3 undo/redo diagrams are intentionally omitted because they do not describe
+the released application. Back up participant data before destructive commands such as `delete` and `clear`.
 
 ### Future data archiving (not implemented)
 
@@ -472,6 +388,10 @@ timetable, simultaneous multi-user editing, or remote hosting.
 ### User stories
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
+
+These stories record both implemented needs and possible future work. A priority is **not** an implementation-status
+claim. The [User Guide](UserGuide.md) is the source of truth for commands available in the current release;
+multiple roles, attendance, import/export, undo, and backup commands are not implemented.
 
 | ID | Priority | As a …​ | I want to …​ | So that I can …​ |
 | -- | -------- | ------- | ------------ | ---------------- |
@@ -524,34 +444,33 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * **Use-case name:** Add a participant
 * **Actor:** Event director
 * **Preconditions:** The event director has the participant's authorised details.
-* **Guarantees:** On success, a new participant record is stored. On failure, no partial participant record is stored.
+* **Guarantees:** A successful command adds and saves one participant. Invalid input or a duplicate leaves the model
+  unchanged. A disk-save failure is reported, but the in-memory model is **not** rolled back.
 
 **Main Success Scenario**
 
-1. **Actor:** Requests to record a new participant.
-2. **System:** Requests the participant information required for a complete record.
-3. **Actor:** Provides the participant information.
-4. **System:** Validates the information and checks for a definite duplicate.
-5. **System:** Stores the new participant record.
-6. **System:** Confirms that the participant was added.
+1. **Actor:** Enters `add` with the required name, phone, email, and address, and any tags.
+2. **System:** Validates the command and checks for a duplicate participant.
+3. **System:** Adds the participant to the model and saves the address book.
+4. **System:** Confirms that the participant was added.
 
     Use case ends.
 
 **Extensions**
 
-* 3a. The actor does not provide all required information.
-    * 3a1. **System:** Identifies the missing information.
-    * 3a2. Use case resumes at step 3.
-* 4a. Some participant information is invalid.
-    * 4a1. **System:** Identifies the invalid information and explains the applicable constraint.
-    * 4a2. Use case resumes at step 3.
-* 4b. The supplied information definitely matches an existing participant.
-    * 4b1. **System:** Reports the duplicate and does not create a record.
+* 2a. Required information is missing or invalid.
+    * 2a1. **System:** Reports the relevant format or value constraint. The actor may enter a corrected command.
 
     Use case ends.
 
-* 5a. The participant record cannot be stored.
-    * 5a1. **System:** Reports that the participant was not added and leaves the existing data unchanged.
+* 2b. The details match an existing participant.
+    * 2b1. **System:** Reports the duplicate without adding a record.
+
+    Use case ends.
+
+* 3a. Saving fails.
+    * 3a1. **System:** Reports the save failure instead of confirming success. The in-memory addition may still be
+      visible; the user must resolve the storage problem before relying on persistence.
 
     Use case ends.
 
@@ -561,17 +480,17 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * **Use-case name:** Update a participant's details
 * **Actor:** Event director
 * **Preconditions:** The participant has an existing record.
-* **Guarantees:** On success, the revised participant record is stored. On failure, the existing record remains
-  unchanged.
+* **Guarantees:** A successful command updates and saves one participant. Invalid input or a duplicate leaves the
+  model unchanged. A disk-save failure is reported but does not undo an in-memory edit.
 
 **Main Success Scenario**
 
-1. **Actor:** Requests participants matching identifying information.
-2. **System:** Provides the matching participant records.
-3. **Actor:** Identifies the participant and provides the revised details.
-4. **System:** Validates the revised details and checks for conflicts with other participant records.
-5. **System:** Stores the revised participant record.
-6. **System:** Confirms the changes.
+1. **Actor:** Finds or lists participants and notes the displayed index.
+2. **System:** Displays the matching participants.
+3. **Actor:** Enters `edit` with that index and at least one revised field.
+4. **System:** Validates the changes and checks for a duplicate participant.
+5. **System:** Replaces the participant in the model and saves the address book.
+6. **System:** Confirms the edit.
 
     Use case ends.
 
@@ -588,28 +507,28 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * 4b. The revised details definitely match another participant.
     * 4b1. **System:** Reports the conflict and does not update the record.
     * 4b2. Use case resumes at step 3.
-* 5a. The revised record cannot be stored.
-    * 5a1. **System:** Reports that the participant was not updated and retains the previous record.
+* 5a. Saving fails.
+    * 5a1. **System:** Reports the save failure. The in-memory edit may remain even though persistence is unconfirmed.
 
     Use case ends.
 
-#### UC03: Assign a participant to event structures
+#### UC03: Assign a participant to a group, role, or activity
 
 * **System:** ZoomAddress
-* **Use-case name:** Assign a participant to event structures
+* **Use-case name:** Assign a participant to a group, role, or activity
 * **Actor:** Event director
-* **Preconditions:** The participant and the relevant groups, roles, and activities have been recorded.
-* **Guarantees:** On success, the participant's assignments are stored. On failure, no partial set of requested
-  assignments is stored.
+* **Preconditions:** The participant is in the directory.
+* **Guarantees:** A successful command replaces one selected assignment and saves the record, preserving the other
+  fields. A save failure is reported but does not roll back an in-memory change.
 
 **Main Success Scenario**
 
 1. **Actor:** Requests participants matching identifying information.
 2. **System:** Provides the matching participant records.
-3. **Actor:** Identifies a participant and specifies the required group, roles, and activities.
-4. **System:** Validates the requested assignments.
-5. **System:** Stores the participant's assignments.
-6. **System:** Confirms the participant's current assignments.
+3. **Actor:** Enters `assign-group`, `assign-role`, or `assign-activity` with the displayed index and one label.
+4. **System:** Validates the index and non-blank label.
+5. **System:** Replaces that category's assignment, if any, and saves the address book.
+6. **System:** Confirms the assignment.
 
     Use case ends.
 
@@ -620,20 +539,18 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     Use case ends.
 
-* 4a. A specified group, role, or activity has not been recorded.
-    * 4a1. **System:** Identifies the unknown event structure.
-    * 4a2. Use case resumes at step 3.
-* 4b. The participant is already assigned to a different group.
-    * 4b1. **System:** Reports the existing group assignment and requests confirmation before replacing it.
-    * 4b2. **Actor:** Confirms the replacement.
-    * 4b3. Use case resumes at step 5.
-* 4c. The participant already has a specified role or activity assignment.
-    * 4c1. **System:** Reports the duplicate assignment.
-    * 4c2. Use case resumes at step 3.
-* 5a. The assignments cannot be stored.
-    * 5a1. **System:** Reports that the assignments were not updated and retains the previous assignments.
+* 4a. The index is out of range or the label is invalid.
+    * 4a1. **System:** Reports the error without changing the participant.
 
     Use case ends.
+
+* 5a. Saving fails.
+    * 5a1. **System:** Reports the failure. The new assignment may still be present in memory.
+
+    Use case ends.
+
+There is no separate group/role/activity catalogue or replacement-confirmation step. Each participant has at most
+one value in each category; issuing another assignment command replaces the previous value in that category.
 
 #### UC04: Find participants by event assignment
 
@@ -656,10 +573,10 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **Extensions**
 
-* 2a. A criterion is invalid or refers to an unknown event structure.
-    * 2a1. **System:** Identifies the invalid criterion.
+* 2a. The command has invalid syntax, such as a missing, blank, or repeated prefix.
+    * 2a1. **System:** Reports the syntax error.
     * 2a2. Use case resumes at step 1.
-* 3a. No participant satisfies all the criteria.
+* 3a. No participant has the specified assignment values (including a valid but unknown label).
     * 3a1. **System:** Reports that no participant was found.
 
     Use case ends.
@@ -670,18 +587,16 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * **Use-case name:** Delete a participant
 * **Actor:** Event director
 * **Preconditions:** The participant has an existing record.
-* **Guarantees:** On success, the participant record and its assignments are removed. On failure, the participant
-  record and assignments remain unchanged.
+* **Guarantees:** A successful command removes and saves the participant record. An invalid index leaves the model
+  unchanged. A disk-save failure is reported but does not restore a participant already removed from memory.
 
 **Main Success Scenario**
 
 1. **Actor:** Requests participants matching identifying information.
 2. **System:** Provides the matching participant records.
 3. **Actor:** Identifies a participant and requests deletion.
-4. **System:** Provides the participant details and requests confirmation.
-5. **Actor:** Confirms the deletion.
-6. **System:** Removes the participant record and its assignments.
-7. **System:** Confirms the deletion.
+4. **System:** Removes the selected participant and attempts to save the address book.
+5. **System:** Confirms the deletion if saving succeeds.
 
     Use case ends.
 
@@ -692,21 +607,19 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     Use case ends.
 
-* 5a. The actor does not confirm the deletion.
-    * 5a1. **System:** Leaves the participant record and assignments unchanged.
+* 4a. Saving fails.
+    * 4a1. **System:** Reports the save failure. The participant may still be absent from the in-memory list.
 
     Use case ends.
 
-* 6a. The deletion cannot be stored.
-    * 6a1. **System:** Reports that the participant was not deleted and retains the participant record and assignments.
-
-    Use case ends.
+`delete` does not ask for confirmation and there is no undo command. The actor should check the displayed index
+before entering it.
 
 ### Non-Functional Requirements
 
 These are acceptance targets for ZoomAddress, not claims that every target has already been verified.
 Unless stated otherwise, checks use one running instance, a writable local data folder, and at most 1,000
-participant records, each with up to 10 group, role, or activity assignments in total.
+participant records, each with at most one group, one role, and one activity assignment.
 
 1. **Usability - keyboard operation:** After launch, an event director must be able to enter and submit every
    participant-management command documented in the User Guide using only the keyboard, without clicking a control.

@@ -36,6 +36,17 @@ These instructions apply to the entire repository. They are the minimum quality 
 - Ensure UML notation, multiplicities, activation bars, messages, and diagram explanations accurately match the implementation.
 - State explicitly in the PR when no UG or DG update is required and explain why.
 
+### Documentation quality gate for every PR
+
+- Write for the intended reader: the UG must let an event director complete realistic tasks; the DG must let a maintainer understand the implemented design. Prefer short, task-oriented explanations over inherited template text.
+- Check every documented command, argument, example, output, error, persistence claim, and platform instruction against the current code. For a release, repeat this against the **exact packaged JAR** and record its commit and checksum. Do not describe proposed behavior as implemented.
+- Explain displayed-list indices, destructive effects, limitations, and recovery steps where they affect a user's decision. Avoid claiming confirmation, rollback, backups, or portability that has not been demonstrated.
+- Keep requirements traceable: distinguish implemented scope from future user stories; make use-case main and extension flows match real behavior; make non-functional requirements measurable and state whether they are targets or verified results.
+- Choose a UML diagram type that suits the point being explained. Check class names, relationships, multiplicities, messages, lifelines, guards, and control flow against source code. Keep diagrams small enough to read, and update both the `.puml` source and rendered image together.
+- Use genuine, current screenshots for user-visible workflows. Place each image next to the relevant explanation, add useful alternative text, and remove obsolete mockups or inherited examples that could be mistaken for the product.
+- Check Markdown rendering, table of contents, anchors, relative links, image paths, captions, spelling, and consistent terminology. Run a local link/image check and inspect the rendered pages when practical.
+- In the PR, identify the exact guide sections and diagram files changed, provide the behavior or source evidence used to verify them, and state any platform or test coverage that remains unverified.
+
 ## Release readiness
 
 - Build the exact candidate JAR with `./gradlew clean shadowJar` when release behavior is affected.

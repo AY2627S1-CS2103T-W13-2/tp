@@ -19,6 +19,9 @@ ZoomAddress is a **desktop participant-management application for directors of l
 
 1. Copy the file to the folder you want to use as the _home folder_ for ZoomAddress.
 
+   ZoomAddress writes `data/addressbook.json` relative to the terminal's **working folder**, so run the JAR from
+   the same folder each time to reopen the same participant data.
+
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar ZoomAddress-v1.4.jar`.<br>
    The ZoomAddress window should appear in a few seconds with some sample data.
 
@@ -399,6 +402,8 @@ Format: `delete INDEX`
 * Deletes the participant at the specified `INDEX`.
 * The index refers to the index number shown in the displayed participant list.
 * The index **must be a positive integer** 1, 2, 3, …​
+* Deletion happens immediately, with **no confirmation or undo**. Check the name at that displayed index before
+  entering `delete` and keep a separate backup of important data.
 
 Examples:
 * `list` followed by `delete 2` deletes the 2nd participant in ZoomAddress.
@@ -409,6 +414,9 @@ Examples:
 Clears all participant records from ZoomAddress.
 
 Format: `clear`
+
+`clear` takes effect immediately, with **no confirmation or undo**. Back up `data/addressbook.json` before using it
+on a directory you need to keep.
 
 ### Exiting the program: `exit`
 
@@ -465,7 +473,9 @@ confident you can restore a valid copy.
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous ZoomAddress home folder.
+**A**: Close the app on both computers. Copy `data/addressbook.json` from the folder where you ran the old JAR to
+the corresponding `data` folder on the new computer. Keep a backup of the destination file before replacing it,
+then launch ZoomAddress from that folder. Use a release JAR compatible with the new computer's Java architecture.
 
 --------------------------------------------------------------------------------------------------------------------
 
