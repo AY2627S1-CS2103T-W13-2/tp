@@ -24,7 +24,8 @@ If you plan to use IntelliJ IDEA (highly recommended):
   :exclamation: Note: Importing a Gradle project is slightly different from importing a normal Java project.
 1. **Verify the setup**:
    1. Run `seedu.address.Main` and try a few commands.
-   1. [Run the tests](Testing.md) to ensure they all pass.
+   1. [Run the tests](Testing.md) to ensure they all pass. Then run `./gradlew check coverage` and
+      `./.github/run-checks.sh` before opening a pull request.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -45,7 +46,8 @@ If you plan to use IntelliJ IDEA (highly recommended):
 
 1. **Learn the design**
 
-   When you are ready to start coding, we recommend that you get some sense of the overall design by reading about [AddressBook’s architecture](DeveloperGuide.md#architecture).
+   Read the repository's [`AGENTS.md`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/AGENTS.md) quality policy and
+   [ZoomAddress architecture](DeveloperGuide.md#architecture) before changing code or documentation.
 
 1. **Do the tutorials**
    These tutorials will help you get acquainted with the codebase.
