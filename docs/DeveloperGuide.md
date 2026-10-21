@@ -98,9 +98,13 @@ Here's a (partial) class diagram of the `Logic` component:
 
 <img src="images/LogicClassDiagram.png" width="550"/>
 
-The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1")` API call as an example.
+The sequence diagram below illustrates command execution, model lookup, and saving for `execute("delete 1")`.
 
 ![Interactions Inside the Logic Component for the `delete 1` Command](images/DeleteSequenceDiagram.png)
+
+The command resolves index `1` against the **currently displayed list**, then passes the selected `Person` to
+`Model.deletePerson`. `LogicManager` saves after command execution; a save failure reports an error but does not
+restore the in-memory deletion.
 
 <div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `DeleteCommandParser` should end at the destroy marker (X), but due to a limitation of PlantUML, it continues to the end of the diagram.
 </div>
@@ -130,6 +134,9 @@ How the parsing works:
 **API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/java/seedu/address/model/Model.java)
 
 <img src="images/ModelClassDiagram.png" width="450" />
+
+This partial diagram includes the optional group, role, and activity value objects: a participant has **zero or one**
+of each, not a separate collection of assignments.
 
 
 The `Model` component,
@@ -242,6 +249,10 @@ The `sort name` command changes the order of the currently displayed participant
 changing the order of records stored in `AddressBook`.
 
 ![Interactions for the `sort name` command](images/SortSequenceDiagram.png)
+
+The diagram omits parser construction to keep the view-update and subsequent save path readable. Although sorting
+only changes a `SortedList` comparator, `LogicManager` still invokes the normal address-book save path before
+returning the result; the comparator itself is not serialized.
 
 1. `AddressBookParser` delegates the argument to `SortCommandParser`, which accepts exactly
    the `name` criterion and creates a `SortCommand`.

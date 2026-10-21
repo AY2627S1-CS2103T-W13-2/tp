@@ -4,10 +4,7 @@ skinparam ArrowFontStyle plain
 
 box Logic LOGIC_COLOR_T1
 participant ":LogicManager" as LogicManager LOGIC_COLOR
-participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
-participant ":SortCommandParser" as SortCommandParser LOGIC_COLOR
 participant "command:SortCommand" as SortCommand LOGIC_COLOR
-participant "result:CommandResult" as CommandResult LOGIC_COLOR
 end box
 
 box Model MODEL_COLOR_T1
@@ -15,26 +12,13 @@ participant "model:ModelManager" as ModelManager MODEL_COLOR
 participant "sortedPersons:SortedList<Person>" as SortedList MODEL_COLOR
 end box
 
+box Storage STORAGE_COLOR_T1
+participant "storage:Storage" as Storage STORAGE_COLOR
+end box
+
 [-> LogicManager : execute("sort name")
 activate LogicManager
-
-LogicManager -> AddressBookParser : parseCommand("sort name")
-activate AddressBookParser
-
-create SortCommandParser
-AddressBookParser -> SortCommandParser : new SortCommandParser()
-activate SortCommandParser
-AddressBookParser -> SortCommandParser : parse(" name")
-
-create SortCommand
-SortCommandParser -> SortCommand : new SortCommand()
-SortCommand --> SortCommandParser : command
-SortCommandParser --> AddressBookParser : command
-deactivate SortCommandParser
-destroy SortCommandParser
-
-AddressBookParser --> LogicManager : command
-deactivate AddressBookParser
+note over LogicManager : Parser creates SortCommand\n(omitted for clarity)
 
 LogicManager -> SortCommand : execute(model)
 activate SortCommand
@@ -46,12 +30,17 @@ SortedList --> ModelManager
 deactivate SortedList
 ModelManager --> SortCommand
 deactivate ModelManager
-
-create CommandResult
-SortCommand -> CommandResult : new CommandResult(MESSAGE_SUCCESS)
-CommandResult --> SortCommand : result
 SortCommand --> LogicManager : result
 deactivate SortCommand
+
+LogicManager -> ModelManager : getAddressBook()
+activate ModelManager
+ModelManager --> LogicManager : addressBook
+deactivate ModelManager
+LogicManager -> Storage : saveAddressBook(addressBook)
+activate Storage
+Storage --> LogicManager
+deactivate Storage
 
 [<-- LogicManager : result
 deactivate LogicManager
