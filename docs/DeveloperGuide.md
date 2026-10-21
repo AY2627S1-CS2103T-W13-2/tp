@@ -492,7 +492,7 @@ multiple roles, attendance, import/export, undo, and backup commands are not imp
 1. **Actor:** Finds or lists participants and notes the displayed index.
 2. **System:** Displays the matching participants.
 3. **Actor:** Enters `edit` with that index and at least one revised field.
-4. **System:** Validates the changes and checks for a duplicate participant.
+4. **System:** Validates the displayed index and revised fields, and checks for a duplicate participant.
 5. **System:** Replaces the participant in the model and saves the address book.
 6. **System:** Confirms the edit.
 
@@ -511,6 +511,11 @@ multiple roles, attendance, import/export, undo, and backup commands are not imp
 * 4b. The revised details definitely match another participant.
     * 4b1. **System:** Reports the conflict and does not update the record.
     * 4b2. Use case resumes at step 3.
+* 4c. The index is outside the currently displayed list.
+    * 4c1. **System:** Reports the invalid displayed index without changing the participant.
+
+    Use case ends.
+
 * 5a. Saving fails.
     * 5a1. **System:** Reports the save failure. The in-memory edit may remain even though persistence is unconfirmed.
 
@@ -581,7 +586,8 @@ one value in each category; issuing another assignment command replaces the prev
     * 2a1. **System:** Reports the syntax error.
     * 2a2. Use case resumes at step 1.
 * 3a. No participant has the specified assignment values (including a valid but unknown label).
-    * 3a1. **System:** Reports that no participant was found.
+    * 3a1. **System:** Successfully completes the query, reports zero matches, and displays an empty result list.
+      Participant records remain unchanged.
 
     Use case ends.
 
@@ -598,8 +604,8 @@ one value in each category; issuing another assignment command replaces the prev
 
 1. **Actor:** Requests participants matching identifying information.
 2. **System:** Provides the matching participant records.
-3. **Actor:** Identifies a participant and requests deletion.
-4. **System:** Removes the selected participant and attempts to save the address book.
+3. **Actor:** Enters `delete` with the participant's currently displayed index.
+4. **System:** Validates the index, removes the selected participant, and attempts to save the address book.
 5. **System:** Confirms the deletion if saving succeeds.
 
     Use case ends.
@@ -611,8 +617,13 @@ one value in each category; issuing another assignment command replaces the prev
 
     Use case ends.
 
-* 4a. Saving fails.
-    * 4a1. **System:** Reports the save failure. The participant may still be absent from the in-memory list.
+* 4a. The index is outside the currently displayed list.
+    * 4a1. **System:** Reports the invalid displayed index without removing a participant.
+
+    Use case ends.
+
+* 4b. Saving fails.
+    * 4b1. **System:** Reports the save failure. The participant may still be absent from the in-memory list.
 
     Use case ends.
 
