@@ -1,0 +1,109 @@
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.security.MessageDigest
+import java.util.zip.ZipFile
+
+// Keep an explicit minimum set as well as comparing every native resource from
+// the selected dependencies, including their bundled Windows runtime DLLs.
+def requiredNatives = [
+    'libdecora_sse.dylib', 'libglass.dylib', 'libjavafx_font.dylib',
+    'libjavafx_iio.dylib', 'libprism_common.dylib', 'libprism_es2.dylib', 'libprism_sw.dylib',
+    'decora_sse.dll', 'glass.dll', 'javafx_font.dll', 'javafx_iio.dll',
+    'prism_common.dll', 'prism_d3d.dll', 'prism_sw.dll',
+    'libdecora_sse.so', 'libglass.so', 'libglassgtk2.so', 'libglassgtk3.so',
+    'libjavafx_font.so', 'libjavafx_font_freetype.so', 'libjavafx_font_pango.so',
+    'libjavafx_iio.so', 'libprism_common.so', 'libprism_es2.so', 'libprism_sw.so'
+]
+def isNative = { String name -> name ==~ /.*\.(dylib|dll|so)/ }
+def fingerprint = { byte[] bytes -> MessageDigest.getInstance('SHA-256').digest(bytes) }
+def referenceNatives = null
+def loadReferenceNatives = {
+    if (referenceNatives == null) {
+        def references = [:]
+        configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts.findAll {
+            it.moduleVersion.id.group == 'org.openjfx'
+        }.each { dependency ->
+            new ZipFile(dependency.file).withCloseable { zip ->
+                zip.entries().toList().findAll { isNative(it.name) }.each { entry ->
+                    if (references.containsKey(entry.name)) {
+                        throw new GradleException("Duplicated dependency native: ${entry.name}")
+                    }
+                    byte[] bytes = zip.getInputStream(entry).withCloseable { it.readAllBytes() }
+                    references[entry.name] = [size: bytes.length, digest: fingerprint(bytes)]
+                }
+            }
+        }
+        def missing = requiredNatives - references.keySet()
+        if (!missing.isEmpty()) {
+            throw new GradleException("Missing native dependencies: ${missing}")
+        }
+        referenceNatives = references
+    }
+    referenceNatives
+}
+
+def verifyNativeArchive = { File artifact, String target ->
+    def references = loadReferenceNatives()
+    int expectedCpu = target == 'mac-aarch64' ? 0x0100000c : 0x01000007
+    new ZipFile(artifact).withCloseable { zip ->
+        def natives = zip.entries().toList().findAll { isNative(it.name) }
+        def names = natives.collect { it.name }
+        def missing = references.keySet() - names
+        if (!missing.isEmpty()) {
+            throw new GradleException("Missing native libraries: ${missing}")
+        }
+        if (names.size() != names.toSet().size()) {
+            throw new GradleException('Duplicated native libraries')
+        }
+        def unexpected = names - references.keySet()
+        if (!unexpected.isEmpty()) {
+            throw new GradleException("Unexpected native libraries: ${unexpected}")
+        }
+        natives.each { entry ->
+            byte[] bytes = zip.getInputStream(entry).withCloseable { it.readAllBytes() }
+            if (bytes.length < 32 || bytes.length < references[entry.name].size) {
+                throw new GradleException("Truncated native library: ${entry.name}")
+            }
+            if (entry.name.endsWith('.dylib')) {
+                def buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
+                int magic = buffer.getInt()
+                int cpu = buffer.getInt()
+                if (magic != (int) 0xfeedfacf || cpu != expectedCpu) {
+                    throw new GradleException("Wrong native architecture in ${entry.name}: "
+                            + "expected ${target}, CPU 0x${Integer.toHexString(cpu)}")
+                }
+            }
+            if (!Arrays.equals(fingerprint(bytes), references[entry.name].digest)) {
+                throw new GradleException("Payload mismatch in native library: ${entry.name}")
+            }
+        }
+    }
+}
+
+tasks.register('verifyMacNatives') {
+    dependsOn shadowJar
+    doLast {
+        if (providers.gradleProperty('javafxVerificationJar').isPresent()) {
+            throw new GradleException('verifyMacNatives always checks shadowJar; '
+                    + 'use verifyExternalMacNatives separately for javafxVerificationJar')
+        }
+        def artifact = shadowJar.archiveFile.get().asFile
+        verifyNativeArchive(artifact, project.ext.javafxMacPlatform)
+        logger.lifecycle("Verified all native payloads (macOS, Windows, Linux) in ${artifact.name}")
+    }
+}
+
+tasks.register('verifyExternalMacNatives') {
+    doLast {
+        def path = providers.gradleProperty('javafxVerificationJar')
+        if (!path.isPresent()) {
+            throw new GradleException('verifyExternalMacNatives requires -PjavafxVerificationJar=/path/to/candidate.jar')
+        }
+        verifyNativeArchive(file(path.get()), project.ext.javafxMacPlatform)
+        logger.lifecycle("Verified external native payloads in ${file(path.get()).name}")
+    }
+}
+
+check.dependsOn tasks.named('verifyMacNatives')
+project.ext.verifyNativeArchive = verifyNativeArchive
+apply from: 'gradle/native-verification-tests.gradle'

@@ -16,8 +16,9 @@ ZoomAddress is a **desktop participant-management application for directors of l
    **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 
 1. Download the JAR matching your **Java runtime architecture** from the [ZoomAddress releases page](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases):
-   * Windows x64, Linux x64 or Intel macOS with x64 Java 25: `ZoomAddress-v1.4.jar`.
+   * Windows x64, Linux x64 or macOS with x64 Java 25 (including Apple Silicon via Rosetta): `ZoomAddress-v1.4.jar`.
    * Apple Silicon macOS with native arm64 Java 25: `ZoomAddress-v1.4-mac-aarch64.jar`.
+   * Run `java -XshowSettings:properties -version` and find `os.arch` to check the active Java runtime: `amd64` or `x86_64` means x64; `aarch64` or `arm64` means arm64. Choose by this value, not the Mac's hardware alone.
    * Check the release notes for the tested commit and checksum. The original v1.4 JAR cannot start with native arm64 Java; use the corrected Apple Silicon asset once it has been published. An unapproved build is not a released fix.
 
 1. Copy the file to the folder you want to use as the _home folder_ for ZoomAddress.
