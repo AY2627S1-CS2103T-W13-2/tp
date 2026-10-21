@@ -345,7 +345,7 @@ schema or assignment cardinality changes are required.
 
 <div markdown="span" class="alert alert-warning">
 
-:exclamation: **Not part of ZoomAddress v1.3:** The following subsection is inherited design
+:exclamation: **Not implemented in ZoomAddress:** The following subsection is inherited design
 background from AddressBook-Level3. ZoomAddress does not contain `VersionedAddressBook`,
 `undo`, or `redo`, and the diagrams below do not describe the current application.
 
@@ -433,7 +433,7 @@ The following activity diagram summarizes what happens when a user executes a ne
 
 ### Future data archiving (not implemented)
 
-ZoomAddress v1.3 does not implement data archiving. The feature remains outside the current
+ZoomAddress does not implement data archiving. The feature remains outside the current
 product scope and is mentioned only as a possible future enhancement.
 
 
