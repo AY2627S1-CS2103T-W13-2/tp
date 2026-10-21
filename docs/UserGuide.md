@@ -53,8 +53,9 @@ ZoomAddress is a **desktop participant-management application for directors of l
 2. Enter `unassigned g/` to see everyone who still needs a group. The result is a new view over all stored
    participants; index `1` now refers to the first participant **in that result**, not necessarily the first
    participant from the original `list`.
-3. Enter `assign-group 1 g/Logistics` to allocate that displayed participant. Check the returned name before
-   continuing. Use `list` whenever you need the full directory again.
+3. **If at least one participant is shown**, enter `assign-group 1 g/Logistics` to allocate the first displayed
+   participant; otherwise skip this step. Check the returned name before continuing. A successful assignment
+   automatically restores the full directory view. You can also enter `list` to restore it at any time.
 4. Enter `filter-all g/Logistics r/Facilitator` to find participants who have **both** assignments. If you need
    only one category, use `filter g/Logistics` instead.
 5. Enter `sort name` to order the current results by name. Use the indices shown **after** sorting for
