@@ -92,6 +92,8 @@ Release an **audited artifact**, not just a passing source tree:
    Upload the correctly named JARs and current screenshots, list the tested commit and checksums, and state actual
    platform coverage and known limitations. Verify the public downloads before closing the release issue and milestone.
 
-The standard `shadowJar` build currently produces `build/libs/addressbook.jar`. A platform-specific packaging change
-must be merged and tested before its additional artifact is described as a published download. Never reuse a checksum
-or approval from an earlier candidate for a rebuilt JAR.
+Do not assume that every build host or platform variant writes the same filename under `build/libs`. Check the
+**merged** build configuration and inspect the output of each build; copy the artifact for its intended platform
+before running another `clean`. A platform-specific packaging change must be merged and tested before its additional
+artifact is described as a published download. Never reuse a checksum or approval from an earlier candidate for a
+rebuilt JAR.
