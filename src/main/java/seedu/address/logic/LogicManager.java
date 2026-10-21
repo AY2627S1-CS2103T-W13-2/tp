@@ -2,6 +2,7 @@ package seedu.address.logic;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javafx.collections.ObservableList;
@@ -24,6 +25,8 @@ public class LogicManager implements Logic {
 
     public static final String FILE_OPS_PERMISSION_ERROR_FORMAT =
             "Could not save data to file %s due to insufficient permissions to write to the file or the folder.";
+
+    private static final String SAVE_FAILURE_LOG_FORMAT = "Failed to save address book to %s (%s)";
 
     private final Logger logger = LogsCenter.getLogger(LogicManager.class);
 
@@ -51,12 +54,20 @@ public class LogicManager implements Logic {
         try {
             storage.saveAddressBook(model.getAddressBook());
         } catch (AccessDeniedException e) {
+            logSaveFailure(e);
             throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
         } catch (IOException ioe) {
+            logSaveFailure(ioe);
             throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
         }
 
         return commandResult;
+    }
+
+    private void logSaveFailure(IOException exception) {
+        String message = String.format(SAVE_FAILURE_LOG_FORMAT,
+                storage.getAddressBookFilePath(), exception.getClass().getSimpleName());
+        logger.log(Level.WARNING, message);
     }
 
     @Override
