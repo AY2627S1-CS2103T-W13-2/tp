@@ -1,3 +1,5 @@
+import java.io.FileNotFoundException
+
 // Exercise the same verifier used by check with real payloads and damaged archives.
 tasks.register('testNativeVerifier') {
     dependsOn shadowJar
@@ -12,6 +14,23 @@ tasks.register('testNativeVerifier') {
         }
         def failures = []
         int cases = 0
+        def exerciseArchiveFailure = { String label, File fixture, String expected,
+                Class<? extends Throwable> expectedCause ->
+            try {
+                project.ext.verifyNativeArchive(fixture, project.ext.javafxMacPlatform)
+                failures << "${label}: accepted invalid archive"
+            } catch (GradleException exception) {
+                if (!exception.message.contains(expected)) {
+                    failures << "${label}: unexpected failure: ${exception.message}"
+                }
+                if (!expectedCause.isInstance(exception.cause)) {
+                    failures << "${label}: expected ${expectedCause.simpleName} cause"
+                }
+            } catch (Exception exception) {
+                failures << "${label}: unwrapped ${exception.class.simpleName}: ${exception.message}"
+            }
+            cases++
+        }
         def exercise = { String label, Map entries, String target, String expected ->
             def fixture = new File(directory, 'fixture.jar')
             new java.util.zip.ZipOutputStream(new FileOutputStream(fixture)).withCloseable { zip ->
@@ -85,6 +104,14 @@ tasks.register('testNativeVerifier') {
         def oversized = new LinkedHashMap(baseline)
         oversized['libglass.dylib'] = Arrays.copyOf(baseline['libglass.dylib'], baseline['libglass.dylib'].length + 1)
         exercise('Appended native payload', oversized, target, 'Payload mismatch')
+        def missingArchive = new File(directory, 'missing-candidate.jar')
+        missingArchive.delete()
+        exerciseArchiveFailure('Missing candidate archive', missingArchive,
+                'does not exist or is not a regular file', FileNotFoundException)
+        def malformedArchive = new File(directory, 'malformed-candidate.jar')
+        malformedArchive.text = 'not a ZIP or JAR archive'
+        exerciseArchiveFailure('Malformed candidate archive', malformedArchive,
+                'unreadable or malformed', java.util.zip.ZipException)
         if (!failures.isEmpty()) {
             throw new GradleException("Native verifier regression failures:\n" + failures.join('\n'))
         }

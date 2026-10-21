@@ -1,3 +1,5 @@
+import java.io.FileNotFoundException
+import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.security.MessageDigest
@@ -43,40 +45,49 @@ def loadReferenceNatives = {
 }
 
 def verifyNativeArchive = { File artifact, String target ->
+    if (!artifact.isFile()) {
+        def cause = new FileNotFoundException(artifact.toString())
+        throw new GradleException("Native archive does not exist or is not a regular file: ${artifact}", cause)
+    }
     def references = loadReferenceNatives()
     int expectedCpu = target == 'mac-aarch64' ? 0x0100000c : 0x01000007
-    new ZipFile(artifact).withCloseable { zip ->
-        def natives = zip.entries().toList().findAll { isNative(it.name) }
-        def names = natives.collect { it.name }
-        def missing = references.keySet() - names
-        if (!missing.isEmpty()) {
-            throw new GradleException("Missing native libraries: ${missing}")
-        }
-        if (names.size() != names.toSet().size()) {
-            throw new GradleException('Duplicated native libraries')
-        }
-        def unexpected = names - references.keySet()
-        if (!unexpected.isEmpty()) {
-            throw new GradleException("Unexpected native libraries: ${unexpected}")
-        }
-        natives.each { entry ->
-            byte[] bytes = zip.getInputStream(entry).withCloseable { it.readAllBytes() }
-            if (bytes.length < 32 || bytes.length < references[entry.name].size) {
-                throw new GradleException("Truncated native library: ${entry.name}")
+    try {
+        new ZipFile(artifact).withCloseable { zip ->
+            def natives = zip.entries().toList().findAll { isNative(it.name) }
+            def names = natives.collect { it.name }
+            def missing = references.keySet() - names
+            if (!missing.isEmpty()) {
+                throw new GradleException("Missing native libraries: ${missing}")
             }
-            if (entry.name.endsWith('.dylib')) {
-                def buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
-                int magic = buffer.getInt()
-                int cpu = buffer.getInt()
-                if (magic != (int) 0xfeedfacf || cpu != expectedCpu) {
-                    throw new GradleException("Wrong native architecture in ${entry.name}: "
-                            + "expected ${target}, CPU 0x${Integer.toHexString(cpu)}")
+            if (names.size() != names.toSet().size()) {
+                throw new GradleException('Duplicated native libraries')
+            }
+            def unexpected = names - references.keySet()
+            if (!unexpected.isEmpty()) {
+                throw new GradleException("Unexpected native libraries: ${unexpected}")
+            }
+            natives.each { entry ->
+                byte[] bytes = zip.getInputStream(entry).withCloseable { it.readAllBytes() }
+                if (bytes.length < 32 || bytes.length < references[entry.name].size) {
+                    throw new GradleException("Truncated native library: ${entry.name}")
+                }
+                if (entry.name.endsWith('.dylib')) {
+                    def buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
+                    int magic = buffer.getInt()
+                    int cpu = buffer.getInt()
+                    if (magic != (int) 0xfeedfacf || cpu != expectedCpu) {
+                        throw new GradleException("Wrong native architecture in ${entry.name}: "
+                                + "expected ${target}, CPU 0x${Integer.toHexString(cpu)}")
+                    }
+                }
+                if (!Arrays.equals(fingerprint(bytes), references[entry.name].digest)) {
+                    throw new GradleException("Payload mismatch in native library: ${entry.name}")
                 }
             }
-            if (!Arrays.equals(fingerprint(bytes), references[entry.name].digest)) {
-                throw new GradleException("Payload mismatch in native library: ${entry.name}")
-            }
         }
+    } catch (IOException exception) {
+        throw new GradleException("Native archive is unreadable or malformed: ${artifact} "
+                + "(${exception.class.simpleName})", exception)
     }
 }
 
