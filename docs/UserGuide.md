@@ -50,6 +50,27 @@ ZoomAddress is a **desktop participant-management application for directors of l
 
 ## Features
 
+### Typical event-day workflow
+
+1. Enter `list` to inspect the directory and note the **displayed** index of a participant.
+2. Enter `unassigned g/` to see everyone who still needs a group. The result is a new view over all stored
+   participants; index `1` now refers to the first participant **in that result**, not necessarily the first
+   participant from the original `list`.
+3. **If at least one participant is shown**, enter `assign-group 1 g/Logistics` to allocate the first displayed
+   participant; otherwise skip this step. Check the returned name before continuing. A successful assignment
+   automatically restores the full directory view. You can also enter `list` to restore it at any time.
+4. Enter `filter-all g/Logistics r/Facilitator` to find participants who have **both** assignments. If you need
+   only one category, use `filter g/Logistics` instead.
+5. Enter `sort name` to order the current results by name. Use the indices shown **after** sorting for
+   `view`, `edit`, or `delete`. Sorting and filtering change the view, not participant fields.
+
+The screenshots in this guide use synthetic participants from the v1.4 release. They show the application content,
+not OS window decorations; fonts may differ by platform.
+
+![Directory after list, showing participant names, displayed indices and assignments](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4/01-participant-directory.png)
+
+*A `list` result: each participant card shows its current group, role and activity.*
+
 <div markdown="block" class="alert alert-info">
 
 **:information_source: Notes about the command format:**<br>
@@ -72,6 +93,10 @@ ZoomAddress is a **desktop participant-management application for directors of l
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </div>
+
+![Invalid list command with extra text and a usage message; the existing participant view remains visible](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4/04-invalid-command.png)
+
+*Invalid input such as `list extra` shows a command-specific usage message without changing the displayed list.*
 
 ZoomAddress adds `view`, `assign-group`, `assign-role`, `assign-activity`, `unassign`, `unassigned`, `sort`, `filter`, `filter-all`, and
 `find-contact` to the original AddressBook-Level3 commands. The other commands below retain their familiar
@@ -309,6 +334,10 @@ Examples:
 * `filter-all g/"Team A/B" r/Facilitator` matches the literal group label `Team A/B` and role Facilitator.
 * `filter-all g/"Team r/Lead" r/"Say \"Hi\" \\ Lead"` matches group `Team r/Lead` and role `Say "Hi" \ Lead`.
 
+![Combined filter result with two participants matching Logistics and Facilitator](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4/02-combined-filter.png)
+
+*A `filter-all g/Logistics r/Facilitator` result: only participants satisfying both criteria remain visible.*
+
 Common invalid inputs:
 
 | Input | Error and correction |
@@ -347,6 +376,10 @@ Examples:
 * `unassigned r/` shows everyone without a role, regardless of their group or activity.
 * `unassigned a/` shows everyone without an activity. Use the resulting displayed index for `view`, `assign-activity`,
   `edit`, or other index-based commands.
+
+![Unassigned group query showing two participants without a group](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4/03-unassigned-groups.png)
+
+*An `unassigned g/` result: a participant may still have a role or activity while lacking a group.*
 
 Common invalid inputs:
 
