@@ -758,9 +758,42 @@ participant records, each with up to 10 group, role, or activity assignments in 
 These instructions describe reproducible smoke and exploratory tests for the release JAR. Perform them in a
 temporary folder so that the test data does not replace a real `data/addressbook.json` file.
 
+### Packaging JavaFX for macOS architectures
+
+JavaFX 17.0.7 publishes separate `mac` (Intel x86-64) and `mac-aarch64`
+(Apple Silicon arm64) artifacts. Their native libraries have the same resource
+names, so merging both into one fat JAR can silently retain the wrong CPU binary.
+The build includes Windows/Linux x64 libraries and exactly one macOS classifier.
+All required JavaFX modules are explicit, with host-selected transitive classifiers disabled.
+
+* `./gradlew clean shadowJar verifyMacNatives -PjavafxMacPlatform=mac` produces
+  `build/libs/addressbook.jar` for Windows/Linux/Intel macOS x64.
+* `./gradlew clean shadowJar verifyMacNatives -PjavafxMacPlatform=mac-aarch64` produces
+  `build/libs/addressbook-mac-aarch64.jar` for native Apple Silicon Java.
+* Without an override, a native arm64 macOS JVM selects `mac-aarch64`; other build
+  hosts select `mac`. Only these two values are accepted. Build tests on the host's
+  matching classifier; cross-building a JAR does not prove it starts on the target OS.
+* `verifyMacNatives`, also run by `check`, opens the final JAR and verifies required
+  native entries, unique names, Mach-O headers and CPU types for every `.dylib`.
+  For a regression check against an existing artifact, supply
+  `-PjavafxVerificationJar=/path/to/candidate.jar` with the expected classifier.
+* CI checks both package variants, and runs host tests using a plain JDK so a bundled
+  JavaFX SDK cannot hide missing dependencies. Native Apple Silicon startup must still
+  be tested on a Mac with a fresh writable `-Djavafx.cachedir=...` directory.
+
+Copy each build output before running the next `clean`. Release copies are named
+`ZoomAddress-v1.4.jar` and `ZoomAddress-v1.4-mac-aarch64.jar`; record each SHA-256
+and the exact commit independently. These are distinct artifacts: Nix must retest
+the corrected native M1 package and affected platforms, Evan audits the exact
+artifacts/guide, and Pavan renews approval before replacement publication. The
+previous v1.4 checksum and sign-off do not approve a rebuilt artifact.
+
 ### Launching the JAR
 
-1. Copy `addressbook.jar` into an empty folder.
+1. Copy the JAR matching your Java runtime architecture into an empty folder.
+   For the manual scenarios below, name this local test copy `addressbook.jar`.
+   Use the Apple Silicon package for native arm64 Java on macOS; use the standard
+   package for Windows/Linux/Intel macOS x64. Published filenames are in the User Guide.
 1. Open a terminal in that folder and run `java -jar addressbook.jar`.
 
 Expected output: the ZoomAddress window opens and shows the sample participants. No error dialog appears.

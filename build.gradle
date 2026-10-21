@@ -49,22 +49,27 @@ task coverage(type: JacocoReport) {
     }
 }
 
+// mac and mac-aarch64 contain identically named native resources. Never merge both.
+def nativeMacPlatform = System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('mac')
+        && System.getProperty('os.arch') in ['aarch64', 'arm64'] ? 'mac-aarch64' : 'mac'
+def javafxMacPlatform = providers.gradleProperty('javafxMacPlatform').getOrElse(nativeMacPlatform)
+if (!(javafxMacPlatform in ['mac', 'mac-aarch64'])) {
+    throw new GradleException('javafxMacPlatform must be mac or mac-aarch64')
+}
+
 dependencies {
     String jUnitVersion = '5.14.4'
     String javaFxVersion = '17.0.7'
 
-    implementation "org.openjfx:javafx-base:${javaFxVersion}:win"
-    implementation "org.openjfx:javafx-base:${javaFxVersion}:mac"
-    implementation "org.openjfx:javafx-base:${javaFxVersion}:linux"
-    implementation "org.openjfx:javafx-controls:${javaFxVersion}:win"
-    implementation "org.openjfx:javafx-controls:${javaFxVersion}:mac"
-    implementation "org.openjfx:javafx-controls:${javaFxVersion}:linux"
-    implementation "org.openjfx:javafx-fxml:${javaFxVersion}:win"
-    implementation "org.openjfx:javafx-fxml:${javaFxVersion}:mac"
-    implementation "org.openjfx:javafx-fxml:${javaFxVersion}:linux"
-    implementation "org.openjfx:javafx-graphics:${javaFxVersion}:win"
-    implementation "org.openjfx:javafx-graphics:${javaFxVersion}:mac"
-    implementation "org.openjfx:javafx-graphics:${javaFxVersion}:linux"
+    ['base', 'controls', 'fxml', 'graphics'].each { module ->
+        ['win', 'linux', javafxMacPlatform].each { platform ->
+            implementation("org.openjfx:javafx-${module}:${javaFxVersion}:${platform}") {
+                // All four modules are explicit; host-selected transitive classifiers
+                // could otherwise reintroduce the wrong macOS architecture.
+                transitive = false
+            }
+        }
+    }
 
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.7.0'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.7.4'
@@ -76,7 +81,43 @@ dependencies {
 }
 
 shadowJar {
-    archiveFileName = 'addressbook.jar'
+    archiveFileName = javafxMacPlatform == 'mac-aarch64'
+            ? 'addressbook-mac-aarch64.jar' : 'addressbook.jar'
 }
 
 defaultTasks 'clean', 'test'
+
+// Verify the native code in the artifact, not just its dependency declarations.
+tasks.register('verifyMacNatives') {
+    dependsOn shadowJar
+    doLast {
+        def target = javafxMacPlatform
+        def artifact = providers.gradleProperty('javafxVerificationJar')
+                .map { file(it) }.getOrElse(shadowJar.archiveFile.get().asFile)
+        int expectedCpu = target == 'mac-aarch64' ? 0x0100000c : 0x01000007
+        new java.util.zip.ZipFile(artifact).withCloseable { zip ->
+            def natives = zip.entries().toList().findAll { it.name.endsWith('.dylib') }
+            def names = natives.collect { it.name }
+            if (!names.containsAll(['libglass.dylib', 'libprism_es2.dylib', 'libprism_sw.dylib'])
+                    || names.size() != names.toSet().size()) {
+                throw new GradleException('Missing or duplicated macOS JavaFX native libraries')
+            }
+            natives.each { entry ->
+                byte[] header = zip.getInputStream(entry).withCloseable { it.readNBytes(8) }
+                if (header.length != 8) {
+                    throw new GradleException("Truncated native library: ${entry.name}")
+                }
+                def buffer = java.nio.ByteBuffer.wrap(header).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                int magic = buffer.getInt()
+                int cpu = buffer.getInt()
+                if (magic != (int) 0xfeedfacf || cpu != expectedCpu) {
+                    throw new GradleException("Wrong native architecture in ${entry.name}: "
+                            + "expected ${target}, CPU 0x${Integer.toHexString(cpu)}")
+                }
+            }
+            logger.lifecycle("Verified ${natives.size()} ${target} native libraries in ${artifact.name}")
+        }
+    }
+}
+
+check.dependsOn tasks.named('verifyMacNatives')
