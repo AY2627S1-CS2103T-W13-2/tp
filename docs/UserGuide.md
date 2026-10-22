@@ -482,9 +482,12 @@ If a save error appears:
 * Check the data folder's write permissions, available disk space, and filesystem support for atomic moves.
 * A command may already have changed the displayed data before saving failed. The error does **not** mean the
   in-memory change was undone or saved. Keep the application open while investigating the error.
-* If replacement fails, ZoomAddress attempts to restore the previous file atomically. If restoration also fails,
-  the error identifies a `.zoomaddress-save-*.bak` recovery file containing the previous saved bytes. Preserve that
-  file before retrying or restarting; automatic restoration is not guaranteed in this case.
+* If atomic replacement is unsupported, the save fails and the original file is left untouched; ZoomAddress does
+  not attempt restoration or fall back to a non-atomic write.
+* For other replacement failures where the destination may have changed, ZoomAddress attempts to restore the
+  previous file atomically if a complete recovery copy was created. If restoration also fails, the error identifies
+  a `.zoomaddress-save-*.bak` recovery file containing the previous saved bytes. Preserve that file before retrying
+  or restarting; automatic restoration is not guaranteed in this case.
 * Temporary files are normally removed. If cleanup fails, their locations are recorded in the application log.
   A `.tmp` file may contain incomplete data and must not be used as a recovery copy. Treat `.bak` files as private
   participant data. A retained recovery copy is not automatically loaded or removed on a later save.
