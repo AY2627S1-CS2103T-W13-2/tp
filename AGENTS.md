@@ -20,6 +20,15 @@ These instructions apply to the entire repository. They are the minimum quality 
 - Use assertions, exceptions, logging, defensive checks, and input validation where they make failures explicit and diagnosable.
 - Make validation rules and error messages specific, consistent, and actionable.
 
+### Code documentation and Javadoc
+
+- Follow the [course code-quality guidance](https://nus-cs2103-ay2627-s1.github.io/website/se-book-adapted/chapters/codeQuality.html), [documentation guidance](https://nus-cs2103-ay2627-s1.github.io/website/se-book-adapted/chapters/documentation.html), and the [SE-EDU Java comments standard](https://se-education.org/guides/conventions/java/intermediate). The [tP rubric](https://nus-cs2103-ay2627-s1.github.io/website/admin/tp-grading.html) assesses coding-standard compliance and code quality; it does not set a comment-count or Javadoc-percentage target.
+- Give every class and public method a descriptive Javadoc header. The standard permits omission for getters/setters, test classes/methods, and overrides only when the inherited documentation applies exactly. If an override changes the contract, document the difference; use `{@inheritDoc}` where helpful.
+- Write for a caller or maintainer who should not need to read the implementation to understand the contract. State what the class or method does and, where relevant, input constraints, return behavior, observable side effects, and exceptions. Document actual behavior, not intended future behavior or guarantees the code does not provide.
+- Begin a method Javadoc with a short third-person summary such as `Returns ...` or `Adds ...`. Use the standard Javadoc layout: `/**` on its own line, aligned `*` lines, a blank line before tags, punctuation in tag descriptions, and no blank line before the declaration. Use `@param` for all parameters or none when none add value; use `@return` and `@throws` where they clarify the contract.
+- Write comments in English with American spelling and no local slang. Explain non-obvious **what** or **why** (for example, an invariant, constraint, or unusual error path); make the **how** clear through names and structure. Do not narrate obvious statements, use comments to excuse confusing code, leave personal notes or dead commented-out code, or add comments merely to increase their number.
+- When changing behavior, update affected Javadoc and comments in the same PR. Manually compare each touched contract with the implementation and tests; Checkstyle alone cannot establish that a comment is accurate or useful.
+
 ## Tests and verification
 
 - Add all applicable positive, negative, boundary, parser, and persistence tests for changed behavior.
