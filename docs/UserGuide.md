@@ -15,11 +15,11 @@ ZoomAddress is a **desktop participant-management application for directors of l
 1. Ensure that Java `25` is installed on your computer.<br>
    **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 
-1. Check the [ZoomAddress releases page](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases) and choose the download for your **Java runtime architecture** based on the assets listed in the approved releases:
-   * Windows x64, Linux x64 or macOS with x64 Java 25 (including Apple Silicon via Rosetta): if the approved v1.4.1 release lists `ZoomAddress-v1.4.1.jar`, download it. If that asset is not listed, use `ZoomAddress-v1.4.jar` from the [existing v1.4 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.4).
-   * Apple Silicon macOS with native arm64 Java 25: if the approved v1.4.1 release lists `ZoomAddress-v1.4.1-mac-aarch64.jar`, download it. If that asset is not listed, wait for its publication. **The existing v1.4 JAR does not work with native arm64 Java**, so it is not a compatible fallback.
+1. Open the [v1.4.1 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.4.1) and download the JAR matching your **Java runtime architecture**:
+   * Windows x64, Linux x64 or macOS with x64 Java 25 (including Apple Silicon via Rosetta): `ZoomAddress-v1.4.1.jar`.
+   * Apple Silicon macOS with native arm64 Java 25: `ZoomAddress-v1.4.1-mac-aarch64.jar`. **The older v1.4 JAR does not work with native arm64 Java**; do not use it as a fallback.
    * Run `java -XshowSettings:properties -version` and find `os.arch` to check the active Java runtime: `amd64` or `x86_64` means x64; `aarch64` or `arm64` means arm64. Choose by this value, not the Mac's hardware alone.
-   * Check the chosen release's notes for its tested commit, checksum and limitations. An unapproved build is not a released fix.
+   * Check the release notes and `SHA256SUMS.txt` for the tested commit, checksums and limitations.
 
 1. Copy the file to the folder you want to use as the _home folder_ for ZoomAddress.
 
@@ -27,9 +27,8 @@ ZoomAddress is a **desktop participant-management application for directors of l
    the same folder each time to reopen the same participant data.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and use the command matching the file you downloaded:
-   * Existing x64 release: `java -jar ZoomAddress-v1.4.jar`.
-   * Corrected x64 release, **after publication**: `java -jar ZoomAddress-v1.4.1.jar`.
-   * Native arm64 macOS release, **after publication**: `java -jar ZoomAddress-v1.4.1-mac-aarch64.jar`.
+   * x64 Java: `java -jar ZoomAddress-v1.4.1.jar`.
+   * Native arm64 Java on Apple Silicon: `java -jar ZoomAddress-v1.4.1-mac-aarch64.jar`.
 
    The ZoomAddress window should appear in a few seconds with some sample data.
 
@@ -413,9 +412,13 @@ Format: `find KEYWORD [MORE_KEYWORDS]`
 * Participants matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
 
 Examples:
-* `find John` returns `john` and `John Doe`
-* `find alex david` returns `Alex Yeoh`, `David Li`<br>
-  ![result for 'find alex david'](images/findAlexDavidResult.png)
+* `find Alex` returns `Alex Yeoh` in the initial sample data.
+* `find alex david` returns `Alex Yeoh` and `David Li`. Search results use the same
+  participant-card layout as the current directory screenshot below, including
+  each participant's group. The screenshot illustrates the layout, not this specific
+  search result.
+
+![Current participant-card layout showing group, role, and activity fields](images/participantDirectory-v1.4.1.png)
 
 ### Locating participants by contact information: `find-contact`
 

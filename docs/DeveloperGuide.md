@@ -719,22 +719,21 @@ All required JavaFX modules are explicit, with host-selected transitive classifi
   JavaFX SDK cannot hide missing dependencies. Native Apple Silicon startup must still
   be tested on a Mac with a fresh writable `-Djavafx.cachedir=...` directory.
 
-Copy each build output before running the next `clean`. Release copies are named
+Copy each build output before running the next `clean`. The v1.4.1 release copies are named
 `ZoomAddress-v1.4.1.jar` and `ZoomAddress-v1.4.1-mac-aarch64.jar`; record each SHA-256
-and the exact commit independently. These are distinct artifacts: Nix must retest
-the corrected native M1 package and affected platforms, Evan audits the exact
-artifacts/guide, and Pavan renews approval before replacement publication. The
-previous v1.4 checksum and sign-off do not approve a rebuilt artifact.
+and the exact commit independently. These are distinct artifacts: test each on its
+supported platform and audit the User Guide against the exact packaged JARs. A
+checksum or approval for one artifact does not establish the identity or behavior
+of a rebuilt artifact.
 
-The release tag and GitHub-generated source archives must identify the same merged
-commit used to build both approved JARs. The existing `v1.4` tag identifies the old
-candidate: do not silently replace its JARs with builds from another commit or move
-the published tag. Agree a new correction tag/version in #74 before publication,
-align `MainApp.VERSION`, asset names and the guides with that version before the
-final build, and record the tag, full commit and both hashes for renewed approval.
-Verify the public tag's peeled commit, downloaded source archives, asset hashes
-and guide/screenshot links after publication. Close #74 and the milestone only
-after those checks and remaining issue tracking are complete.
+The published [v1.4.1 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.4.1)
+uses commit `8bd9682b5c51bb80f6a6038924238ba443e2f17b`; its two JARs, checksums,
+source archives and screenshots are release assets. For a future release, align
+`MainApp.VERSION`, the tag, asset names and both guides before building. Verify that
+the tag and GitHub-generated source archives identify the build commit, then
+download and hash the public JARs, check screenshot and guide links, and record the
+tested platforms and limitations. Never move a published tag or replace a tested JAR
+silently; any rebuilt JAR needs new checksums and relevant retesting.
 
 ### Launching the JAR
 
@@ -784,7 +783,7 @@ Expected data change: the previous participant data is removed and the four reco
 | Run `find Beth` again. | `edit 1 p/87654321` | Reports the edited Beth Lee record. | Only Beth's phone changes; all three assignments remain. |
 | Run `find Beth` again. | `view 1` | Shows phone `87654321`, group Logistics, role Facilitator, and activity Campfire. | None. |
 
-### New v1.3 workflows
+### Assignment, sorting, and query workflows
 
 #### Clearing assignments
 
