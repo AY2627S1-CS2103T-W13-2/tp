@@ -15,9 +15,9 @@ ZoomAddress is a **desktop participant-management application for directors of l
 1. Ensure that Java `25` is installed on your computer.<br>
    **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 
-1. Check the [ZoomAddress releases page](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases) before downloading. **The corrected v1.4.1 downloads are pending approval and publication.** Use them only once an approved v1.4.1 release lists those assets.
-   * Windows x64, Linux x64 or macOS with x64 Java 25 (including Apple Silicon via Rosetta): until v1.4.1 is published, download `ZoomAddress-v1.4.jar` from the [existing v1.4 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.4). After publication, use `ZoomAddress-v1.4.1.jar`.
-   * Apple Silicon macOS with native arm64 Java 25: wait for the approved `ZoomAddress-v1.4.1-mac-aarch64.jar` asset. The existing v1.4 JAR cannot start with this runtime. Until the corrected asset is published, there is no compatible download for this runtime.
+1. Check the [ZoomAddress releases page](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases) and choose the download for your **Java runtime architecture** based on the assets listed in the approved releases:
+   * Windows x64, Linux x64 or macOS with x64 Java 25 (including Apple Silicon via Rosetta): if the approved v1.4.1 release lists `ZoomAddress-v1.4.1.jar`, download it. If that asset is not listed, use `ZoomAddress-v1.4.jar` from the [existing v1.4 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.4).
+   * Apple Silicon macOS with native arm64 Java 25: if the approved v1.4.1 release lists `ZoomAddress-v1.4.1-mac-aarch64.jar`, download it. If that asset is not listed, wait for its publication. **The existing v1.4 JAR does not work with native arm64 Java**, so it is not a compatible fallback.
    * Run `java -XshowSettings:properties -version` and find `os.arch` to check the active Java runtime: `amd64` or `x86_64` means x64; `aarch64` or `arm64` means arm64. Choose by this value, not the Mac's hardware alone.
    * Check the chosen release's notes for its tested commit, checksum and limitations. An unapproved build is not a released fix.
 
