@@ -720,7 +720,7 @@ All required JavaFX modules are explicit, with host-selected transitive classifi
   be tested on a Mac with a fresh writable `-Djavafx.cachedir=...` directory.
 
 Copy each build output before running the next `clean`. Release copies are named
-`ZoomAddress-v1.4.jar` and `ZoomAddress-v1.4-mac-aarch64.jar`; record each SHA-256
+`ZoomAddress-v1.4.1.jar` and `ZoomAddress-v1.4.1-mac-aarch64.jar`; record each SHA-256
 and the exact commit independently. These are distinct artifacts: Nix must retest
 the corrected native M1 package and affected platforms, Evan audits the exact
 artifacts/guide, and Pavan renews approval before replacement publication. The
