@@ -2,11 +2,16 @@ package seedu.address.logic.parser;
 
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
+import static seedu.address.logic.parser.FilterAllCommandParser.MESSAGE_AFTER_QUOTE;
+import static seedu.address.logic.parser.FilterAllCommandParser.MESSAGE_INVALID_ESCAPE;
+import static seedu.address.logic.parser.FilterAllCommandParser.MESSAGE_PARTIAL_QUOTE;
+import static seedu.address.logic.parser.FilterAllCommandParser.MESSAGE_UNFINISHED_QUOTE;
 import static seedu.address.logic.parser.FilterCommandParser.MESSAGE_BLANK_VALUE;
 import static seedu.address.logic.parser.FilterCommandParser.MESSAGE_MISSING_PREFIX;
 import static seedu.address.logic.parser.FilterCommandParser.MESSAGE_MULTIPLE_PREFIXES;
 import static seedu.address.logic.parser.FilterCommandParser.MESSAGE_REPEATED_PREFIX;
 import static seedu.address.logic.parser.FilterCommandParser.MESSAGE_UNEXPECTED_ARGUMENTS;
+import static seedu.address.logic.parser.FilterCommandParser.MESSAGE_UNEXPECTED_ARGUMENTS_AFTER_QUOTE;
 import static seedu.address.logic.parser.FilterCommandParser.MESSAGE_UNSUPPORTED_PREFIX;
 import static seedu.address.model.person.AssignmentMatchesPredicate.AssignmentType.ACTIVITY;
 import static seedu.address.model.person.AssignmentMatchesPredicate.AssignmentType.GROUP;
@@ -41,6 +46,36 @@ public class FilterCommandParserTest {
     public void parse_validActivity_returnsFilterCommand() {
         assertParseSuccess(parser, " a/Campfire",
                 new FilterCommand(new AssignmentMatchesPredicate(ACTIVITY, "Campfire")));
+    }
+
+    @Test
+    public void parse_quotedValues_decodesLiteralsAndProtectsPrefixes() {
+        assertParseSuccess(parser, " g/\"Team r/Lead a/Campfire\"",
+                new FilterCommand(new AssignmentMatchesPredicate(GROUP, "Team r/Lead a/Campfire")));
+        assertParseSuccess(parser, " r/  \"Say \\\"Hi\\\" \\\\ Lead\"  ",
+                new FilterCommand(new AssignmentMatchesPredicate(ROLE, "Say \"Hi\" \\ Lead")));
+        assertParseSuccess(parser, " a/\"Team A/B\"",
+                new FilterCommand(new AssignmentMatchesPredicate(ACTIVITY, "Team A/B")));
+    }
+
+    @Test
+    public void parse_invalidQuotedValues_throwsSpecificError() {
+        assertParseFailure(parser, " g/\"Team r/Lead", MESSAGE_UNFINISHED_QUOTE);
+        assertParseFailure(parser, " g/\"Team\\", MESSAGE_UNFINISHED_QUOTE);
+        assertParseFailure(parser, " g/\"Team\\q\"", MESSAGE_INVALID_ESCAPE);
+        assertParseFailure(parser, " g/\" \"", MESSAGE_BLANK_VALUE);
+        assertParseFailure(parser, " g/\" \" r/Other", MESSAGE_BLANK_VALUE);
+        assertParseFailure(parser, " g/Team\"X\"", MESSAGE_PARTIAL_QUOTE);
+        assertParseFailure(parser, " g/\"Team\"extra", MESSAGE_AFTER_QUOTE);
+        assertParseFailure(parser, " g/\"Team\"r/Lead", MESSAGE_AFTER_QUOTE);
+        assertParseFailure(parser, " g/\"Team\" extra", MESSAGE_UNEXPECTED_ARGUMENTS_AFTER_QUOTE);
+        assertParseFailure(parser, " g/\"Team\" p/Other", MESSAGE_UNSUPPORTED_PREFIX);
+    }
+
+    @Test
+    public void parse_prefixesOutsideQuotedValue_throwsSpecificError() {
+        assertParseFailure(parser, " g/\"Team r/Lead\" r/Other", MESSAGE_MULTIPLE_PREFIXES);
+        assertParseFailure(parser, " g/\"Team r/Lead\" g/Other", MESSAGE_REPEATED_PREFIX);
     }
 
     @Test

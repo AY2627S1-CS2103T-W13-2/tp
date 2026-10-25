@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.logic.parser.AddressBookParser;
+import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -90,6 +92,31 @@ public class FilterCommandTest {
         command.execute(model);
 
         assertEquals(List.of(slashGroupMember), model.getFilteredPersonList());
+        assertEquals(originalAddressBook, model.getAddressBook());
+    }
+
+    @Test
+    public void execute_quotedPrefixLikeValue_matchesLiteralAndPreservesIndices() throws Exception {
+        Person quoted = new PersonBuilder().withName("Quoted Person")
+                .withGroup("Team r/Lead a/Campfire").build();
+        model.addPerson(quoted);
+
+        new AddressBookParser().parseCommand("filter g/\"team r/lead a/campfire\"").execute(model);
+
+        assertEquals(List.of(quoted), model.getFilteredPersonList());
+        assertEquals(String.format(ViewCommand.MESSAGE_VIEW_PARTICIPANT_SUCCESS, Messages.format(quoted)),
+                new ViewCommand(Index.fromOneBased(1)).execute(model).getFeedbackToUser());
+        assertEquals(6, model.getAddressBook().getPersonList().size());
+    }
+
+    @Test
+    public void execute_invalidQuotedValue_preservesCurrentViewAndData() throws Exception {
+        AddressBookParser parser = new AddressBookParser();
+        parser.parseCommand("filter g/Logistics").execute(model);
+
+        assertThrows(ParseException.class, () -> parser.parseCommand("filter g/\"unfinished"));
+
+        assertEquals(List.of(logisticsLead, logisticsFacilitator), model.getFilteredPersonList());
         assertEquals(originalAddressBook, model.getAddressBook());
     }
 
