@@ -76,7 +76,8 @@ not OS window decorations; fonts may differ by platform.
 
 ![Directory after list, showing participant names, displayed indices and assignments](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4/01-participant-directory.png)
 
-*A `list` result: each participant card shows its current group, role and activity.*
+*A `list` result: cards show assigned groups, roles and activities where present. A missing group appears as
+`Unassigned`; a missing role or activity is omitted from the card.*
 
 <div markdown="block" class="alert alert-info">
 
@@ -105,9 +106,8 @@ not OS window decorations; fonts may differ by platform.
 
 *Invalid input such as `list extra` shows a command-specific usage message without changing the displayed list.*
 
-ZoomAddress adds `view`, `assign-group`, `assign-role`, `assign-activity`, `unassign`, `unassigned`, `sort`, `filter`, `filter-all`, and
-`find-contact` to the original AddressBook-Level3 commands. The other commands below retain their familiar
-AddressBook workflow, with participant-focused wording.
+The commands below cover both participant records and event assignments. Use the command summary at the end of
+this guide when you need a quick syntax reminder.
 
 ### Viewing help: `help`
 
@@ -548,7 +548,7 @@ Action | Format, Examples
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **Find by contact** | `find-contact PHONE_OR_EMAIL`<br> e.g., `find-contact alex@example.com`
 **Filter by assignment** | `filter g/GROUP` or `filter r/ROLE` or `filter a/ACTIVITY`<br> e.g., `filter g/Logistics`
-**Filter by combined assignments** | `filter-all g/GROUP r/ROLE [a/ACTIVITY]` (any two or three categories)<br> e.g., `filter-all g/Logistics r/Facilitator`
+**Filter by combined assignments** | `filter-all g/GROUP r/ROLE`, `filter-all g/GROUP a/ACTIVITY`, or `filter-all r/ROLE a/ACTIVITY`; optionally include the third distinct category<br> e.g., `filter-all g/Logistics r/Facilitator`
 **Find incomplete allocations** | `unassigned g/` or `unassigned r/` or `unassigned a/`
 **List** | `list`
 **Sort** | `sort name`
