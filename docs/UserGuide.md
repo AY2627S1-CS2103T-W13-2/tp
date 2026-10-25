@@ -554,3 +554,4 @@ Action | Format, Examples
 **Sort** | `sort name`
 **View** | `view INDEX`<br> e.g., `view 3`
 **Help** | `help`
+**Exit** | `exit`
