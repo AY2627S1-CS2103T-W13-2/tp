@@ -295,8 +295,9 @@ Formats:
 * To search for a value containing a prefix-like fragment such as `r/Lead` or `a/Campfire`, put the **entire value**
   in double quotes: `filter g/"Team r/Lead"`. Text inside the quotes is literal, so the fragment does not start a
   second criterion. Quotes are not part of the matched value. Inside quotes, use `\"` for a literal double quote and
-  `\\` for a literal backslash; other escapes are rejected. An unfinished quote, partial quote, or extra text after a
-  closing quote gives a specific error. The existing unquoted form, including `filter g/team a/b`, still works.
+  `\\` for a literal backslash; other escapes are rejected. An unfinished opening quote or extra text after a closing
+  quote gives a specific error. Only a quote at the start of the value begins quoted syntax: quotes elsewhere in an
+  unquoted value remain literal, so existing searches such as `filter g/Team "A"` and `filter g/team a/b` still work.
 * Participants without the selected assignment are excluded.
 * A successful filter displays matching participants with list indices starting from 1. If nothing matches, the list
   is empty and ZoomAddress reports that 0 participants matched.
@@ -340,7 +341,7 @@ Formats:
 * Close every quoted value, then use whitespace before the next prefix. Partial quoting and text after a closing
   quote are rejected. Quotes are query syntax and are not part of the matched label.
 * These quoting rules also apply to a **quoted** value in `filter`. Existing unquoted searches remain supported:
-  `filter g/team a/b` still matches a stored group named `Team A/B`.
+  `filter g/team a/b` still matches a stored group named `Team A/B`, and unquoted quote characters remain literal.
 
 Examples:
 * `filter-all g/Logistics r/Facilitator` matches participants who are both in Logistics and Facilitators.

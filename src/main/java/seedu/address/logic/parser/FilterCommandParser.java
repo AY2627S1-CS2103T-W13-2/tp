@@ -67,9 +67,6 @@ public class FilterCommandParser implements Parser<FilterCommand> {
             quotedRemainder = args.substring(quotedValue.end());
         } else {
             value = args.substring(valueStart).strip();
-            if (value.indexOf('"') >= 0) {
-                throw new ParseException(QuotedAssignmentValueParser.MESSAGE_PARTIAL_QUOTE);
-            }
             noMatchErrorMessage = getUnquotedPrefixError(args, valueStart, suppliedPrefix);
         }
         if (value.isBlank()) {

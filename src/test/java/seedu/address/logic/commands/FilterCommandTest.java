@@ -110,6 +110,16 @@ public class FilterCommandTest {
     }
 
     @Test
+    public void execute_unquotedLiteralQuote_matchesStoredGroup() throws Exception {
+        Person quoted = new PersonBuilder().withName("Quote Person").withGroup("Team \"A\"").build();
+        model.addPerson(quoted);
+
+        new AddressBookParser().parseCommand("filter g/Team \"A\"").execute(model);
+
+        assertEquals(List.of(quoted), model.getFilteredPersonList());
+    }
+
+    @Test
     public void execute_invalidQuotedValue_preservesCurrentViewAndData() throws Exception {
         AddressBookParser parser = new AddressBookParser();
         parser.parseCommand("filter g/Logistics").execute(model);

@@ -4,7 +4,6 @@ import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailur
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
 import static seedu.address.logic.parser.FilterAllCommandParser.MESSAGE_AFTER_QUOTE;
 import static seedu.address.logic.parser.FilterAllCommandParser.MESSAGE_INVALID_ESCAPE;
-import static seedu.address.logic.parser.FilterAllCommandParser.MESSAGE_PARTIAL_QUOTE;
 import static seedu.address.logic.parser.FilterAllCommandParser.MESSAGE_UNFINISHED_QUOTE;
 import static seedu.address.logic.parser.FilterCommandParser.MESSAGE_BLANK_VALUE;
 import static seedu.address.logic.parser.FilterCommandParser.MESSAGE_MISSING_PREFIX;
@@ -59,13 +58,20 @@ public class FilterCommandParserTest {
     }
 
     @Test
+    public void parse_unquotedLiteralQuotes_preservesExistingSearches() {
+        assertParseSuccess(parser, " g/Team \"A\"",
+                new FilterCommand(new AssignmentMatchesPredicate(GROUP, "Team \"A\"")));
+        assertParseSuccess(parser, " g/Team\"X\"",
+                new FilterCommand(new AssignmentMatchesPredicate(GROUP, "Team\"X\"")));
+    }
+
+    @Test
     public void parse_invalidQuotedValues_throwsSpecificError() {
         assertParseFailure(parser, " g/\"Team r/Lead", MESSAGE_UNFINISHED_QUOTE);
         assertParseFailure(parser, " g/\"Team\\", MESSAGE_UNFINISHED_QUOTE);
         assertParseFailure(parser, " g/\"Team\\q\"", MESSAGE_INVALID_ESCAPE);
         assertParseFailure(parser, " g/\" \"", MESSAGE_BLANK_VALUE);
         assertParseFailure(parser, " g/\" \" r/Other", MESSAGE_BLANK_VALUE);
-        assertParseFailure(parser, " g/Team\"X\"", MESSAGE_PARTIAL_QUOTE);
         assertParseFailure(parser, " g/\"Team\"extra", MESSAGE_AFTER_QUOTE);
         assertParseFailure(parser, " g/\"Team\"r/Lead", MESSAGE_AFTER_QUOTE);
         assertParseFailure(parser, " g/\"Team\" extra", MESSAGE_UNEXPECTED_ARGUMENTS_AFTER_QUOTE);

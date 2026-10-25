@@ -295,6 +295,8 @@ non-whitespace remainder is rejected by the single-filter parser. Quoting errors
 command does not execute and the current displayed list stays unchanged. The unquoted single-filter path still
 checks the complete value against stored assignments before interpreting a later supported prefix as a conflicting
 criterion; this retains searches such as `filter g/team a/b` for a stored group named `Team A/B`.
+Only a leading quote enters the new quoted-value path; an unquoted label such as `Team "A"` remains a literal search
+value for backward compatibility. In contrast, `filter-all` continues to reject partial quotes in unquoted values.
 
 Executing the command updates only the model's `FilteredList`. It does not replace or reorder the `AddressBook`'s
 stored participant list. The UI observes the filtered list and assigns fresh displayed indices to the matching records.
@@ -841,6 +843,9 @@ For the quoted-value boundary, run `find Beth`, then `assign-group 1 g/Team r/Le
 without changing that displayed list or any stored record. Finally, run `filter g/Team r/Lead` to confirm that an
 existing unquoted complete-value match still works. Restore Beth's group with `find Beth` and
 `assign-group 1 g/Logistics`.
+
+Also run `find Beth`, `assign-group 1 g/Team "A"`, and `filter g/Team "A"`: Beth should match because quotes inside
+an unquoted value are literal. Restore Beth's group afterward.
 
 #### Finding incomplete allocations
 
