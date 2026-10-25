@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import seedu.address.logic.commands.FilterAllCommand;
+import seedu.address.logic.parser.QuotedAssignmentValueParser.ParsedValue;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.AssignmentMatchesPredicate.AssignmentType;
 import seedu.address.model.person.AssignmentsMatchAllPredicate;
@@ -20,10 +21,10 @@ public class FilterAllCommandParser implements Parser<FilterAllCommand> {
             "Specify two or three distinct assignment prefixes: g/, r/, a/.";
     public static final String MESSAGE_EXPECTED_PREFIX = "Expected an assignment prefix: g/, r/, or a/.";
     public static final String MESSAGE_BLANK_VALUE = "Assignment values must not be blank.";
-    public static final String MESSAGE_UNFINISHED_QUOTE = "Unfinished quoted value. Close the double quote.";
-    public static final String MESSAGE_INVALID_ESCAPE = "Unsupported escape. Inside quotes, use \\\" or \\\\.";
-    public static final String MESSAGE_PARTIAL_QUOTE = "Quote the entire assignment value, not just part of it.";
-    public static final String MESSAGE_AFTER_QUOTE = "Expected whitespace or end of input after a quoted value.";
+    public static final String MESSAGE_UNFINISHED_QUOTE = QuotedAssignmentValueParser.MESSAGE_UNFINISHED_QUOTE;
+    public static final String MESSAGE_INVALID_ESCAPE = QuotedAssignmentValueParser.MESSAGE_INVALID_ESCAPE;
+    public static final String MESSAGE_PARTIAL_QUOTE = QuotedAssignmentValueParser.MESSAGE_PARTIAL_QUOTE;
+    public static final String MESSAGE_AFTER_QUOTE = QuotedAssignmentValueParser.MESSAGE_AFTER_QUOTE;
 
     private static final Pattern PREFIX = Pattern.compile("[A-Za-z]+/");
 
@@ -43,7 +44,7 @@ public class FilterAllCommandParser implements Parser<FilterAllCommand> {
             }
             int valueStart = skipWhitespace(args, prefix.end());
             ParsedValue value = valueStart < args.length() && args.charAt(valueStart) == '"'
-                    ? readQuotedValue(args, valueStart) : readPlainValue(args, prefix.end());
+                    ? QuotedAssignmentValueParser.parse(args, valueStart) : readPlainValue(args, prefix.end());
             if (value.text().isBlank()) {
                 throw new ParseException(MESSAGE_BLANK_VALUE);
             }
@@ -80,41 +81,10 @@ public class FilterAllCommandParser implements Parser<FilterAllCommand> {
         return new ParsedValue(args.substring(start, end).strip(), end);
     }
 
-    private ParsedValue readQuotedValue(String args, int start) throws ParseException {
-        StringBuilder value = new StringBuilder();
-        int position = start + 1;
-        while (position < args.length()) {
-            char next = args.charAt(position++);
-            if (next == '"') {
-                if (position < args.length() && !Character.isWhitespace(args.charAt(position))) {
-                    throw new ParseException(MESSAGE_AFTER_QUOTE);
-                }
-                return new ParsedValue(value.toString().strip(), position);
-            }
-            if (next == '\\') {
-                if (position == args.length()) {
-                    throw new ParseException(MESSAGE_UNFINISHED_QUOTE);
-                }
-                next = args.charAt(position++);
-                if (next != '"' && next != '\\') {
-                    throw new ParseException(MESSAGE_INVALID_ESCAPE);
-                }
-            }
-            value.append(next);
-        }
-        throw new ParseException(MESSAGE_UNFINISHED_QUOTE);
-    }
-
     private int skipWhitespace(String args, int position) {
         while (position < args.length() && Character.isWhitespace(args.charAt(position))) {
             position++;
         }
         return position;
-    }
-
-    /**
-     * A decoded value and the position immediately after it in the input.
-     */
-    private record ParsedValue(String text, int end) {
     }
 }
