@@ -80,7 +80,7 @@ public class UnassignCommand extends Command {
                 ? Optional.empty() : person.getActivity();
         Optional<Group> group = assignmentType == AssignmentType.GROUP ? Optional.empty() : person.getGroup();
         return new Person(person.getName(), person.getPhone(), person.getEmail(), person.getAddress(), person.getTags(),
-                role, activity, group);
+                role, activity, group, person.getRemark());
     }
 
     @Override

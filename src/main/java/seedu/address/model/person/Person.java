@@ -29,6 +29,7 @@ public class Person {
     private final Optional<Role> role;
     private final Optional<Activity> activity;
     private final Optional<Group> group;
+    private final Remark remark;
 
     /**
      * Every field must be present and not null.
@@ -64,7 +65,16 @@ public class Person {
      */
     public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags,
             Optional<Role> role, Optional<Activity> activity, Optional<Group> group) {
-        requireAllNonNull(name, phone, email, address, tags, role, activity, group);
+        this(name, phone, email, address, tags, role, activity, group, new Remark(""));
+    }
+
+    /**
+     * Creates a participant with independent assignments and a non-null remark.
+     * Empty remark text represents no note. All arguments must be non-null.
+     */
+    public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags,
+            Optional<Role> role, Optional<Activity> activity, Optional<Group> group, Remark remark) {
+        requireAllNonNull(name, phone, email, address, tags, role, activity, group, remark);
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -73,6 +83,7 @@ public class Person {
         this.role = role;
         this.activity = activity;
         this.group = group;
+        this.remark = remark;
     }
 
     public Name getName() {
@@ -111,6 +122,10 @@ public class Person {
         return role;
     }
 
+    public Remark getRemark() {
+        return remark;
+    }
+
     /**
      * Returns true if both persons have the same name.
      * This defines a weaker notion of equality between two persons.
@@ -146,13 +161,14 @@ public class Person {
                 && tags.equals(otherPerson.tags)
                 && role.equals(otherPerson.role)
                 && activity.equals(otherPerson.activity)
-                && group.equals(otherPerson.group);
+                && group.equals(otherPerson.group)
+                && remark.equals(otherPerson.remark);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, tags, role, activity, group);
+        return Objects.hash(name, phone, email, address, tags, role, activity, group, remark);
     }
 
     @Override
@@ -166,6 +182,7 @@ public class Person {
                 .add("role", role.orElse(null))
                 .add("activity", activity)
                 .add("group", group.orElse(null))
+                .add("remark", remark)
                 .toString();
     }
 

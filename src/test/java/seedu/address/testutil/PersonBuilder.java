@@ -11,6 +11,7 @@ import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.person.Remark;
 import seedu.address.model.person.Role;
 import seedu.address.model.tag.Tag;
 import seedu.address.model.util.SampleDataUtil;
@@ -33,6 +34,7 @@ public class PersonBuilder {
     private Optional<Role> role;
     private Optional<Activity> activity = Optional.empty();
     private Optional<Group> group = Optional.empty();
+    private Remark remark = new Remark("");
 
     /**
      * Creates a {@code PersonBuilder} with the default details.
@@ -58,6 +60,7 @@ public class PersonBuilder {
         role = personToCopy.getRole();
         activity = personToCopy.getActivity();
         group = personToCopy.getGroup();
+        remark = personToCopy.getRemark();
     }
 
     /**
@@ -124,8 +127,16 @@ public class PersonBuilder {
         return this;
     }
 
+    /**
+     * Sets the remark text without changing other participant fields.
+     */
+    public PersonBuilder withRemark(String remark) {
+        this.remark = new Remark(remark);
+        return this;
+    }
+
     public Person build() {
-        return new Person(name, phone, email, address, tags, role, activity, group);
+        return new Person(name, phone, email, address, tags, role, activity, group, remark);
     }
 
 }

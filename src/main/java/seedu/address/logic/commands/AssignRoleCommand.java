@@ -53,7 +53,7 @@ public class AssignRoleCommand extends Command {
         Person participant = lastShownList.get(index.getZeroBased());
         Person participantWithRole = new Person(participant.getName(), participant.getPhone(), participant.getEmail(),
                 participant.getAddress(), participant.getTags(), Optional.of(role),
-                participant.getActivity(), participant.getGroup());
+                participant.getActivity(), participant.getGroup(), participant.getRemark());
 
         model.setPerson(participant, participantWithRole);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);

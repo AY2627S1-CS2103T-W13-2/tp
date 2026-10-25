@@ -18,6 +18,7 @@ import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.person.Remark;
 import seedu.address.model.person.Role;
 import seedu.address.model.tag.Tag;
 
@@ -35,6 +36,7 @@ class JsonAdaptedPerson {
     private final String role;
     private final String activity;
     private final String group;
+    private final String remark;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
 
     /**
@@ -44,7 +46,8 @@ class JsonAdaptedPerson {
     public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("address") String address,
             @JsonProperty("tags") List<JsonAdaptedTag> tags, @JsonProperty("role") String role,
-            @JsonProperty("activity") String activity, @JsonProperty("group") String group) {
+            @JsonProperty("activity") String activity, @JsonProperty("group") String group,
+            @JsonProperty("remark") String remark) {
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -52,9 +55,18 @@ class JsonAdaptedPerson {
         this.role = role;
         this.activity = activity;
         this.group = group;
+        this.remark = remark;
         if (tags != null) {
             this.tags.addAll(tags);
         }
+    }
+
+    /**
+     * Constructs an adapted participant without a remark for backward compatibility.
+     */
+    public JsonAdaptedPerson(String name, String phone, String email, String address,
+            List<JsonAdaptedTag> tags, String role, String activity, String group) {
+        this(name, phone, email, address, tags, role, activity, group, null);
     }
 
     /**
@@ -91,6 +103,7 @@ class JsonAdaptedPerson {
         role = source.getRole().map(assignedRole -> assignedRole.value).orElse(null);
         activity = source.getActivity().map(assignedActivity -> assignedActivity.value).orElse(null);
         group = source.getGroup().map(Object::toString).orElse(null);
+        remark = source.getRemark().value;
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
                 .collect(Collectors.toList()));
@@ -159,8 +172,9 @@ class JsonAdaptedPerson {
             throw new IllegalValueException(Group.MESSAGE_CONSTRAINTS);
         }
         final Optional<Group> modelGroup = Optional.ofNullable(group).map(Group::new);
+        final Remark modelRemark = new Remark(remark == null ? "" : remark);
         return new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags,
-                Optional.ofNullable(modelRole), modelActivity, modelGroup);
+                Optional.ofNullable(modelRole), modelActivity, modelGroup, modelRemark);
     }
 
 }
