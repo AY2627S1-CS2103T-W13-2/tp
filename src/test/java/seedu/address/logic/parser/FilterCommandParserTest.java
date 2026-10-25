@@ -55,6 +55,8 @@ public class FilterCommandParserTest {
                 new FilterCommand(new AssignmentMatchesPredicate(ROLE, "Say \"Hi\" \\ Lead")));
         assertParseSuccess(parser, " a/\"Team A/B\"",
                 new FilterCommand(new AssignmentMatchesPredicate(ACTIVITY, "Team A/B")));
+        assertParseSuccess(parser, " g/\"\\\"Alpha\\\"\"",
+                new FilterCommand(new AssignmentMatchesPredicate(GROUP, "\"Alpha\"")));
     }
 
     @Test

@@ -297,6 +297,10 @@ checks the complete value against stored assignments before interpreting a later
 criterion; this retains searches such as `filter g/team a/b` for a stored group named `Team A/B`.
 Only a leading quote enters the new quoted-value path; an unquoted label such as `Team "A"` remains a literal search
 value for backward compatibility. In contrast, `filter-all` continues to reject partial quotes in unquoted values.
+The leading quote is necessarily syntax in the new grammar, so an older query `filter g/"Alpha"` now matches the
+unquoted label `Alpha` rather than a stored label containing those quote characters. To find the latter, escape the
+literal quotes inside a quoted query: `filter g/"\"Alpha\""`. Tests cover both labels in one address book so the
+distinction cannot silently regress.
 
 Executing the command updates only the model's `FilteredList`. It does not replace or reorder the `AddressBook`'s
 stored participant list. The UI observes the filtered list and assigns fresh displayed indices to the matching records.
@@ -846,6 +850,11 @@ existing unquoted complete-value match still works. Restore Beth's group with `f
 
 Also run `find Beth`, `assign-group 1 g/Team "A"`, and `filter g/Team "A"`: Beth should match because quotes inside
 an unquoted value are literal. Restore Beth's group afterward.
+
+On a disposable copy of the prepared data, run `find Beth`, `assign-group 1 g/Alpha`, `find Alice`, and
+`assign-group 1 g/"Alpha"`. `filter g/"Alpha"` must display Beth, while `filter g/"\"Alpha\""` must display Alice.
+Restore Beth with `find Beth`, `assign-group 1 g/Logistics`; then clear Alice's test group with `find Alice`,
+`unassign 1 g/`.
 
 #### Finding incomplete allocations
 

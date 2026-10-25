@@ -298,6 +298,10 @@ Formats:
   `\\` for a literal backslash; other escapes are rejected. An unfinished opening quote or extra text after a closing
   quote gives a specific error. Only a quote at the start of the value begins quoted syntax: quotes elsewhere in an
   unquoted value remain literal, so existing searches such as `filter g/Team "A"` and `filter g/team a/b` still work.
+* A stored label whose **first character is a literal double quote** needs an escaped search. For example, a group
+  stored as `"Alpha"` (including both quote characters) is found with `filter g/"\"Alpha\""`. By contrast,
+  `filter g/"Alpha"` now searches for `Alpha` without quote characters. This is a change from older versions, where
+  the latter query searched for the quoted label.
 * Participants without the selected assignment are excluded.
 * A successful filter displays matching participants with list indices starting from 1. If nothing matches, the list
   is empty and ZoomAddress reports that 0 participants matched.
@@ -309,6 +313,7 @@ Examples:
 * `filter a/  Campfire  ` displays participants assigned to Campfire after trimming the value.
 * `filter g/"Team r/Lead"` displays participants whose group is literally `Team r/Lead`.
 * `filter r/"Say \"Hi\" \\ Lead"` matches the literal role `Say "Hi" \ Lead`.
+* `filter g/"\"Alpha\""` matches a group whose stored name includes the outer quote characters: `"Alpha"`.
 
 ### Filtering by combined assignments: `filter-all`
 

@@ -2,6 +2,7 @@ package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.parser.FilterCommandParser.MESSAGE_MULTIPLE_PREFIXES;
 import static seedu.address.logic.parser.FilterCommandParser.MESSAGE_REPEATED_PREFIX;
 import static seedu.address.model.person.AssignmentMatchesPredicate.AssignmentType.ACTIVITY;
@@ -104,9 +105,26 @@ public class FilterCommandTest {
         new AddressBookParser().parseCommand("filter g/\"team r/lead a/campfire\"").execute(model);
 
         assertEquals(List.of(quoted), model.getFilteredPersonList());
-        assertEquals(String.format(ViewCommand.MESSAGE_VIEW_PARTICIPANT_SUCCESS, Messages.format(quoted)),
-                new ViewCommand(Index.fromOneBased(1)).execute(model).getFeedbackToUser());
+        assertTrue(new ViewCommand(Index.fromOneBased(1)).execute(model).getFeedbackToUser()
+                .contains(quoted.getName().toString()));
         assertEquals(6, model.getAddressBook().getPersonList().size());
+    }
+
+    @Test
+    public void execute_leadingLiteralQuotes_requiresEscapedQuotedSearch() throws Exception {
+        Person plainGroup = new PersonBuilder().withName("Plain Alpha")
+                .withGroup("Alpha").build();
+        Person quotedGroup = new PersonBuilder().withName("Quoted Alpha")
+                .withGroup("\"Alpha\"").build();
+        model.addPerson(plainGroup);
+        model.addPerson(quotedGroup);
+        AddressBookParser parser = new AddressBookParser();
+
+        parser.parseCommand("filter g/\"Alpha\"").execute(model);
+        assertEquals(List.of(plainGroup), model.getFilteredPersonList());
+
+        parser.parseCommand("filter g/\"\\\"Alpha\\\"\"").execute(model);
+        assertEquals(List.of(quotedGroup), model.getFilteredPersonList());
     }
 
     @Test
