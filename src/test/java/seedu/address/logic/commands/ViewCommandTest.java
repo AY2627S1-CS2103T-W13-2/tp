@@ -14,7 +14,6 @@ import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
-import seedu.address.logic.Messages;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
@@ -22,6 +21,17 @@ import seedu.address.model.person.Person;
 import seedu.address.testutil.PersonBuilder;
 
 public class ViewCommandTest {
+
+    private static final String ALICE_DETAILS = String.join("\n",
+            "Participant details:",
+            "Name: Alice Pauline",
+            "Phone: 94351253",
+            "Email: alice@example.com",
+            "Address: 123, Jurong West Ave 6, #08-111",
+            "Role: Unassigned",
+            "Activity: Unassigned",
+            "Group: Unassigned",
+            "Tags: friends");
 
     private final Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
@@ -43,27 +53,53 @@ public class ViewCommandTest {
     }
 
     @Test
+    public void execute_multipleTags_displaysSortedSeparatedTagNames() throws Exception {
+        Person original = model.getFilteredPersonList().get(0);
+        Person tagged = new PersonBuilder(original).withTags("zeta", "Alpha").build();
+        model.setPerson(original, tagged);
+
+        String feedback = new ViewCommand(INDEX_FIRST_PERSON).execute(model).getFeedbackToUser();
+
+        assertTrue(feedback.contains("Tags: Alpha, zeta"));
+    }
+
+    @Test
+    public void execute_noTags_displaysNone() throws Exception {
+        Person original = model.getFilteredPersonList().get(0);
+        Person untagged = new PersonBuilder(original).withTags().build();
+        model.setPerson(original, untagged);
+
+        String feedback = new ViewCommand(INDEX_FIRST_PERSON).execute(model).getFeedbackToUser();
+
+        assertTrue(feedback.endsWith("Tags: None"));
+    }
+
+    @Test
+    public void execute_unassignedDetails_displaysReadableLabels() throws Exception {
+        String feedback = new ViewCommand(INDEX_FIRST_PERSON).execute(model).getFeedbackToUser();
+
+        assertTrue(feedback.contains("\nName: Alice Pauline\n"));
+        assertTrue(feedback.contains("\nRole: Unassigned\n"));
+        assertTrue(feedback.contains("\nActivity: Unassigned\n"));
+        assertTrue(feedback.contains("\nGroup: Unassigned\n"));
+    }
+
+    @Test
     public void execute_validIndexUnfilteredList_displaysCompleteRecordWithoutChangingModel() {
-        Person participantToView = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         ViewCommand viewCommand = new ViewCommand(INDEX_FIRST_PERSON);
-        String expectedMessage = String.format(ViewCommand.MESSAGE_VIEW_PARTICIPANT_SUCCESS,
-                Messages.format(participantToView));
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
 
-        assertCommandSuccess(viewCommand, model, new CommandResult(expectedMessage), expectedModel);
+        assertCommandSuccess(viewCommand, model, new CommandResult(ALICE_DETAILS), expectedModel);
     }
 
     @Test
     public void execute_validIndexFilteredList_displaysCompleteRecordWithoutChangingModel() {
         showPersonAtIndex(model, INDEX_FIRST_PERSON);
-        Person participantToView = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         ViewCommand viewCommand = new ViewCommand(INDEX_FIRST_PERSON);
-        String expectedMessage = String.format(ViewCommand.MESSAGE_VIEW_PARTICIPANT_SUCCESS,
-                Messages.format(participantToView));
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         showPersonAtIndex(expectedModel, INDEX_FIRST_PERSON);
 
-        assertCommandSuccess(viewCommand, model, expectedMessage, expectedModel);
+        assertCommandSuccess(viewCommand, model, ALICE_DETAILS, expectedModel);
     }
 
     @Test

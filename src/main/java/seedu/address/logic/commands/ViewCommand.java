@@ -3,10 +3,10 @@ package seedu.address.logic.commands;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.person.Person;
@@ -45,7 +45,28 @@ public class ViewCommand extends Command {
 
         Person participantToView = lastShownList.get(targetIndex.getZeroBased());
         return new CommandResult(String.format(MESSAGE_VIEW_PARTICIPANT_SUCCESS,
-                Messages.format(participantToView)));
+                formatDetails(participantToView)));
+    }
+
+    /**
+     * Formats a participant as readable, consistently ordered detail lines.
+     */
+    private static String formatDetails(Person person) {
+        String tagNames = person.getTags().stream()
+                .map(tag -> tag.tagName)
+                .sorted()
+                .collect(Collectors.joining(", "));
+        String displayedTags = tagNames.isEmpty() ? "None" : tagNames;
+
+        return String.join("\n",
+                "Name: " + person.getName(),
+                "Phone: " + person.getPhone(),
+                "Email: " + person.getEmail(),
+                "Address: " + person.getAddress(),
+                "Role: " + person.getRole().map(Object::toString).orElse("Unassigned"),
+                "Activity: " + person.getActivity().map(Object::toString).orElse("Unassigned"),
+                "Group: " + person.getGroup().map(Object::toString).orElse("Unassigned"),
+                "Tags: " + displayedTags);
     }
 
     @Override

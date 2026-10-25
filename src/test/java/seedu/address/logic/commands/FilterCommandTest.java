@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.AddressBookParser;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -57,9 +56,8 @@ public class FilterCommandTest {
 
         assertEquals(String.format(FilterCommand.MESSAGE_SUCCESS, 2), result.getFeedbackToUser());
         assertEquals(List.of(logisticsLead, logisticsFacilitator), model.getFilteredPersonList());
-        assertEquals(String.format(ViewCommand.MESSAGE_VIEW_PARTICIPANT_SUCCESS,
-                Messages.format(logisticsFacilitator)),
-                new ViewCommand(Index.fromOneBased(2)).execute(model).getFeedbackToUser());
+        assertTrue(new ViewCommand(Index.fromOneBased(2)).execute(model).getFeedbackToUser()
+                .startsWith("Participant details:\nName: Cara Ong\n"));
         assertEquals(List.of(logisticsLead, programmesLead, logisticsFacilitator, unassigned, slashGroupMember),
                 model.getAddressBook().getPersonList());
         assertEquals(originalAddressBook, model.getAddressBook());

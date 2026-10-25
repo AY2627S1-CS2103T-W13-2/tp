@@ -171,6 +171,9 @@ Format: `view INDEX`
 * Displays the participant at the specified `INDEX`.
 * The index refers to the index number shown in the displayed participant list.
 * The index **must be a positive integer** 1, 2, 3, …​
+* Details appear on separate labelled lines. A missing group, role, or activity appears as `Unassigned`.
+* Tags are sorted by their names (case-sensitive) and separated by commas; `Tags: None` means the participant
+  has no tags. Viewing does not change the participant or the current list.
 
 Examples:
 * `list` followed by `view 2` displays all stored details of the 2nd participant in ZoomAddress.
