@@ -162,6 +162,25 @@ The class diagram shows the stable storage contracts and JSON adapters rather th
 participant contains its own nullable group, role, and activity strings and a list of tag adapters; there is no
 separate persisted group, role, or activity directory. The `0..*` multiplicities allow an empty directory or no tags.
 
+### Backward-compatible participant remarks
+
+`Person` holds one non-null immutable `Remark`; `Remark.value` is free text and `""` means no note. Text is retained
+exactly, including Unicode, whitespace, quotes and line breaks. Legacy `Person` constructors default to an empty
+remark, while the full constructor accepts it after the optional group. `getRemark()` provides the value for
+dependent command and UI increments. Remark changes affect `equals` and `hashCode`, but not name-based identity.
+The partial model diagram focuses on stored participant values; the derived filtered/sorted view pipeline is
+described in the Model component text rather than expanded in this diagram.
+
+`JsonAdaptedPerson` stores `remark` as a JSON string. Its creator maps an absent or JSON `null` property to an empty
+remark during conversion; saving emits the string, including `""`. Existing files need no manual migration or
+deletion, and a read leaves their bytes unchanged. All paths that replace a `Person` in edit, assign-group,
+assign-role, assign-activity and unassign carry the original remark forward. No new command, prefix or UI rendering
+is introduced here; the remark command, detail output and card rendering are separate increments.
+
+`RemarkStorageTest` covers legacy/null/empty input, unchanged bytes on read and full-field disk round trips.
+`RemarkPreservationIntegrationTest` exercises edit, each assignment and each unassignment through parser, logic
+and real storage using sorted/filtered displayed indices. It also checks invalid-index rejection without data loss.
+
 ### Participant data at startup
 
 `MainApp` creates the editable model, logic and UI only after participant data loads. `JsonAddressBookStorage`
