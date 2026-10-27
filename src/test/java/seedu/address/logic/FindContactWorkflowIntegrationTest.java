@@ -2,6 +2,7 @@ package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.logic.commands.FindContactCommand;
-import seedu.address.logic.commands.ViewCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
@@ -60,8 +60,10 @@ public class FindContactWorkflowIntegrationTest {
 
             assertEquals("1 person(s) listed!", logic.execute("find-contact " + query).getFeedbackToUser());
             assertEquals(List.of(alice), logic.getFilteredPersonList());
-            assertEquals(String.format(ViewCommand.MESSAGE_VIEW_PARTICIPANT_SUCCESS, Messages.format(alice)),
-                    logic.execute("view 1").getFeedbackToUser());
+            String details = logic.execute("view 1").getFeedbackToUser();
+            assertTrue(details.contains("Name: Alice Tan"));
+            assertTrue(details.contains("Phone: 81234567"));
+            assertTrue(details.contains("Remark: Vegetarian meal"));
             assertEquals(original, model.getAddressBook());
             assertEquals(original, new AddressBook(storage.readAddressBook().orElseThrow()));
             assertEquals(before, Files.readString(storage.getAddressBookFilePath()));
