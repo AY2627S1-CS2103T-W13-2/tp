@@ -5,6 +5,12 @@ title: User Guide
 
 ZoomAddress is a **desktop participant-management application for directors of large-scale computing events**. It is optimized for keyboard-driven commands while retaining the benefits of a graphical interface, allowing event directors to manage participant records quickly and locally.
 
+**Using the v1.4.1 release?** This online guide can include commands added after that release. Use the
+[archived v1.4.1 User Guide](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4.1/UserGuide-e493f549.md)
+for instructions that match your installed JAR. In particular, quoted values for the single-criterion `filter`
+command are not supported by v1.4.1, even if they appear below. This notice does not change the installed
+app's Help link; check the JAR version shown in the application before following a newer example.
+
 * Table of Contents
 {:toc}
 
