@@ -171,13 +171,18 @@ dependent command and UI increments. Remark changes affect `equals` and `hashCod
 The partial model diagram focuses on stored participant values; the derived filtered/sorted view pipeline is
 described in the Model component text rather than expanded in this diagram.
 
-`JsonAdaptedPerson` stores `remark` as a JSON string. Its creator maps an absent or JSON `null` property to an empty
-remark during conversion; saving emits the string, including `""`. Existing files need no manual migration or
-deletion, and a read leaves their bytes unchanged. All paths that replace a `Person` in edit, assign-group,
+`JsonAdaptedPerson` stores `remark` as a JSON string. Its creator reads a `JsonNode` so Jackson cannot silently
+coerce numbers or booleans to text. Missing or JSON `null` values become empty text; arrays, objects, numbers and
+booleans are rejected with `Remark must be a JSON string or null.` through the existing `DataLoadingException`
+path. Quoted strings such as `"42"` and `"true"` remain valid text. Saving emits the string, including `""`.
+Existing files need no manual migration or deletion, and a read leaves their bytes unchanged.
+All paths that replace a `Person` in edit, assign-group,
 assign-role, assign-activity and unassign carry the original remark forward. No new command, prefix or UI rendering
 is introduced here; the remark command, detail output and card rendering are separate increments.
 
-`RemarkStorageTest` covers legacy/null/empty input, unchanged bytes on read and full-field disk round trips.
+`RemarkStorageTest` covers legacy/null/empty input, rejection of non-text JSON without changing the file,
+unchanged bytes on read and full-field disk round trips. It inspects each saved remark's JSON type and exact text,
+including the explicit empty string, rather than relying only on equality after reloading.
 `RemarkPreservationIntegrationTest` exercises edit, each assignment and each unassignment through parser, logic
 and real storage using sorted/filtered displayed indices. It also checks invalid-index rejection without data loss.
 

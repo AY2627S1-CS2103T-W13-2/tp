@@ -1,6 +1,7 @@
 package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
@@ -9,8 +10,10 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.commons.util.JsonUtil;
 import seedu.address.model.AddressBook;
 import seedu.address.model.person.Person;
@@ -58,6 +61,42 @@ public class RemarkStorageTest {
     }
 
     @Test
+    public void readAddressBook_numericRemark_rejectsWithoutRewritingFile() throws Exception {
+        assertInvalidRemark("42");
+        assertInvalidRemark("-7");
+        assertInvalidRemark("42.5");
+    }
+
+    @Test
+    public void readAddressBook_booleanRemark_rejectsWithoutRewritingFile() throws Exception {
+        assertInvalidRemark("true");
+        assertInvalidRemark("false");
+    }
+
+    @Test
+    public void readAddressBook_objectRemark_rejectsWithoutRewritingFile() throws Exception {
+        assertInvalidRemark("{}");
+    }
+
+    @Test
+    public void readAddressBook_arrayRemark_rejectsWithoutRewritingFile() throws Exception {
+        assertInvalidRemark("[]");
+    }
+
+    @Test
+    public void readAddressBook_textResemblingScalar_preservesText() throws Exception {
+        for (String text : new String[] {"42", "true"}) {
+            String json = """
+                    {"name":"Alice Tan","phone":"81234567","email":"alice@example.com",
+                     "address":"1 Main Street","tags":[],"remark":"%s"}
+                    """.formatted(text);
+            Person loaded = JsonUtil.fromJsonString(json, JsonAdaptedPerson.class).toModelType();
+
+            assertEquals(new Remark(text), loaded.getRemark());
+        }
+    }
+
+    @Test
     public void saveAndReadAddressBook_emptyAndFreeTextRemarks_preservesAllFields() throws Exception {
         AddressBook original = new AddressBook();
         original.addPerson(new PersonBuilder().withName("Empty Note").build());
@@ -70,6 +109,27 @@ public class RemarkStorageTest {
         AddressBook reloaded = new AddressBook(new JsonAddressBookStorage(path).readAddressBook().orElseThrow());
 
         assertEquals(original, reloaded);
-        assertTrue(Files.readString(path).contains("\"remark\""));
+        JsonNode savedPeople = new ObjectMapper().readTree(Files.readString(path)).path("persons");
+        JsonNode emptyRemark = savedPeople.get(0).path("remark");
+        assertTrue(emptyRemark.isTextual());
+        assertEquals("", emptyRemark.textValue());
+        JsonNode detailedRemark = savedPeople.get(1).path("remark");
+        assertTrue(detailedRemark.isTextual());
+        assertEquals(original.getPersonList().get(1).getRemark().value, detailedRemark.textValue());
+    }
+
+    private void assertInvalidRemark(String remarkJson) throws Exception {
+        String json = """
+                {"persons":[{"name":"Alice Tan","phone":"81234567","email":"alice@example.com",
+                 "address":"1 Main Street","tags":[],"remark":%s}]}
+                """.formatted(remarkJson);
+        Path path = temporaryFolder.resolve("invalid-remark.json");
+        Files.writeString(path, json);
+
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(path);
+        DataLoadingException exception = assertThrows(DataLoadingException.class, storage::readAddressBook);
+
+        assertTrue(exception.getCause().getMessage().contains("Remark must be a JSON string or null."));
+        assertEquals(json, Files.readString(path));
     }
 }

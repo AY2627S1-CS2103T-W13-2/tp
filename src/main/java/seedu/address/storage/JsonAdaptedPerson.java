@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.group.Group;
@@ -41,13 +42,16 @@ class JsonAdaptedPerson {
 
     /**
      * Constructs a {@code JsonAdaptedPerson} with the given person details.
+     * Missing or JSON null remarks become empty text without coercing other JSON types.
+     *
+     * @throws IllegalArgumentException if the remark is neither a JSON string nor null.
      */
     @JsonCreator
     public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("address") String address,
             @JsonProperty("tags") List<JsonAdaptedTag> tags, @JsonProperty("role") String role,
             @JsonProperty("activity") String activity, @JsonProperty("group") String group,
-            @JsonProperty("remark") String remark) {
+            @JsonProperty("remark") JsonNode remark) {
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -55,7 +59,7 @@ class JsonAdaptedPerson {
         this.role = role;
         this.activity = activity;
         this.group = group;
-        this.remark = remark;
+        this.remark = readRemarkText(remark);
         if (tags != null) {
             this.tags.addAll(tags);
         }
@@ -172,9 +176,21 @@ class JsonAdaptedPerson {
             throw new IllegalValueException(Group.MESSAGE_CONSTRAINTS);
         }
         final Optional<Group> modelGroup = Optional.ofNullable(group).map(Group::new);
-        final Remark modelRemark = new Remark(remark == null ? "" : remark);
+        final Remark modelRemark = new Remark(remark);
         return new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags,
                 Optional.ofNullable(modelRole), modelActivity, modelGroup, modelRemark);
     }
 
+    /**
+     * Returns exact remark text, defaulting missing or JSON null values to empty text.
+     */
+    private static String readRemarkText(JsonNode remark) {
+        if (remark == null || remark.isNull()) {
+            return "";
+        }
+        if (!remark.isTextual()) {
+            throw new IllegalArgumentException("Remark must be a JSON string or null.");
+        }
+        return remark.textValue();
+    }
 }
