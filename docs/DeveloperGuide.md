@@ -292,8 +292,10 @@ The `find-contact` command locates participants using one complete phone number 
 the address book.
 
 1. `AddressBookParser` routes the command arguments to `FindContactCommandParser`.
-1. `FindContactCommandParser` trims surrounding whitespace and validates the value using the existing `Phone` and
-   `Email` validation rules. Blank, malformed, or multiple values are rejected before command execution.
+1. `FindContactCommandParser` calls `String.strip()` to remove surrounding whitespace recognized by
+   `Character.isWhitespace`, including EM SPACE and IDEOGRAPHIC SPACE. It then validates the exact remaining value
+   using the existing `Phone` and `Email` rules. It does not remove internal whitespace, non-breaking spaces or
+   zero-width formatting characters. Blank, malformed, or multiple values are rejected before command execution.
 1. The parser creates a `ContactMatchesQueryPredicate` and places it in a `FindContactCommand`.
 1. When executed, the command passes the predicate to `Model#updateFilteredPersonList`. Phone numbers require an
    exact match, while email addresses require an exact case-insensitive match.
@@ -303,6 +305,11 @@ the address book.
 The predicate is kept in the Model package because it evaluates `Person` contact fields and can be tested
 independently of command parsing and execution. Reusing the existing validators also keeps accepted search values
 consistent with values that can be stored for a participant.
+
+`FindContactCommandParserTest` checks Unicode padding, blank input and rejected internal/non-breaking/zero-width
+characters. `FindContactWorkflowIntegrationTest` exercises full command routing from a sorted/filtered view,
+case-insensitive email and exact phone searches, displayed indices, no-match and invalid input. It verifies that
+participant fields (including assignments and remarks), saved JSON bytes and reloaded records stay unchanged.
 
 ### Assignment filtering
 
