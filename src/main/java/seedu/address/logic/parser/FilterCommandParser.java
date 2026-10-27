@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import seedu.address.logic.commands.FilterCommand;
+import seedu.address.logic.parser.QuotedAssignmentValueParser.ParsedValue;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.AssignmentMatchesPredicate;
 import seedu.address.model.person.AssignmentMatchesPredicate.AssignmentType;
@@ -25,6 +26,8 @@ public class FilterCommandParser implements Parser<FilterCommand> {
     public static final String MESSAGE_UNSUPPORTED_PREFIX = "Unsupported prefix. Use only g/, r/, or a/.";
     public static final String MESSAGE_UNEXPECTED_ARGUMENTS =
             "Unexpected extra arguments before the assignment prefix.";
+    public static final String MESSAGE_UNEXPECTED_ARGUMENTS_AFTER_QUOTE =
+            "Unexpected extra arguments after the quoted assignment value.";
 
     private static final Pattern SUPPORTED_PREFIX = Pattern.compile("(?:^|\\s)(g/|r/|a/)");
     private static final Pattern PREFIX_LIKE_ARGUMENT = Pattern.compile("(?:^|\\s)\\S+/");
@@ -50,28 +53,63 @@ public class FilterCommandParser implements Parser<FilterCommand> {
 
         Prefix suppliedPrefix = toPrefix(matcher.group(1));
         int valueStart = matcher.end();
-        String value = args.substring(valueStart).strip();
+        int firstContent = valueStart;
+        while (firstContent < args.length() && Character.isWhitespace(args.charAt(firstContent))) {
+            firstContent++;
+        }
+        boolean isQuoted = firstContent < args.length() && args.charAt(firstContent) == '"';
+        String value;
+        String noMatchErrorMessage = null;
+        String quotedRemainder = null;
+        if (isQuoted) {
+            ParsedValue quotedValue = QuotedAssignmentValueParser.parse(args, firstContent);
+            value = quotedValue.text();
+            quotedRemainder = args.substring(quotedValue.end());
+        } else {
+            value = args.substring(valueStart).strip();
+            noMatchErrorMessage = getUnquotedPrefixError(args, valueStart, suppliedPrefix);
+        }
         if (value.isBlank()) {
             throw new ParseException(MESSAGE_BLANK_VALUE);
         }
-
-        List<Prefix> laterPrefixes = new ArrayList<>();
-        matcher.region(valueStart, args.length());
-        while (matcher.find()) {
-            laterPrefixes.add(toPrefix(matcher.group(1)));
-        }
-
-        String noMatchErrorMessage = null;
-        if (laterPrefixes.contains(suppliedPrefix)) {
-            noMatchErrorMessage = MESSAGE_REPEATED_PREFIX;
-        } else if (!laterPrefixes.isEmpty()) {
-            noMatchErrorMessage = MESSAGE_MULTIPLE_PREFIXES;
+        if (isQuoted) {
+            validateQuotedRemainder(quotedRemainder, suppliedPrefix);
         }
 
         AssignmentType type = suppliedPrefix.equals(PREFIX_GROUP) ? AssignmentType.GROUP
                 : suppliedPrefix.equals(PREFIX_ROLE) ? AssignmentType.ROLE
                 : AssignmentType.ACTIVITY;
         return new FilterCommand(new AssignmentMatchesPredicate(type, value), noMatchErrorMessage);
+    }
+
+    private String getUnquotedPrefixError(String args, int valueStart, Prefix suppliedPrefix) {
+        Matcher matcher = SUPPORTED_PREFIX.matcher(args);
+        List<Prefix> laterPrefixes = new ArrayList<>();
+        matcher.region(valueStart, args.length());
+        while (matcher.find()) {
+            laterPrefixes.add(toPrefix(matcher.group(1)));
+        }
+
+        if (laterPrefixes.contains(suppliedPrefix)) {
+            return MESSAGE_REPEATED_PREFIX;
+        }
+        return laterPrefixes.isEmpty() ? null : MESSAGE_MULTIPLE_PREFIXES;
+    }
+
+    private void validateQuotedRemainder(String remainder, Prefix suppliedPrefix) throws ParseException {
+        String extra = remainder.strip();
+        if (extra.isEmpty()) {
+            return;
+        }
+        Matcher matcher = SUPPORTED_PREFIX.matcher(extra);
+        if (matcher.lookingAt()) {
+            throw new ParseException(toPrefix(matcher.group(1)).equals(suppliedPrefix)
+                    ? MESSAGE_REPEATED_PREFIX : MESSAGE_MULTIPLE_PREFIXES);
+        }
+        if (PREFIX_LIKE_ARGUMENT.matcher(extra).lookingAt()) {
+            throw new ParseException(MESSAGE_UNSUPPORTED_PREFIX);
+        }
+        throw new ParseException(MESSAGE_UNEXPECTED_ARGUMENTS_AFTER_QUOTE);
     }
 
     private Prefix toPrefix(String prefix) {

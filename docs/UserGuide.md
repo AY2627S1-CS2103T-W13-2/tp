@@ -292,6 +292,16 @@ Formats:
   This also applies to slash-containing values: `filter g/team a/b` matches a stored group named `Team A/B`.
   If the complete value does not match a stored assignment, a later `g/`, `r/`, or `a/` fragment is reported as a
   repeated or additional assignment prefix.
+* To search for a value containing a prefix-like fragment such as `r/Lead` or `a/Campfire`, put the **entire value**
+  in double quotes: `filter g/"Team r/Lead"`. Text inside the quotes is literal, so the fragment does not start a
+  second criterion. Quotes are not part of the matched value. Inside quotes, use `\"` for a literal double quote and
+  `\\` for a literal backslash; other escapes are rejected. An unfinished opening quote or extra text after a closing
+  quote gives a specific error. Only a quote at the start of the value begins quoted syntax: quotes elsewhere in an
+  unquoted value remain literal, so existing searches such as `filter g/Team "A"` and `filter g/team a/b` still work.
+* A stored label whose **first character is a literal double quote** needs an escaped search. For example, a group
+  stored as `"Alpha"` (including both quote characters) is found with `filter g/"\"Alpha\""`. By contrast,
+  `filter g/"Alpha"` now searches for `Alpha` without quote characters. This is a change from older versions, where
+  the latter query searched for the quoted label.
 * Participants without the selected assignment are excluded.
 * A successful filter displays matching participants with list indices starting from 1. If nothing matches, the list
   is empty and ZoomAddress reports that 0 participants matched.
@@ -301,6 +311,9 @@ Examples:
 * `filter g/Logistics` displays all participants assigned to the Logistics group.
 * `filter r/facilitator` displays participants whose role is Facilitator, regardless of letter case.
 * `filter a/  Campfire  ` displays participants assigned to Campfire after trimming the value.
+* `filter g/"Team r/Lead"` displays participants whose group is literally `Team r/Lead`.
+* `filter r/"Say \"Hi\" \\ Lead"` matches the literal role `Say "Hi" \ Lead`.
+* `filter g/"\"Alpha\""` matches a group whose stored name includes the outer quote characters: `"Alpha"`.
 
 ### Filtering by combined assignments: `filter-all`
 
@@ -332,8 +345,8 @@ Formats:
   backslash. Other escapes are rejected. Unquoted backslashes are literal.
 * Close every quoted value, then use whitespace before the next prefix. Partial quoting and text after a closing
   quote are rejected. Quotes are query syntax and are not part of the matched label.
-* These quoting rules apply to `filter-all`. Existing `filter` syntax is unchanged:
-  `filter g/team a/b` still matches a stored group named `Team A/B`.
+* These quoting rules also apply to a **quoted** value in `filter`. Existing unquoted searches remain supported:
+  `filter g/team a/b` still matches a stored group named `Team A/B`, and unquoted quote characters remain literal.
 
 Examples:
 * `filter-all g/Logistics r/Facilitator` matches participants who are both in Logistics and Facilitators.
@@ -360,6 +373,11 @@ Common invalid inputs:
 | `filter-all g/"Team"r/Lead` | `Expected whitespace or end of input after a quoted value.` Add a space between criteria. |
 
 Invalid queries leave the current view and participant data unchanged.
+
+The same quote-boundary errors apply to `filter`: `filter g/"Team r/Lead` is unfinished, `filter g/"Team\q"`
+contains an unsupported escape, and `filter g/"Team"r/Lead` needs whitespace after the closing quote. A second
+prefix **outside** a complete quoted value, such as `filter g/"Team r/Lead" r/Other`, is rejected rather than treated
+as part of the group name.
 
 ### Finding incomplete allocations: `unassigned`
 
