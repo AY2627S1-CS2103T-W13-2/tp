@@ -834,7 +834,8 @@ silently; any rebuilt JAR needs new checksums and relevant retesting.
    package for Windows/Linux x64 and macOS with x64 Java (including Apple Silicon
    via Rosetta). Check `os.arch` using `java -XshowSettings:properties -version`:
    `amd64`/`x86_64` is x64; `aarch64`/`arm64` is arm64. Published filenames are in the User Guide.
-1. Open a terminal in that folder and run `java -jar addressbook.jar`.
+1. Open a terminal in that folder and run `java -version` to confirm the active Java runtime is version 25.
+   Then run `java -jar addressbook.jar` from the same folder.
 
 Expected output: the ZoomAddress window opens and shows the sample participants. No error dialog appears.
 
