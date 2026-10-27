@@ -131,6 +131,10 @@ Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
 A participant can have any number of tags, including zero.
 </div>
 
+ZoomAddress currently identifies duplicates by **exact name**. It rejects a second participant with the same
+capitalization and spelling, even if their contact details differ; a case-only variation of the name is treated as
+different. Check the displayed directory before adding someone who may share a name with an existing participant.
+
 Examples:
 * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
