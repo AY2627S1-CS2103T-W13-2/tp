@@ -493,7 +493,17 @@ ZoomAddress automatically saves data after every successful command. You do not 
 Participant saves first prepare the complete JSON and write it to a temporary file in the data folder. The previous
 file is replaced only through an atomic filesystem move; ZoomAddress does not fall back to truncating the data file
 if atomic replacement is unsupported. For an existing file, a temporary recovery copy is kept until replacement
-succeeds. The JSON format and assignment fields are unchanged.
+succeeds. Existing participant and assignment fields retain their format.
+
+Participant records also support an optional text `remark` field. Older data files with no `remark`, or a JSON
+`null` remark, load with empty remark text; reading does not rewrite the file. A later successful save writes the
+remark as a JSON string, including `""` for no remark. Existing edit, assignment and unassignment commands preserve
+this text. This storage increment does not yet add a remark command or show remarks on participant cards.
+Numbers, booleans, arrays and objects are not valid remark values. If you manually edit the data file, enclose
+remark text in JSON double quotes; otherwise ZoomAddress refuses to load that file without rewriting it.
+Restore a known-good backup or correct the invalid value before reopening the application.
+Keep a backup before changing application versions: older JARs do not preserve the new remark field and can discard
+it when saving, even if they can open the rest of the participant data.
 
 If preparing the participant snapshot or serializing it fails, ZoomAddress reports a save error before creating
 temporary files or replacing the saved file.
