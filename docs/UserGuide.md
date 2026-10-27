@@ -292,6 +292,16 @@ Formats:
   This also applies to slash-containing values: `filter g/team a/b` matches a stored group named `Team A/B`.
   If the complete value does not match a stored assignment, a later `g/`, `r/`, or `a/` fragment is reported as a
   repeated or additional assignment prefix.
+* To search for a value containing a prefix-like fragment such as `r/Lead` or `a/Campfire`, put the **entire value**
+  in double quotes: `filter g/"Team r/Lead"`. Text inside the quotes is literal, so the fragment does not start a
+  second criterion. Quotes are not part of the matched value. Inside quotes, use `\"` for a literal double quote and
+  `\\` for a literal backslash; other escapes are rejected. An unfinished opening quote or extra text after a closing
+  quote gives a specific error. Only a quote at the start of the value begins quoted syntax: quotes elsewhere in an
+  unquoted value remain literal, so existing searches such as `filter g/Team "A"` and `filter g/team a/b` still work.
+* A stored label whose **first character is a literal double quote** needs an escaped search. For example, a group
+  stored as `"Alpha"` (including both quote characters) is found with `filter g/"\"Alpha\""`. By contrast,
+  `filter g/"Alpha"` now searches for `Alpha` without quote characters. This is a change from older versions, where
+  the latter query searched for the quoted label.
 * Participants without the selected assignment are excluded.
 * A successful filter displays matching participants with list indices starting from 1. If nothing matches, the list
   is empty and ZoomAddress reports that 0 participants matched.
@@ -301,6 +311,9 @@ Examples:
 * `filter g/Logistics` displays all participants assigned to the Logistics group.
 * `filter r/facilitator` displays participants whose role is Facilitator, regardless of letter case.
 * `filter a/  Campfire  ` displays participants assigned to Campfire after trimming the value.
+* `filter g/"Team r/Lead"` displays participants whose group is literally `Team r/Lead`.
+* `filter r/"Say \"Hi\" \\ Lead"` matches the literal role `Say "Hi" \ Lead`.
+* `filter g/"\"Alpha\""` matches a group whose stored name includes the outer quote characters: `"Alpha"`.
 
 ### Filtering by combined assignments: `filter-all`
 
@@ -332,8 +345,8 @@ Formats:
   backslash. Other escapes are rejected. Unquoted backslashes are literal.
 * Close every quoted value, then use whitespace before the next prefix. Partial quoting and text after a closing
   quote are rejected. Quotes are query syntax and are not part of the matched label.
-* These quoting rules apply to `filter-all`. Existing `filter` syntax is unchanged:
-  `filter g/team a/b` still matches a stored group named `Team A/B`.
+* These quoting rules also apply to a **quoted** value in `filter`. Existing unquoted searches remain supported:
+  `filter g/team a/b` still matches a stored group named `Team A/B`, and unquoted quote characters remain literal.
 
 Examples:
 * `filter-all g/Logistics r/Facilitator` matches participants who are both in Logistics and Facilitators.
@@ -360,6 +373,11 @@ Common invalid inputs:
 | `filter-all g/"Team"r/Lead` | `Expected whitespace or end of input after a quoted value.` Add a space between criteria. |
 
 Invalid queries leave the current view and participant data unchanged.
+
+The same quote-boundary errors apply to `filter`: `filter g/"Team r/Lead` is unfinished, `filter g/"Team\q"`
+contains an unsupported escape, and `filter g/"Team"r/Lead` needs whitespace after the closing quote. A second
+prefix **outside** a complete quoted value, such as `filter g/"Team r/Lead" r/Other`, is rejected rather than treated
+as part of the group name.
 
 ### Finding incomplete allocations: `unassigned`
 
@@ -475,7 +493,17 @@ ZoomAddress automatically saves data after every successful command. You do not 
 Participant saves first prepare the complete JSON and write it to a temporary file in the data folder. The previous
 file is replaced only through an atomic filesystem move; ZoomAddress does not fall back to truncating the data file
 if atomic replacement is unsupported. For an existing file, a temporary recovery copy is kept until replacement
-succeeds. The JSON format and assignment fields are unchanged.
+succeeds. Existing participant and assignment fields retain their format.
+
+Participant records also support an optional text `remark` field. Older data files with no `remark`, or a JSON
+`null` remark, load with empty remark text; reading does not rewrite the file. A later successful save writes the
+remark as a JSON string, including `""` for no remark. Existing edit, assignment and unassignment commands preserve
+this text. This storage increment does not yet add a remark command or show remarks on participant cards.
+Numbers, booleans, arrays and objects are not valid remark values. If you manually edit the data file, enclose
+remark text in JSON double quotes; otherwise ZoomAddress refuses to load that file without rewriting it.
+Restore a known-good backup or correct the invalid value before reopening the application.
+Keep a backup before changing application versions: older JARs do not preserve the new remark field and can discard
+it when saving, even if they can open the rest of the participant data.
 
 If preparing the participant snapshot or serializing it fails, ZoomAddress reports a save error before creating
 temporary files or replacing the saved file.

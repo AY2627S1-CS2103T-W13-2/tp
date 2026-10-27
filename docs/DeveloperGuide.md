@@ -162,6 +162,30 @@ The class diagram shows the stable storage contracts and JSON adapters rather th
 participant contains its own nullable group, role, and activity strings and a list of tag adapters; there is no
 separate persisted group, role, or activity directory. The `0..*` multiplicities allow an empty directory or no tags.
 
+### Backward-compatible participant remarks
+
+`Person` holds one non-null immutable `Remark`; `Remark.value` is free text and `""` means no note. Text is retained
+exactly, including Unicode, whitespace, quotes and line breaks. Legacy `Person` constructors default to an empty
+remark, while the full constructor accepts it after the optional group. `getRemark()` provides the value for
+dependent command and UI increments. Remark changes affect `equals` and `hashCode`, but not name-based identity.
+The partial model diagram focuses on stored participant values; the derived filtered/sorted view pipeline is
+described in the Model component text rather than expanded in this diagram.
+
+`JsonAdaptedPerson` stores `remark` as a JSON string. Its creator reads a `JsonNode` so Jackson cannot silently
+coerce numbers or booleans to text. Missing or JSON `null` values become empty text; arrays, objects, numbers and
+booleans are rejected with `Remark must be a JSON string or null.` through the existing `DataLoadingException`
+path. Quoted strings such as `"42"` and `"true"` remain valid text. Saving emits the string, including `""`.
+Existing files need no manual migration or deletion, and a read leaves their bytes unchanged.
+All paths that replace a `Person` in edit, assign-group,
+assign-role, assign-activity and unassign carry the original remark forward. No new command, prefix or UI rendering
+is introduced here; the remark command, detail output and card rendering are separate increments.
+
+`RemarkStorageTest` covers legacy/null/empty input, rejection of non-text JSON without changing the file,
+unchanged bytes on read and full-field disk round trips. It inspects each saved remark's JSON type and exact text,
+including the explicit empty string, rather than relying only on equality after reloading.
+`RemarkPreservationIntegrationTest` exercises edit, each assignment and each unassignment through parser, logic
+and real storage using sorted/filtered displayed indices. It also checks invalid-index rejection without data loss.
+
 ### Participant data at startup
 
 `MainApp` creates the editable model, logic and UI only after participant data loads. `JsonAddressBookStorage`
@@ -288,6 +312,20 @@ predicates and commands for each assignment field. The predicate trims the reque
 locale-independent lower-casing, and compares it with the participant's corresponding optional assignment. A missing
 assignment therefore cannot match.
 
+For a quoted single-filter value, `FilterCommandParser` uses the same `QuotedAssignmentValueParser` as
+`FilterAllCommandParser`. The shared parser decodes only escaped quotes and backslashes and treats prefix-like text
+inside the quotes as literal value text. A closing quote must be followed by whitespace or end of input, and any
+non-whitespace remainder is rejected by the single-filter parser. Quoting errors are `ParseException`s, so the
+command does not execute and the current displayed list stays unchanged. The unquoted single-filter path still
+checks the complete value against stored assignments before interpreting a later supported prefix as a conflicting
+criterion; this retains searches such as `filter g/team a/b` for a stored group named `Team A/B`.
+Only a leading quote enters the new quoted-value path; an unquoted label such as `Team "A"` remains a literal search
+value for backward compatibility. In contrast, `filter-all` continues to reject partial quotes in unquoted values.
+The leading quote is necessarily syntax in the new grammar, so an older query `filter g/"Alpha"` now matches the
+unquoted label `Alpha` rather than a stored label containing those quote characters. To find the latter, escape the
+literal quotes inside a quoted query: `filter g/"\"Alpha\""`. Tests cover both labels in one address book so the
+distinction cannot silently regress.
+
 Executing the command updates only the model's `FilteredList`. It does not replace or reorder the `AddressBook`'s
 stored participant list. The UI observes the filtered list and assigns fresh displayed indices to the matching records.
 
@@ -303,8 +341,8 @@ partial quoting and missing separators are parse errors before any model update.
 The parser constructs `AssignmentsMatchAllPredicate`, which defensively validates and copies the criteria and
 composes the existing `AssignmentMatchesPredicate` instances with `allMatch` (AND). This keeps matching in Model
 and shares exact, locale-independent case-insensitive matching and absent-assignment semantics with `filter`.
-Criterion order is immaterial. `FilterCommandParser` and `FilterCommand` are unchanged, including their handling of
-existing case-insensitive slash-containing labels.
+Criterion order is immaterial. `FilterCommand` and the assignment matching predicate retain their existing
+case-insensitive, slash-containing-label behavior; only the quoted-value parsing path is shared with `filter`.
 
 `FilterAllCommand` replaces the model's filter predicate over all stored participants. It never filters an already
 filtered snapshot, changes the sorted-view comparator, or mutates participant records. Index-based commands read
@@ -826,6 +864,21 @@ First restore Beth's assignments with `find Beth`, `assign-group 1 g/Logistics`,
 | Beth has role Facilitator. | `filter r/ Facilitator ` | An indexed list containing Beth; surrounding whitespace is ignored. | None. |
 | Beth has activity Campfire. | `filter a/Campfire` | An indexed list containing Beth. | None. |
 | Prepared data is loaded. | `filter g/Nonexistent` | A clear zero-result response and an empty displayed list. | None. |
+
+For the quoted-value boundary, run `find Beth`, then `assign-group 1 g/Team r/Lead`. Run
+`filter g/"team r/lead"`: only Beth should appear, even though the group contains `r/`. Run
+`filter g/"Team r/Lead" r/Other`, then `filter g/"Team r/Lead` and verify each reports a specific parser error
+without changing that displayed list or any stored record. Finally, run `filter g/Team r/Lead` to confirm that an
+existing unquoted complete-value match still works. Restore Beth's group with `find Beth` and
+`assign-group 1 g/Logistics`.
+
+Also run `find Beth`, `assign-group 1 g/Team "A"`, and `filter g/Team "A"`: Beth should match because quotes inside
+an unquoted value are literal. Restore Beth's group afterward.
+
+On a disposable copy of the prepared data, run `find Beth`, `assign-group 1 g/Alpha`, `find Alice`, and
+`assign-group 1 g/"Alpha"`. `filter g/"Alpha"` must display Beth, while `filter g/"\"Alpha\""` must display Alice.
+Restore Beth with `find Beth`, `assign-group 1 g/Logistics`; then clear Alice's test group with `find Alice`,
+`unassign 1 g/`.
 
 #### Finding incomplete allocations
 

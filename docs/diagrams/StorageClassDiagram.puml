@@ -20,6 +20,7 @@ package Storage as StoragePackage {
         role : String [0..1]
         activity : String [0..1]
         group : String [0..1]
+        remark : String
     }
     class JsonAdaptedTag
 }
@@ -43,6 +44,7 @@ show JsonAdaptedPerson fields
 legend bottom
   Selected storage contracts and JSON adapters.
   Optional assignments are nullable JSON strings.
+  Missing/null remarks load as empty text; saves write a string.
   Low-level I/O helpers and model conversions are omitted.
 endlegend
 

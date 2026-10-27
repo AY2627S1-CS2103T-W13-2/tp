@@ -13,6 +13,8 @@ import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BOB;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.testutil.PersonBuilder;
@@ -103,7 +105,7 @@ public class PersonTest {
     public void toStringMethod() {
         String expected = Person.class.getCanonicalName() + "{name=" + ALICE.getName() + ", phone=" + ALICE.getPhone()
                 + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress() + ", tags=" + ALICE.getTags()
-                + ", role=null, activity=" + ALICE.getActivity() + ", group=null}";
+                + ", role=null, activity=" + ALICE.getActivity() + ", group=null, remark=}";
         assertEquals(expected, ALICE.toString());
     }
 
@@ -129,5 +131,39 @@ public class PersonTest {
         assertFalse(assigned.equals(new PersonBuilder(assigned).withActivity("Hiking").build()));
         assertTrue(assigned.toString().contains("role=Facilitator"));
         assertTrue(assigned.toString().contains("activity=Optional[Campfire]"));
+    }
+
+    @Test
+    public void equals_differentRemark_sameIdentityButDifferentData() {
+        Person noted = new PersonBuilder(ALICE).withRemark("Needs a vegetarian meal").build();
+        Person copy = new PersonBuilder(noted).build();
+        assertEquals(new Remark(""), ALICE.getRemark());
+        assertTrue(ALICE.isSamePerson(noted));
+        assertFalse(ALICE.equals(noted));
+        assertEquals(noted, copy);
+        assertEquals(noted.hashCode(), copy.hashCode());
+    }
+
+    @Test
+    public void constructor_nullRemark_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new Person(ALICE.getName(), ALICE.getPhone(),
+                ALICE.getEmail(), ALICE.getAddress(), ALICE.getTags(), ALICE.getRole(), ALICE.getActivity(),
+                ALICE.getGroup(), null));
+    }
+
+    @Test
+    public void constructor_legacySignatures_defaultToEmptyRemark() {
+        for (Person person : List.of(
+                new Person(ALICE.getName(), ALICE.getPhone(), ALICE.getEmail(), ALICE.getAddress(), ALICE.getTags()),
+                new Person(ALICE.getName(), ALICE.getPhone(), ALICE.getEmail(), ALICE.getAddress(), ALICE.getTags(),
+                        new Role("Helper")),
+                new Person(ALICE.getName(), ALICE.getPhone(), ALICE.getEmail(), ALICE.getAddress(), ALICE.getTags(),
+                        ALICE.getRole()),
+                new Person(ALICE.getName(), ALICE.getPhone(), ALICE.getEmail(), ALICE.getAddress(), ALICE.getTags(),
+                        ALICE.getRole(), ALICE.getActivity()),
+                new Person(ALICE.getName(), ALICE.getPhone(), ALICE.getEmail(), ALICE.getAddress(), ALICE.getTags(),
+                        ALICE.getRole(), ALICE.getActivity(), ALICE.getGroup()))) {
+            assertEquals(new Remark(""), person.getRemark());
+        }
     }
 }

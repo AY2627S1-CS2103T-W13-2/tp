@@ -15,8 +15,8 @@ public class FilterCommand extends Command {
 
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + ": Filters participants by exactly one assignment (case-insensitive).\n"
-            + "Parameters: g/GROUP | r/ROLE | a/ACTIVITY\n"
-            + "Examples: filter g/Logistics, filter r/Facilitator, filter a/Campfire";
+            + "Parameters: g/GROUP | r/ROLE | a/ACTIVITY (quote the entire value if it contains prefix-like text)\n"
+            + "Examples: filter g/Logistics, filter r/Facilitator, filter g/\"Team r/Lead\"";
 
     public static final String MESSAGE_SUCCESS = "%1$d participant(s) matched the assignment.";
 
