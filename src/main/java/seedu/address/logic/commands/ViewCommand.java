@@ -66,7 +66,8 @@ public class ViewCommand extends Command {
                 "Role: " + person.getRole().map(Object::toString).orElse("Unassigned"),
                 "Activity: " + person.getActivity().map(Object::toString).orElse("Unassigned"),
                 "Group: " + person.getGroup().map(Object::toString).orElse("Unassigned"),
-                "Tags: " + displayedTags);
+                "Tags: " + displayedTags,
+                "Remark: " + (person.getRemark().value.isEmpty() ? "None" : person.getRemark().value));
     }
 
     @Override

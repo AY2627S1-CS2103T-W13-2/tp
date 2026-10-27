@@ -31,7 +31,8 @@ public class ViewCommandTest {
             "Role: Unassigned",
             "Activity: Unassigned",
             "Group: Unassigned",
-            "Tags: friends");
+            "Tags: friends",
+            "Remark: None");
 
     private final Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
@@ -71,7 +72,7 @@ public class ViewCommandTest {
 
         String feedback = new ViewCommand(INDEX_FIRST_PERSON).execute(model).getFeedbackToUser();
 
-        assertTrue(feedback.endsWith("Tags: None"));
+        assertTrue(feedback.contains("\nTags: None\n"));
     }
 
     @Test
@@ -82,6 +83,26 @@ public class ViewCommandTest {
         assertTrue(feedback.contains("\nRole: Unassigned\n"));
         assertTrue(feedback.contains("\nActivity: Unassigned\n"));
         assertTrue(feedback.contains("\nGroup: Unassigned\n"));
+    }
+
+    @Test
+    public void execute_nonEmptyRemark_displaysExactTextWithoutChangingModel() throws Exception {
+        Person original = model.getFilteredPersonList().get(0);
+        Person remarked = new PersonBuilder(original).withRemark("Needs wheelchair access").build();
+        model.setPerson(original, remarked);
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+
+        String feedback = new ViewCommand(INDEX_FIRST_PERSON).execute(model).getFeedbackToUser();
+
+        assertTrue(feedback.endsWith("Remark: Needs wheelchair access"));
+        assertEquals(expectedModel, model);
+    }
+
+    @Test
+    public void execute_emptyRemark_displaysNone() throws Exception {
+        String feedback = new ViewCommand(INDEX_FIRST_PERSON).execute(model).getFeedbackToUser();
+
+        assertTrue(feedback.endsWith("Remark: None"));
     }
 
     @Test
