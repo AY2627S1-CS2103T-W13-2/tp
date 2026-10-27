@@ -921,8 +921,13 @@ use the indices in the sorted list while it is displayed.
 |---|---|---|---|
 | Prepared data is loaded. | `find-contact 81234567` | One indexed result: Alice Tan. | None. |
 | Prepared data is loaded. | `find-contact ALICE@EXAMPLE.COM` | One indexed result: Alice Tan; email matching is case-insensitive. | None. |
+| Prepared data is loaded. | `find-contact  ALICE@EXAMPLE.COM ` | One indexed result: Alice Tan; surrounding U+2003 EM SPACE characters are removed. | None. |
 | Prepared data is loaded. | `find-contact 8123` | Zero results because phone matching requires the complete number. | None. |
 | Prepared data is loaded. | `find-contact nobody@example.com` | A clear zero-result response and an empty displayed list. | None. |
+
+Copy and paste the EM SPACE example as shown; those spaces are not ordinary ASCII spaces. In contrast, inserting
+an EM SPACE *inside* a phone number or email address must report an invalid contact and leave the current view
+unchanged.
 
 #### Filtering by assignment
 
