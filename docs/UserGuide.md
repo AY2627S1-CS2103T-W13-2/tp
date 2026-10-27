@@ -444,7 +444,10 @@ Finds participants whose complete phone number or email address matches the give
 
 Format: `find-contact PHONE_OR_EMAIL`
 
-* Provide exactly one valid phone number or email address. Surrounding whitespace is ignored.
+* Provide exactly one valid phone number or email address. Surrounding ordinary spaces, tabs and Unicode
+  whitespace such as U+2003 EM SPACE or U+3000 IDEOGRAPHIC SPACE are ignored.
+* Internal whitespace is not removed. Non-breaking spaces (including U+00A0) and zero-width characters are not
+  ignored; remove these characters if pasted contact text is rejected. Use an ordinary space after `find-contact`.
 * Phone numbers are matched exactly. Partial phone numbers do not match.
 * Email addresses are matched exactly and case-insensitively. For example, `ALEX@EXAMPLE.COM`
   matches `alex@example.com`.
@@ -454,6 +457,13 @@ Format: `find-contact PHONE_OR_EMAIL`
 Examples:
 * `find-contact 98765432` finds participants whose phone number is exactly `98765432`.
 * `find-contact alex@example.com` finds participants whose email address is `alex@example.com`.
+* `find-contact   ALEX@EXAMPLE.COM   ` searches for the same email, ignoring the surrounding spaces and letter case.
+
+The feedback is `N person(s) listed!`, where `N` is the number of matches; no match gives `0 person(s) listed!`
+and an empty displayed list. Results are reindexed from 1, so use the new displayed indices for later commands.
+For example, `find-contact alex@example.com extra` and `find-contact 9876 5432` are invalid and report
+`Contact must be one complete valid phone number or email address.` A blank query shows command usage instead.
+Invalid queries leave the displayed list and participant data unchanged.
 
 ### Deleting a participant: `delete`
 
