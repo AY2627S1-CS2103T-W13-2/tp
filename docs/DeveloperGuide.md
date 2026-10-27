@@ -732,9 +732,11 @@ participant records, each with at most one group, one role, and one activity ass
    at least 95 of 100 consecutive valid local participant-management commands must display their result within
    two seconds of submission. The trial must include adding, listing, finding, editing, deleting, and changing
    assignments, with no other resource-intensive applications running.
-4. **Portability:** The same release JAR must launch and pass the add, list, find, edit, delete, and save/reopen
-   smoke checks on Windows 11 x64, Ubuntu 24.04 LTS x64, and macOS 14 x64 with Java 25 and compatible JavaFX
-   libraries, without changing the source code or rebuilding the JAR.
+4. **Portability:** The release's x64 JAR must launch and pass the add, list, find, edit, delete, and save/reopen
+   smoke checks on Windows 11 x64, Ubuntu 24.04 LTS x64, and macOS 14 x64 with Java 25. The separate
+   macOS arm64 JAR must pass the same checks on Apple Silicon with native arm64 Java 25. Neither check may
+   require changing the source code or rebuilding the tested JAR. These are targets, not a claim that every
+   platform has already been tested.
 5. **Reliability - persistence:** After each of 20 valid data-changing commands that completes without a save
    error, closing the application normally and reopening it must restore all participant fields and assignments
    exactly as they were before closing. This target excludes forced termination and hardware failure.
@@ -761,6 +763,8 @@ participant records, each with at most one group, one role, and one activity ass
   and people with event responsibilities.
 * **Participant record**: The stored details and assignments for one participant; represented by `Person` in the
   existing codebase and referred to as a person or contact in inherited documentation.
+* **Remark**: Free-text note stored with a participant record. An empty string represents no note; it is distinct
+  from the participant's tags and event assignments.
 * **Role**: An event responsibility assigned to a participant. In the requirements, this means an event role,
   not a software development team role or an application access permission.
 * **Unassigned participant**: A participant with no assignment in the category being queried; for example, no group
@@ -834,7 +838,8 @@ silently; any rebuilt JAR needs new checksums and relevant retesting.
 
 Expected output: the ZoomAddress window opens and shows the sample participants. No error dialog appears.
 
-Expected data change: none until a command is run. ZoomAddress subsequently stores participant data at
+Expected participant-data change: none until a command is run. Startup can create or update
+`preferences.json` even without a participant command. ZoomAddress stores participant data at
 `data/addressbook.json`, relative to the folder from which the JAR was launched.
 
 To test window preferences, resize and move the window, exit, and run `java -jar addressbook.jar` again. The window
@@ -958,7 +963,8 @@ restore the full sorted view. Restarting restores stored order and clears these 
 #### Combined assignment filtering
 
 Using the participants and restored Beth assignments above, run `filter-all g/Logistics r/Facilitator`: only Beth
-should appear. Adding `a/Campfire` should retain Beth; replacing it with `a/Nonexistent` should show zero matches.
+should appear. Run `filter-all g/Logistics r/Facilitator a/Campfire` to retain Beth, then
+`filter-all g/Logistics r/Facilitator a/Nonexistent` to show zero matches.
 Run `filter g/Nonexistent`, then `filter-all r/facilitator g/logistics`: Beth should reappear. After `sort name`,
 run the combined query and `view 1` to verify the displayed index points to Beth. `list` restores everyone in sorted
 order. Save/restart and check that all original participant fields and stored order remain unchanged.
@@ -1010,7 +1016,7 @@ Each indexed command should report an invalid displayed index, and the stored pa
 
 ### Saving, exiting, and restarting
 
-1. Complete the core-operation and v1.3 workflow tests above.
+1. Complete the core participant operations and assignment/query workflows above.
 1. Run `exit` and wait for the window to close.
 1. From the same folder, run `java -jar addressbook.jar`.
 1. Run `find Beth`, then `view 1`.
