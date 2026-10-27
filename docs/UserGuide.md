@@ -41,15 +41,14 @@ ZoomAddress is a **desktop participant-management application for directors of l
 
    * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a participant named `John Doe` to ZoomAddress.
 
-   * `delete 3` : Deletes the 3rd participant shown in the current list.
-
    * `view 3` : Displays all stored details of the 3rd participant shown in the current list.
 
    * `find-contact 98765432` : Finds participants with the exact phone number `98765432`.
 
-   * `clear` : Deletes all participant records.
-
    * `exit` : Exits the app.
+
+   `delete` and `clear` are described below, but are deliberately omitted from this starter list because
+   they permanently remove records without confirmation or undo.
 
 1. Refer to the [Features](#features) section below for details of each command.
 
@@ -477,8 +476,10 @@ Clears all participant records from ZoomAddress.
 
 Format: `clear`
 
-`clear` takes effect immediately, with **no confirmation or undo**. Back up `data/addressbook.json` before using it
-on a directory you need to keep.
+`clear` deletes **all stored participants**, not just those currently shown. A search or filter can display an
+empty list while records still exist; `clear` will delete those hidden records too. It takes effect immediately,
+with **no confirmation or undo**. Enter `list` to inspect the full directory and back up `data/addressbook.json`
+before using `clear` on data you need to keep.
 
 ### Exiting the program: `exit`
 
