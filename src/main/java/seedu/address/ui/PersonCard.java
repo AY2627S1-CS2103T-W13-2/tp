@@ -45,6 +45,8 @@ public class PersonCard extends UiPart<Region> {
     @FXML
     private Label group;
     @FXML
+    private Label remark;
+    @FXML
     private FlowPane tags;
 
     /**
@@ -68,6 +70,10 @@ public class PersonCard extends UiPart<Region> {
             role.setVisible(false);
         }
         group.setText("Group: " + person.getGroup().map(Object::toString).orElse("Unassigned"));
+        String remarkText = person.getRemark().value;
+        remark.setText(remarkText.isEmpty() ? "" : "Remark: " + remarkText);
+        remark.setVisible(!remarkText.isEmpty());
+        remark.setManaged(!remarkText.isEmpty());
         person.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
                 .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
