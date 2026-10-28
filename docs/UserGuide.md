@@ -223,11 +223,19 @@ Format: `remark INDEX r/REMARK`
 * The current search, filter, and sort order are also preserved. This lets you update several participants in a
   focused view without having to run the query again.
 * A successful non-empty update reports `Updated remark for NAME.`; clearing reports `Cleared remark for NAME.`
+* Participant cards show a non-empty remark below the assignment details, prefixed with `Remark:`.
+  Long notes wrap onto additional lines; scroll the participant list to read taller cards. Clearing a remark
+  hides its row without leaving a blank gap. A literal note `None` remains visible as `Remark: None`.
 
 Examples:
 * `remark 2 r/Needs wheelchair access` records the note for the second displayed participant.
 * `remark 1 r/Check in at 09:00; use entrance A/B.` accepts spaces, punctuation, and an embedded slash.
 * `remark 2 r/` clears the second displayed participant's remark.
+
+![Participant card with a wrapped accessibility remark below the role](images/remarkCard.png)
+
+*A JavaFX participant-card capture from the v1.5 feature build, using synthetic data. The note wraps within
+the card; this component image is not a full application-window screenshot.*
 
 Invalid examples:
 * `remark`, `remark 1`, and `remark one r/Note` show the command format because the index or `r/` is missing or
@@ -552,8 +560,8 @@ succeeds. Existing participant and assignment fields retain their format.
 Participant records also support an optional text `remark` field. Older data files with no `remark`, or a JSON
 `null` remark, load with empty remark text; reading does not rewrite the file. A later successful save writes the
 remark as a JSON string, including `""` for no remark. Existing edit, assignment and unassignment commands preserve
-this text. Use the `remark` command to update it; participant cards may not show the text, so use `view INDEX` to
-check the exact saved remark.
+this text. Use the `remark` command to update it. Non-empty remarks appear on participant cards; `view INDEX`
+also shows the saved remark, quoting and escaping present text as described in the view section.
 Numbers, booleans, arrays and objects are not valid remark values. If you manually edit the data file, enclose
 remark text in JSON double quotes; otherwise ZoomAddress refuses to load that file without rewriting it.
 Restore a known-good backup or correct the invalid value before reopening the application.
