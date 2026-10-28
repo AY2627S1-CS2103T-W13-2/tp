@@ -2,9 +2,11 @@
 
 [![CI Status](https://github.com/AY2627S1-CS2103T-W13-2/tp/actions/workflows/gradle.yml/badge.svg)](https://github.com/AY2627S1-CS2103T-W13-2/tp/actions/workflows/gradle.yml)
 
-![ZoomAddress participant directory with group, role and activity assignments](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4/01-participant-directory.png)
+![ZoomAddress directory with four participants, assignments and event-day remarks](docs/images/Ui.png)
 
-*Actual v1.4 JavaFX view with synthetic participant data; OS window decorations are omitted.*
+*Integrated v1.5 candidate captured from the packaged JavaFX application with synthetic data; OS window
+decorations are omitted. This candidate is not yet published. See the
+[releases](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases) for available downloads.*
 
 ZoomAddress is a desktop participant-management application for directors of large-scale computing events, such as
 orientation camps. It helps event directors keep track of participants and their relevant information, making it
@@ -18,6 +20,7 @@ remote service.
 * Create, view, find, and remove participant records.
 * Sort the currently displayed participants by name without changing stored records.
 * Assign participants to groups, roles, and activities.
+* Record, replace, or clear participant remarks and read them on participant cards.
 * Retrieve participant details and assignment information quickly.
 * Save and load participant data locally and automatically.
 * Perform common operations efficiently using typed commands.
