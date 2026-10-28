@@ -5,15 +5,19 @@ title: ZoomAddress
 
 [![CI Status](https://github.com/AY2627S1-CS2103T-W13-2/tp/actions/workflows/gradle.yml/badge.svg)](https://github.com/AY2627S1-CS2103T-W13-2/tp/actions/workflows/gradle.yml)
 
-![ZoomAddress participant directory showing group, role and activity assignments](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4/01-participant-directory.png)
+![ZoomAddress directory with four participants, assignments and event-day remarks](images/Ui.png)
 
-*Actual v1.4 JavaFX view with synthetic participant data; OS window decorations are omitted.*
+*Integrated v1.5 candidate with synthetic participant data, captured from the packaged JavaFX application.
+OS window decorations are omitted. The candidate is not yet a published release.*
 
 **ZoomAddress is a desktop participant-management application for directors of large-scale computing events.** It
-keeps participant information and assignments to groups, roles, and activities in one local directory. Its
+keeps participant information, event-day remarks, and assignments to groups, roles, and activities in one local directory. Its
 keyboard-driven command interface helps experienced users retrieve and update records quickly.
 
 * To start using ZoomAddress, see the [_Quick Start_ section of the **User Guide**](UserGuide.html#quick-start).
+  Check the [published releases](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases) for available downloads;
+  the candidate shown here includes features not present in v1.4.1.
+* To record notes such as arrival instructions, see [**Participant remarks**](UserGuide.html#recording-or-clearing-a-participant-remark-remark).
 * To see how to find incomplete allocations and combine filters, see the
   [_Typical event-day workflow_](UserGuide.html#typical-event-day-workflow).
 * To contribute to ZoomAddress, see the [**Developer Guide**](DeveloperGuide.html).
