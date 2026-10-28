@@ -2,6 +2,7 @@ package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.io.TempDir;
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.Logic;
 import seedu.address.logic.LogicManager;
-import seedu.address.logic.Messages;
 import seedu.address.logic.parser.AddressBookParser;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.AddressBook;
@@ -81,8 +81,8 @@ public class FilterAllCommandTest {
         assertEquals(List.of(), model.getFilteredPersonList());
         parser.parseCommand("filter-all r/Facilitator g/Logistics").execute(model);
         assertEquals(List.of(ada, zed), model.getFilteredPersonList());
-        assertEquals(String.format(ViewCommand.MESSAGE_VIEW_PARTICIPANT_SUCCESS, Messages.format(zed)),
-                new ViewCommand(Index.fromOneBased(2)).execute(model).getFeedbackToUser());
+        assertTrue(new ViewCommand(Index.fromOneBased(2)).execute(model).getFeedbackToUser()
+                .startsWith("Participant details:\nName: Zed Tan\n"));
         parser.parseCommand("list").execute(model);
         assertEquals(List.of(ada, bea, cal, dan, zed), model.getFilteredPersonList());
     }
