@@ -550,6 +550,12 @@ Format: `exit`
 
 ### Saving the data
 
+Diagnostic logs such as `addressbook.log.0` are separate from the saved participant directory. Routine command
+logging records the command type and outcome, without command arguments or displayed participant details.
+Deleting a participant or upgrading does not erase existing logs: logs from older versions may still contain
+names, contact details and remarks. Before sharing logs for troubleshooting, inspect and redact personal data
+(including any personal information in file paths). Do not assume deletion from the directory erases those copies.
+
 ZoomAddress automatically saves data after every successful command. You do not need to save manually.
 
 Participant saves first prepare the complete JSON and write it to a temporary file in the data folder. The previous
