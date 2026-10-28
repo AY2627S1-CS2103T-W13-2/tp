@@ -232,6 +232,13 @@ public class LogicManagerTest {
     }
 
     private void assertSaveFailureWarning(List<LogRecord> records, Path addressBookPath, IOException exception) {
+        String logged = records.stream().map(LogRecord::getMessage)
+                .collect(java.util.stream.Collectors.joining());
+        assertFalse(logged.contains(AMY.getName().fullName));
+        assertFalse(logged.contains(AMY.getPhone().value));
+        assertFalse(logged.contains(AMY.getEmail().value));
+        assertTrue(logged.contains("AddCommand: save failed"));
+        assertFalse(logged.contains("AddCommand: succeeded"));
         List<LogRecord> warnings = records.stream()
                 .filter(record -> record.getLevel().equals(Level.WARNING))
                 .toList();

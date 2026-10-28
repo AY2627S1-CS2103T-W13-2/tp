@@ -260,6 +260,16 @@ checks that the selected assignment exists, and creates an updated `Person` with
 It replaces the participant through `Model.setPerson`; `LogicManager` then saves the model to disk. Invalid input
 or a missing assignment produces an error without modifying the participant.
 
+### Preserving the displayed view after an edit
+
+`EditCommand` resolves its index against `Model.getFilteredPersonList()`, which is the current filtered and sorted
+view. After replacing the selected participant through `Model.setPerson`, it leaves the existing filter predicate
+and sort comparator unchanged. The `FilteredList` immediately re-evaluates the edited participant: an edit to an
+unrelated field keeps the participant in the filtered view, while an edit that no longer matches the query removes
+that participant. The `SortedList` repositions a participant if the edited value affects its comparator. Both cases
+update the displayed indices. `EditCommandTest` covers consecutive edits in a group-filtered view and the index
+transition when a name edit changes search membership.
+
 ### Updating a participant remark
 
 The `remark INDEX r/TEXT` command sets or replaces the selected participant's remark; an empty `r/` clears it.
