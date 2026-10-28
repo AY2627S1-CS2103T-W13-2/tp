@@ -128,6 +128,31 @@ public class MainAppTest {
     }
 
     @Test
+    public void initializeFromStorage_duplicatePersons_blocksStartupAndPreservesBytes() throws Exception {
+        Path dataFile = testFolder.resolve("participants.json");
+        Files.writeString(dataFile, """
+                {"persons": [{"name":"Alice", "phone":"91234567", "email":"alice@example.com",
+                  "address":"Kent Ridge", "tags":[]}], "persons":[]}
+                """);
+        byte[] originalBytes = Files.readAllBytes(dataFile);
+
+        for (int attempt = 0; attempt < 2; attempt++) {
+            MainApp app = new MainApp();
+            app.initializeFromStorage(storage(dataFile), new UserPrefs());
+
+            assertNull(app.model);
+            assertNull(app.logic);
+            assertNull(app.ui);
+            assertNotNull(app.getStartupError());
+            assertTrue(app.getStartupError().contains(dataFile.toString()));
+            assertTrue(app.getStartupError().contains("Back up the file"));
+            app.stop();
+            assertArrayEquals(originalBytes, Files.readAllBytes(dataFile));
+            assertFalse(Files.exists(testFolder.resolve("prefs.json")));
+        }
+    }
+
+    @Test
     public void initModelManager_injectedReadFailure_preservesExistingFile() throws Exception {
         Path dataFile = testFolder.resolve("participants.json");
         Files.writeString(dataFile, "existing participant bytes");
@@ -192,6 +217,18 @@ public class MainAppTest {
         assertNotNull(app.logic);
         assertNotNull(app.ui);
         assertNull(app.getStartupError());
+    }
+
+    @Test
+    public void initPrefs_duplicateKeys_usesExistingDefaultFallback() throws Exception {
+        Path prefsFile = testFolder.resolve("prefs.json");
+        Files.writeString(prefsFile, "{\"guiSettings\":null,\"guiSettings\":null}");
+        JsonUserPrefsStorage prefsStorage = new JsonUserPrefsStorage(prefsFile);
+
+        UserPrefs prefs = new MainApp().initPrefs(prefsStorage);
+
+        assertEquals(new UserPrefs(), prefs);
+        assertEquals(prefs, prefsStorage.readUserPrefs().orElseThrow());
     }
 
     private Storage storage(Path dataFile) {

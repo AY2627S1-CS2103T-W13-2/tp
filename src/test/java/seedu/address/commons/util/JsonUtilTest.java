@@ -92,6 +92,20 @@ public class JsonUtilTest {
         assertEquals("null", Files.readString(file));
     }
 
+    @Test
+    public void fromJsonString_duplicateKnownField_throwsIoException() {
+        assertThrows(IOException.class, () -> JsonUtil.fromJsonString(
+                "{\"name\":\"Original\",\"name\":\"Replacement\"}", SerializableTestClass.class));
+    }
+
+    @Test
+    public void fromJsonString_duplicateUnknownFields_throwsIoException() {
+        assertThrows(IOException.class, () -> JsonUtil.fromJsonString(
+                "{\"future\":1,\"future\":2}", SerializableTestClass.class));
+        assertThrows(IOException.class, () -> JsonUtil.fromJsonString(
+                "{\"future\":{\"entry\":1,\"entry\":2}}", SerializableTestClass.class));
+    }
+
     //TODO: @Test jsonUtil_readJsonStringToObjectInstance_correctObject()
 
     //TODO: @Test jsonUtil_writeThenReadObjectToJson_correctObject()
