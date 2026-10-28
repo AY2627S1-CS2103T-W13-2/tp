@@ -5,11 +5,12 @@ title: User Guide
 
 ZoomAddress is a **desktop participant-management application for directors of large-scale computing events**. It is optimized for keyboard-driven commands while retaining the benefits of a graphical interface, allowing event directors to manage participant records quickly and locally.
 
-**Using the v1.4.1 release?** This online guide can include commands added after that release. Use the
+**Using the v1.4.1 release?** The Quick Start below installs v1.4.1, but the Features section also describes
+changes intended for v1.5, including `remark` and quoted single-criterion `filter` values. Those newer commands
+will not work in the v1.4.1 JAR. Use the
 [archived v1.4.1 User Guide](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4.1/UserGuide-e493f549.md)
-for instructions that match your installed JAR. In particular, quoted values for the single-criterion `filter`
-command are not supported by v1.4.1, even if they appear below. This notice does not change the installed
-app's Help link; check the JAR version shown in the application before following a newer example.
+for instructions that match your installed JAR. The installed app's Help link still opens this mutable online
+guide, so check the version shown in the application before following an example below.
 
 * Table of Contents
 {:toc}
@@ -74,7 +75,7 @@ app's Help link; check the JAR version shown in the application before following
 4. Enter `filter-all g/Logistics r/Facilitator` to find participants who have **both** assignments. If you need
    only one category, use `filter g/Logistics` instead.
 5. Enter `sort name` to order the current results by name. Use the indices shown **after** sorting for
-   `view`, `edit`, or `delete`. Sorting and filtering change the view, not participant fields.
+   `view`, `edit`, `remark`, or `delete`. Sorting and filtering change the view, not participant fields.
 
 The screenshots in this guide use synthetic participants from the v1.4 release. They show the application content,
 not OS window decorations; fonts may differ by platform.
@@ -180,10 +181,20 @@ Format: `view INDEX`
 * Displays the participant at the specified `INDEX`.
 * The index refers to the index number shown in the displayed participant list.
 * The index **must be a positive integer** 1, 2, 3, …​
+* Details appear on separate labelled lines. A missing group, role, or activity appears as `Unassigned`.
+* Tags are sorted by their names (case-sensitive) and separated by commas; `Tags: (none)` means the participant
+  has no tags. A real tag named `None` appears as `Tags: None`. Viewing does not change the participant or the
+  current list.
+* An empty saved remark appears as `Remark: None`. A present remark is enclosed in double quotes, so the literal
+  remark `None` appears as `Remark: "None"`. Quotes, backslashes, and line breaks in present remarks are escaped
+  for display; viewing never changes the saved text.
 
 Examples:
 * `list` followed by `view 2` displays all stored details of the 2nd participant in ZoomAddress.
 * `find Betsy` followed by `view 1` displays all stored details of the 1st participant in the results of the `find` command.
+* For a participant named Alice Pauline with no remark, the output includes `Name: Alice Pauline` and ends
+  with `Remark: None`. A saved remark such as `Needs wheelchair access` appears as
+  `Remark: "Needs wheelchair access"`.
 
 ### Editing a participant: `edit`
 
@@ -200,6 +211,46 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`
 Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st participant to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd participant to be `Betsy Crower` and clears all existing tags.
+
+### Recording or clearing a participant remark: `remark`
+
+Sets, replaces, or clears the free-text remark stored for one participant.
+
+Format: `remark INDEX r/REMARK`
+
+* `INDEX` is the positive integer shown beside the participant in the current list. After a search, filter, or
+  `sort name`, use the index in that displayed view.
+* `REMARK` may contain spaces, punctuation, and Unicode text. Surrounding whitespace is removed. Use an empty `r/`
+  to clear the existing remark: `remark INDEX r/`.
+* The command must contain one recognized `r/` prefix. In this command it means remark; in `assign-role`, `filter`,
+  and `filter-all`, it means role. The shared command tokenizer recognizes a prefix only when it is immediately
+  preceded by the ASCII space character. Therefore, a second ASCII-space-delimited `r/` is rejected as a duplicate;
+  an `r/` preceded by a tab or another Unicode whitespace character remains part of the remark text.
+* The change is saved automatically. The participant's name, contact details, tags, group, role, and activity are
+  preserved.
+* The current search, filter, and sort order are also preserved. This lets you update several participants in a
+  focused view without having to run the query again.
+* A successful non-empty update reports `Updated remark for NAME.`; clearing reports `Cleared remark for NAME.`
+* Participant cards show a non-empty remark below the assignment details, prefixed with `Remark:`.
+  Long notes wrap onto additional lines; scroll the participant list to read taller cards. Clearing a remark
+  hides its row without leaving a blank gap. A literal note `None` remains visible as `Remark: None`.
+
+Examples:
+* `remark 2 r/Needs wheelchair access` records the note for the second displayed participant.
+* `remark 1 r/Check in at 09:00; use entrance A/B.` accepts spaces, punctuation, and an embedded slash.
+* `remark 2 r/` clears the second displayed participant's remark.
+
+![Participant card with a wrapped accessibility remark below the role](images/remarkCard.png)
+
+*A JavaFX participant-card capture from the v1.5 feature build, using synthetic data. The note wraps within
+the card; this component image is not a full application-window screenshot.*
+
+Invalid examples:
+* `remark`, `remark 1`, and `remark one r/Note` show the command format because the index or `r/` is missing or
+  malformed.
+* `remark 1 r/First note r/Second note` is rejected because `r/` is repeated.
+* `remark 99 r/Note` reports that the participant index is invalid when fewer than 99 participants are displayed.
+  Invalid commands leave both the current view and all participant data unchanged.
 
 ### Assigning an activity: `assign-activity`
 
@@ -453,7 +504,10 @@ Finds participants whose complete phone number or email address matches the give
 
 Format: `find-contact PHONE_OR_EMAIL`
 
-* Provide exactly one valid phone number or email address. Surrounding whitespace is ignored.
+* Provide exactly one valid phone number or email address. Surrounding ordinary spaces, tabs and Unicode
+  whitespace such as U+2003 EM SPACE or U+3000 IDEOGRAPHIC SPACE are ignored.
+* Internal whitespace is not removed. Non-breaking spaces (including U+00A0) and zero-width characters are not
+  ignored; remove these characters if pasted contact text is rejected. Use an ordinary space after `find-contact`.
 * Phone numbers are matched exactly. Partial phone numbers do not match.
 * Email addresses are matched exactly and case-insensitively. For example, `ALEX@EXAMPLE.COM`
   matches `alex@example.com`.
@@ -463,6 +517,13 @@ Format: `find-contact PHONE_OR_EMAIL`
 Examples:
 * `find-contact 98765432` finds participants whose phone number is exactly `98765432`.
 * `find-contact alex@example.com` finds participants whose email address is `alex@example.com`.
+* `find-contact   ALEX@EXAMPLE.COM   ` searches for the same email, ignoring the surrounding spaces and letter case.
+
+The feedback is `N person(s) listed!`, where `N` is the number of matches; no match gives `0 person(s) listed!`
+and an empty displayed list. Results are reindexed from 1, so use the new displayed indices for later commands.
+For example, `find-contact alex@example.com extra` and `find-contact 9876 5432` are invalid and report
+`Contact must be one complete valid phone number or email address.` A blank query shows command usage instead.
+Invalid queries leave the displayed list and participant data unchanged.
 
 ### Deleting a participant: `delete`
 
@@ -509,7 +570,8 @@ succeeds. Existing participant and assignment fields retain their format.
 Participant records also support an optional text `remark` field. Older data files with no `remark`, or a JSON
 `null` remark, load with empty remark text; reading does not rewrite the file. A later successful save writes the
 remark as a JSON string, including `""` for no remark. Existing edit, assignment and unassignment commands preserve
-this text. This storage increment does not yet add a remark command or show remarks on participant cards.
+this text. Use the `remark` command to update it. Non-empty remarks appear on participant cards; `view INDEX`
+also shows the saved remark, quoting and escaping present text as described in the view section.
 Numbers, booleans, arrays and objects are not valid remark values. If you manually edit the data file, enclose
 remark text in JSON double quotes; otherwise ZoomAddress refuses to load that file without rewriting it.
 Restore a known-good backup or correct the invalid value before reopening the application.
@@ -590,6 +652,7 @@ Action | Format, Examples
 **Filter by combined assignments** | `filter-all g/GROUP r/ROLE`, `filter-all g/GROUP a/ACTIVITY`, or `filter-all r/ROLE a/ACTIVITY`; optionally include the third distinct category<br> e.g., `filter-all g/Logistics r/Facilitator`
 **Find incomplete allocations** | `unassigned g/` or `unassigned r/` or `unassigned a/`
 **List** | `list`
+**Remark** | `remark INDEX r/REMARK` or `remark INDEX r/` to clear<br> e.g., `remark 2 r/Needs wheelchair access`
 **Sort** | `sort name`
 **View** | `view INDEX`<br> e.g., `view 3`
 **Help** | `help`

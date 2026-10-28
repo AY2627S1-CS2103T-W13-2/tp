@@ -23,6 +23,7 @@ import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.FindContactCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.RemarkCommand;
 import seedu.address.logic.commands.SortCommand;
 import seedu.address.logic.commands.UnassignCommand;
 import seedu.address.logic.commands.UnassignedCommand;
@@ -76,6 +77,7 @@ public class AddressBookParser {
             case FilterCommand.COMMAND_WORD -> new FilterCommandParser().parse(arguments);
             case ListCommand.COMMAND_WORD -> new NoArgumentsCommandParser<>(
                     ListCommand::new, ListCommand.MESSAGE_USAGE).parse(arguments);
+            case RemarkCommand.COMMAND_WORD -> new RemarkCommandParser().parse(arguments);
             case SortCommand.COMMAND_WORD -> new SortCommandParser().parse(arguments);
             case UnassignCommand.COMMAND_WORD -> new UnassignCommandParser().parse(arguments);
             case UnassignedCommand.COMMAND_WORD -> new UnassignedCommandParser().parse(arguments);

@@ -176,9 +176,9 @@ coerce numbers or booleans to text. Missing or JSON `null` values become empty t
 booleans are rejected with `Remark must be a JSON string or null.` through the existing `DataLoadingException`
 path. Quoted strings such as `"42"` and `"true"` remain valid text. Saving emits the string, including `""`.
 Existing files need no manual migration or deletion, and a read leaves their bytes unchanged.
-All paths that replace a `Person` in edit, assign-group,
-assign-role, assign-activity and unassign carry the original remark forward. No new command, prefix or UI rendering
-is introduced here; the remark command, detail output and card rendering are separate increments.
+All paths that replace a `Person` in edit, assign-group, assign-role, assign-activity and unassign carry the original
+remark forward. The `remark` command described below is the only command that changes this value. Detail and card
+rendering remain separate increments.
 
 `RemarkStorageTest` covers legacy/null/empty input, rejection of non-text JSON without changing the file,
 unchanged bytes on read and full-field disk round trips. It inspects each saved remark's JSON type and exact text,
@@ -260,6 +260,38 @@ checks that the selected assignment exists, and creates an updated `Person` with
 It replaces the participant through `Model.setPerson`; `LogicManager` then saves the model to disk. Invalid input
 or a missing assignment produces an error without modifying the participant.
 
+### Updating a participant remark
+
+The `remark INDEX r/TEXT` command sets or replaces the selected participant's remark; an empty `r/` clears it.
+`AddressBookParser` delegates to `RemarkCommandParser`, which tokenizes the single `r/` prefix, rejects duplicate or
+missing prefixes, and parses the positive displayed index. The shared tokenizer recognizes prefixes only when they
+are preceded by an ASCII space. Consequently, a second ASCII-space-delimited `r/` is rejected, while an `r/`
+preceded by a tab or another Unicode whitespace character remains part of the remark text. The parser strips
+surrounding Unicode whitespace from the remark text after tokenization. Empty text is deliberately valid because it
+represents a clear operation.
+
+The following class diagram shows the parser's contract and its creation of a `RemarkCommand`:
+
+![Classes used to parse the remark command](images/ParserClass.png)
+
+The parsed command owns one displayed `Index` and one immutable `Remark`. During execution, it uses the `Model` API
+to replace only the selected participant:
+
+![Classes used to execute the remark command](images/RemarkClass.png)
+
+`RemarkCommand` resolves the index against `Model.getFilteredPersonList()`, so the command uses the exact indices
+shown after filtering and sorting. It constructs a replacement `Person` with the new `Remark` and every other field
+copied from the selected participant, then calls `Model.setPerson`. It deliberately does not call
+`updateFilteredPersonList` or `updateSortedPersonList`; the user's current view and ordering therefore remain active.
+An out-of-range displayed index fails before replacement, leaving the model unchanged. After successful execution,
+the existing `LogicManager` save path persists the new remark.
+
+`RemarkCommandTest` covers adding, replacing and clearing remarks, full-field preservation, filtered/sorted indices,
+view preservation and invalid indices. `RemarkCommandParserTest` covers empty remarks, missing and malformed indices,
+missing and duplicate prefixes, punctuation, Unicode whitespace stripping, and ASCII-space versus Unicode-space
+prefix boundaries. `RemarkCommandIntegrationTest` routes the real command through logic and JSON storage, then
+reloads after add, replace and clear operations.
+
 ### Sorting participants by name
 
 The `sort name` command changes the order of the currently displayed participants without
@@ -292,8 +324,10 @@ The `find-contact` command locates participants using one complete phone number 
 the address book.
 
 1. `AddressBookParser` routes the command arguments to `FindContactCommandParser`.
-1. `FindContactCommandParser` trims surrounding whitespace and validates the value using the existing `Phone` and
-   `Email` validation rules. Blank, malformed, or multiple values are rejected before command execution.
+1. `FindContactCommandParser` calls `String.strip()` to remove surrounding whitespace recognized by
+   `Character.isWhitespace`, including EM SPACE and IDEOGRAPHIC SPACE. It then validates the exact remaining value
+   using the existing `Phone` and `Email` rules. It does not remove internal whitespace, non-breaking spaces or
+   zero-width formatting characters. Blank, malformed, or multiple values are rejected before command execution.
 1. The parser creates a `ContactMatchesQueryPredicate` and places it in a `FindContactCommand`.
 1. When executed, the command passes the predicate to `Model#updateFilteredPersonList`. Phone numbers require an
    exact match, while email addresses require an exact case-insensitive match.
@@ -303,6 +337,11 @@ the address book.
 The predicate is kept in the Model package because it evaluates `Person` contact fields and can be tested
 independently of command parsing and execution. Reusing the existing validators also keeps accepted search values
 consistent with values that can be stored for a participant.
+
+`FindContactCommandParserTest` checks Unicode padding, blank input and rejected internal/non-breaking/zero-width
+characters. `FindContactWorkflowIntegrationTest` exercises full command routing from a sorted/filtered view,
+case-insensitive email and exact phone searches, displayed indices, no-match and invalid input. It verifies that
+participant fields (including assignments and remarks), saved JSON bytes and reloaded records stay unchanged.
 
 ### Assignment filtering
 
@@ -823,6 +862,23 @@ Expected data change: the previous participant data is removed and the four reco
 
 ### Assignment, sorting, and query workflows
 
+#### Participant remarks
+
+Use the prepared data and complete Beth's group, role, activity and phone updates from the core-operation table.
+
+| Preconditions | Command or action | Expected output | Expected data change |
+|---|---|---|---|
+| Run `list`, then `sort name`. | `remark 2 r/Bring hearing loop; use entrance A/B.` | `Updated remark for Beth Lee.` The sorted list remains displayed. | Only Beth's remark changes. |
+| The sorted list remains displayed. | `view 2` | Ends with `Remark: "Bring hearing loop; use entrance A/B."`. | None. |
+| Run `find Beth`. | `remark 1 r/Wheelchair access confirmed.` | `Updated remark for Beth Lee.` The one-result view remains displayed. | Beth's remark is replaced; all other fields remain unchanged. |
+| Exit, restart, and run `find Beth`. | `view 1` | Shows `Remark: "Wheelchair access confirmed."`. | The replacement remark survived reload. |
+| The Beth result remains displayed. | `remark 1 r/` | `Cleared remark for Beth Lee.` | Beth's remark becomes empty; all other fields remain unchanged. |
+| The Beth result remains displayed. | `view 1` | Ends with `Remark: None`; phone and all assignments retain their earlier values. | None. |
+
+Also run `filter g/Logistics`, `sort name`, and `remark 1 r/Filtered index check`. Confirm the command updates the
+participant currently shown at index 1 without restoring the full directory or changing the stored participant order.
+Clear the test remark afterward with `remark 1 r/`.
+
 #### Clearing assignments
 
 | Preconditions | Command or action | Expected output | Expected data change |
@@ -916,6 +972,9 @@ For every command below, the status area should identify the actual problem and 
 | `view 999` | Reports that the participant index is invalid. |
 | `assign-role 1 r/Facilitator r/Leader` | A duplicate `r/` prefix message. |
 | `assign-role x/value 1 r/Facilitator` | The `assign-role` usage message because the index contains an unknown argument. |
+| `remark`, `remark 1`, or `remark one r/Note` | The `remark` usage message because the index or prefix is missing or malformed. |
+| `remark 1 r/First r/Second` | A duplicate `r/` prefix message; no remark changes. |
+| `remark 999 r/Note` | Reports that the participant index is invalid; the current view and records remain unchanged. |
 | `unassign 1`, `unassign 1 g/ r/`, or `unassign 1 g/Logistics` | A specific message for the missing, conflicting, or non-empty prefix. |
 | `sort`, `sort phone`, or `sort name extra` | A specific message for the missing, unsupported, or extra criterion. |
 | `find-contact`, `find-contact 81234567 extra` | A specific message for the blank or multi-value search. |
@@ -935,7 +994,8 @@ Expected data change: none.
 Next, run `find Chen` again followed by `assign-group 1 g/Programmes`. The success message must name Chen Wei, and
 `find Chen` followed by `view 1` must show group Programmes. No other participant's group should change.
 
-Repeat `find Nobody`, then try `view 1`, `edit 1 p/81111111`, `delete 1`, and each assignment command with index 1.
+Repeat `find Nobody`, then try `view 1`, `edit 1 p/81111111`, `remark 1 r/Note`, `delete 1`, and each assignment
+command with index 1.
 Each indexed command should report an invalid displayed index, and the stored participants should remain unchanged.
 
 ### Saving, exiting, and restarting
@@ -958,8 +1018,8 @@ Precondition: use a disposable copy of the application data.
 Command: `clear`, then `list`.
 
 Expected output: the list is empty. `find Alice`, `find-contact 81234567`, and `filter g/Logistics` each show zero
-results. `view 1`, `edit 1 p/81111111`, `delete 1`, and assignment or unassignment commands using index 1 report an
-invalid displayed index.
+results. `view 1`, `edit 1 p/81111111`, `remark 1 r/Note`, `delete 1`, and assignment or unassignment commands using
+index 1 report an invalid displayed index.
 
 Expected data change: the empty list is saved and remains empty after exiting and restarting.
 

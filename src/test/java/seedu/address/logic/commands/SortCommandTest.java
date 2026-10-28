@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
-import seedu.address.logic.Messages;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -106,9 +105,7 @@ public class SortCommandTest {
 
         CommandResult result = new ViewCommand(INDEX_FIRST_PERSON).execute(model);
 
-        String expectedMessage = String.format(ViewCommand.MESSAGE_VIEW_PARTICIPANT_SUCCESS,
-                Messages.format(ALICE_UPPERCASE));
-        assertEquals(expectedMessage, result.getFeedbackToUser());
+        assertTrue(result.getFeedbackToUser().startsWith("Participant details:\nName: Alice\n"));
     }
 
     @Test

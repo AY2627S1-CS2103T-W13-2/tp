@@ -1,4 +1,5 @@
 @startuml
+!pragma layout smetana
 hide circle
 skinparam classAttributeIconSize 0
 
@@ -8,12 +9,21 @@ Class "{abstract}\nCommand" as Command {
 Class RemarkCommand {
   +COMMAND_WORD: String
   +MESSAGE_USAGE: String
-  +MESSAGE_NOT_IMPLEMENTED_YET: String
+  +MESSAGE_SET_REMARK_SUCCESS: String
+  +MESSAGE_CLEAR_REMARK_SUCCESS: String
+  -index: Index
+  -remark: Remark
   +execute(Model): CommandResult
 }
 Class CommandException
+Class Index
+Class Remark
+Class Model
 
 RemarkCommand -up-|> Command
 Command ..> CommandException: throws >
 RemarkCommand .right.> CommandException: throws >
+RemarkCommand --> "1" Index
+RemarkCommand --> "1" Remark
+RemarkCommand ..> Model: updates >
 @enduml
