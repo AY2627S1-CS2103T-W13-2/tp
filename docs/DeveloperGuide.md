@@ -90,6 +90,11 @@ The `UI` component,
 * keeps a reference to the `Logic` component, because the `UI` relies on the `Logic` to execute commands.
 * depends on some classes in the `Model` component because it displays `Person` objects from the model.
 
+`PersonListPanel` creates a `PersonCard` for each person in the displayed list. The card reads the stored remark
+without changing it. For a non-empty remark, `PersonCard` sets the label to `Remark: ` followed by the exact text;
+the FXML label wraps long text so the card can grow vertically. For an empty remark, both `visible` and `managed`
+are false, so the row does not leave a blank gap. The list remains scrollable when cards become taller.
+
 ### Logic component
 
 **API** : [`Logic.java`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/java/seedu/address/logic/Logic.java)
@@ -909,6 +914,12 @@ Use the prepared data and complete Beth's group, role, activity and phone update
 Also run `filter g/Logistics`, `sort name`, and `remark 1 r/Filtered index check`. Confirm the command updates the
 participant currently shown at index 1 without restoring the full directory or changing the stored participant order.
 Clear the test remark afterward with `remark 1 r/`.
+
+With Beth displayed, run
+`remark 1 r/Accessibility check: confirm the step-free entrance, reserve a hearing loop, and brief the registration team before doors open.`
+Narrow the window until the card's remark wraps across lines, and scroll the participant list to check that the
+whole note remains visible. Run `remark 1 r/` and confirm the remark row disappears without a blank gap; `view 1`
+should end with `Remark: None`.
 
 #### Clearing assignments
 
