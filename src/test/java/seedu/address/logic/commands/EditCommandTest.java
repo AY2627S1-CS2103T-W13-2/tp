@@ -11,9 +11,12 @@ import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static seedu.address.logic.commands.CommandTestUtil.showPersonAtIndex;
+import static seedu.address.model.person.AssignmentMatchesPredicate.AssignmentType.GROUP;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +27,8 @@ import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.person.AssignmentMatchesPredicate;
+import seedu.address.model.person.NameContainsKeywordsPredicate;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 import seedu.address.testutil.PersonBuilder;
@@ -111,8 +116,60 @@ public class EditCommandTest {
 
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
         expectedModel.setPerson(model.getFilteredPersonList().get(0), editedPerson);
+        expectedModel.updateFilteredPersonList(new NameContainsKeywordsPredicate(List.of(
+                personInFilteredList.getName().fullName.split("\\s+")[0])));
 
         assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void execute_groupFilteredView_consecutiveEditsPreserveDisplayedTargets() throws Exception {
+        Person alice = new PersonBuilder().withName("Alice Tan").withPhone("81111111")
+                .withEmail("alice@example.com").withGroup("Logistics").build();
+        Person bob = new PersonBuilder().withName("Bob Lee").withPhone("82222222")
+                .withEmail("bob@example.com").build();
+        Person charlie = new PersonBuilder().withName("Charlie Ong").withPhone("83333333")
+                .withEmail("charlie@example.com").withGroup("Logistics").build();
+        Model filteredModel = createModel(alice, bob, charlie);
+        filteredModel.updateFilteredPersonList(new AssignmentMatchesPredicate(GROUP, "Logistics"));
+
+        Person editedAlice = new PersonBuilder(alice).withPhone("84444444").build();
+        new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withPhone("84444444").build()).execute(filteredModel);
+
+        assertEquals(List.of(editedAlice, charlie), filteredModel.getFilteredPersonList());
+
+        Person editedCharlie = new PersonBuilder(charlie).withPhone("85555555").build();
+        new EditCommand(INDEX_SECOND_PERSON,
+                new EditPersonDescriptorBuilder().withPhone("85555555").build()).execute(filteredModel);
+
+        assertEquals(List.of(editedAlice, editedCharlie), filteredModel.getFilteredPersonList());
+        assertEquals(List.of(editedAlice, bob, editedCharlie), filteredModel.getAddressBook().getPersonList());
+    }
+
+    @Test
+    public void execute_nameEditChangesMembership_updatesDisplayedTargets() throws Exception {
+        Person alice = new PersonBuilder().withName("Alice Tan").withPhone("81111111")
+                .withEmail("alice@example.com").build();
+        Person alex = new PersonBuilder().withName("Alex Lim").withPhone("82222222")
+                .withEmail("alex@example.com").build();
+        Person bob = new PersonBuilder().withName("Bob Lee").withPhone("83333333")
+                .withEmail("bob@example.com").build();
+        Model filteredModel = createModel(alice, alex, bob);
+        filteredModel.updateFilteredPersonList(new NameContainsKeywordsPredicate(List.of("Alice", "Alex")));
+
+        Person renamedAlice = new PersonBuilder(alice).withName("Zoe Tan").build();
+        new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withName("Zoe Tan").build()).execute(filteredModel);
+
+        assertEquals(List.of(alex), filteredModel.getFilteredPersonList());
+
+        Person editedAlex = new PersonBuilder(alex).withPhone("84444444").build();
+        new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withPhone("84444444").build()).execute(filteredModel);
+
+        assertEquals(List.of(editedAlex), filteredModel.getFilteredPersonList());
+        assertEquals(List.of(renamedAlice, editedAlex, bob), filteredModel.getAddressBook().getPersonList());
     }
 
     @Test
@@ -213,6 +270,12 @@ public class EditCommandTest {
         String expected = EditCommand.class.getCanonicalName() + "{index=" + index + ", editPersonDescriptor="
                 + editPersonDescriptor + "}";
         assertEquals(expected, editCommand.toString());
+    }
+
+    private static Model createModel(Person... participants) {
+        AddressBook addressBook = new AddressBook();
+        addressBook.setPersons(List.of(participants));
+        return new ModelManager(addressBook, new UserPrefs());
     }
 
 }

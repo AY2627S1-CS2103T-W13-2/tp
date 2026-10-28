@@ -199,6 +199,9 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`
 * Existing values will be updated to the input values.
 * When editing tags, all of the participant's existing tags are removed; adding tags is not cumulative.
 * To remove all of a participant's tags, enter `t/` without a tag after it.
+* The current search, filter, and sort settings remain active after an edit. If an edited field no longer matches the
+  current view, that participant disappears; editing a name in a name-sorted view can move that participant. The
+  displayed indices update in either case, so check them before each subsequent index-based command.
 
 Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st participant to be `91234567` and `johndoe@example.com` respectively.
