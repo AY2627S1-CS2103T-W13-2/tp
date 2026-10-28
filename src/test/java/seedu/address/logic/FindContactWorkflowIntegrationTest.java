@@ -63,7 +63,7 @@ public class FindContactWorkflowIntegrationTest {
             String details = logic.execute("view 1").getFeedbackToUser();
             assertTrue(details.contains("Name: Alice Tan"));
             assertTrue(details.contains("Phone: 81234567"));
-            assertTrue(details.contains("Remark: Vegetarian meal"));
+            assertTrue(details.contains("Remark: \"Vegetarian meal\""));
             assertEquals(original, model.getAddressBook());
             assertEquals(original, new AddressBook(storage.readAddressBook().orElseThrow()));
             assertEquals(before, Files.readString(storage.getAddressBookFilePath()));

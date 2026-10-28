@@ -56,7 +56,7 @@ public class ViewCommand extends Command {
                 .map(tag -> tag.tagName)
                 .sorted()
                 .collect(Collectors.joining(", "));
-        String displayedTags = tagNames.isEmpty() ? "None" : tagNames;
+        String displayedTags = tagNames.isEmpty() ? "(none)" : tagNames;
 
         return String.join("\n",
                 "Name: " + person.getName(),
@@ -67,7 +67,23 @@ public class ViewCommand extends Command {
                 "Activity: " + person.getActivity().map(Object::toString).orElse("Unassigned"),
                 "Group: " + person.getGroup().map(Object::toString).orElse("Unassigned"),
                 "Tags: " + displayedTags,
-                "Remark: " + (person.getRemark().value.isEmpty() ? "None" : person.getRemark().value));
+                "Remark: " + formatRemark(person.getRemark().value));
+    }
+
+    /**
+     * Quotes a present remark so its text cannot be confused with the empty-remark marker.
+     */
+    private static String formatRemark(String remark) {
+        if (remark.isEmpty()) {
+            return "None";
+        }
+
+        String escapedRemark = remark.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
+        return "\"" + escapedRemark + "\"";
     }
 
     @Override

@@ -172,17 +172,19 @@ Format: `view INDEX`
 * The index refers to the index number shown in the displayed participant list.
 * The index **must be a positive integer** 1, 2, 3, …​
 * Details appear on separate labelled lines. A missing group, role, or activity appears as `Unassigned`.
-* Tags are sorted by their names (case-sensitive) and separated by commas; `Tags: None` means the participant
-  has no tags. Viewing does not change the participant or the current list.
-* An empty saved remark appears as `Remark: None`; otherwise the saved remark text is shown. Viewing never
-  changes that text.
+* Tags are sorted by their names (case-sensitive) and separated by commas; `Tags: (none)` means the participant
+  has no tags. A real tag named `None` appears as `Tags: None`. Viewing does not change the participant or the
+  current list.
+* An empty saved remark appears as `Remark: None`. A present remark is enclosed in double quotes, so the literal
+  remark `None` appears as `Remark: "None"`. Quotes, backslashes, and line breaks in present remarks are escaped
+  for display; viewing never changes the saved text.
 
 Examples:
 * `list` followed by `view 2` displays all stored details of the 2nd participant in ZoomAddress.
 * `find Betsy` followed by `view 1` displays all stored details of the 1st participant in the results of the `find` command.
 * For a participant named Alice Pauline with no remark, the output includes `Name: Alice Pauline` and ends
   with `Remark: None`. A saved remark such as `Needs wheelchair access` appears as
-  `Remark: Needs wheelchair access`.
+  `Remark: "Needs wheelchair access"`.
 
 ### Editing a participant: `edit`
 

@@ -65,10 +65,21 @@ public class ViewCommandTest {
     }
 
     @Test
-    public void execute_noTags_displaysNone() throws Exception {
+    public void execute_noTags_displaysDistinctEmptyMarker() throws Exception {
         Person original = model.getFilteredPersonList().get(0);
         Person untagged = new PersonBuilder(original).withTags().build();
         model.setPerson(original, untagged);
+
+        String feedback = new ViewCommand(INDEX_FIRST_PERSON).execute(model).getFeedbackToUser();
+
+        assertTrue(feedback.contains("\nTags: (none)\n"));
+    }
+
+    @Test
+    public void execute_tagNamedNone_displaysLiteralTag() throws Exception {
+        Person original = model.getFilteredPersonList().get(0);
+        Person tagged = new PersonBuilder(original).withTags("None").build();
+        model.setPerson(original, tagged);
 
         String feedback = new ViewCommand(INDEX_FIRST_PERSON).execute(model).getFeedbackToUser();
 
@@ -94,8 +105,30 @@ public class ViewCommandTest {
 
         String feedback = new ViewCommand(INDEX_FIRST_PERSON).execute(model).getFeedbackToUser();
 
-        assertTrue(feedback.endsWith("Remark: Needs wheelchair access"));
+        assertTrue(feedback.endsWith("Remark: \"Needs wheelchair access\""));
         assertEquals(expectedModel, model);
+    }
+
+    @Test
+    public void execute_remarkNamedNone_displaysQuotedLiteral() throws Exception {
+        Person original = model.getFilteredPersonList().get(0);
+        Person remarked = new PersonBuilder(original).withRemark("None").build();
+        model.setPerson(original, remarked);
+
+        String feedback = new ViewCommand(INDEX_FIRST_PERSON).execute(model).getFeedbackToUser();
+
+        assertTrue(feedback.endsWith("Remark: \"None\""));
+    }
+
+    @Test
+    public void execute_remarkWithQuotesAndNewline_displaysEscapedSingleLine() throws Exception {
+        Person original = model.getFilteredPersonList().get(0);
+        Person remarked = new PersonBuilder(original).withRemark("Use \"quiet\" area\nBring form").build();
+        model.setPerson(original, remarked);
+
+        String feedback = new ViewCommand(INDEX_FIRST_PERSON).execute(model).getFeedbackToUser();
+
+        assertTrue(feedback.endsWith("Remark: \"Use \\\"quiet\\\" area\\nBring form\""));
     }
 
     @Test
