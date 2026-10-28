@@ -177,8 +177,8 @@ booleans are rejected with `Remark must be a JSON string or null.` through the e
 path. Quoted strings such as `"42"` and `"true"` remain valid text. Saving emits the string, including `""`.
 Existing files need no manual migration or deletion, and a read leaves their bytes unchanged.
 All paths that replace a `Person` in edit, assign-group, assign-role, assign-activity and unassign carry the original
-remark forward. The `remark` command described below is the only command that changes this value. Detail and card
-rendering remain separate increments.
+remark forward. The `remark` command described below is the only command that changes this value. The `view`
+detail formatter and participant cards consume the stored remark without changing it.
 
 `RemarkStorageTest` covers legacy/null/empty input, rejection of non-text JSON without changing the file,
 unchanged bytes on read and full-field disk round trips. It inspects each saved remark's JSON type and exact text,
@@ -250,6 +250,21 @@ Save diagnostics log operation phases and recovery-file locations, without parti
 This change therefore does not roll back the in-memory model. The writer assumes one writer and does not provide
 power-loss durability, cross-process coordination, automatic startup recovery, or new guarantees for preferences.
 Retained backups are deliberately not overwritten or automatically consumed by subsequent saves.
+
+### Viewing a participant's full record
+
+`ViewCommand` resolves its positive index against `Model.getFilteredPersonList()`, the same filtered and sorted
+list shown in the UI. It rejects an index outside that displayed list before selecting a `Person`. The command
+formats the selected participant into labelled lines in a fixed order; it does not alter the model or the current
+view. Tags are sorted by name (case-sensitively) and comma-separated, with `(none)` reserved for an empty tag set.
+Missing group, role and activity assignments display as `Unassigned`.
+
+An empty remark displays as `None`. A present remark is quoted, so the literal text `None` remains distinguishable
+from the empty marker. The formatter escapes backslashes, quotes, newline, carriage return and tab characters;
+it does not change the stored remark. `LogicManager` still follows its normal save path after a successful `view`,
+so this command does not promise that the JSON file is never rewritten.
+`ViewCommandTest` covers filtered indices, all detail fields, sorted and empty tags, absent assignments, empty and
+literal-`None` remarks, and escaped multiline text.
 
 ### Clearing a participant assignment
 
@@ -868,7 +883,7 @@ Expected data change: the previous participant data is removed and the four reco
 
 | Preconditions | Command or action | Expected output | Expected data change |
 |---|---|---|---|
-| Prepared data is loaded. | `view 2` | Details for Beth Lee, including `Unassigned` for group, role, and activity. | None. |
+| Prepared data is loaded. | `view 2` | Labelled details for Beth Lee, including `Unassigned` for group, role, and activity; `Tags: facilitator`; and `Remark: None`. | None. |
 | Prepared data is loaded. | `find bEtH` | One indexed result, Beth Lee; matching is case-insensitive. | None. |
 | The Beth Lee search result is displayed. | `assign-group 1 g/Logistics` | Confirms that Beth Lee was assigned to Logistics. | Beth's group becomes Logistics; other fields remain unchanged. |
 | Run `find Beth` again. | `assign-role 1 r/Facilitator` | Confirms that Beth Lee received the Facilitator role. | Beth's role becomes Facilitator; group and other fields remain unchanged. |
