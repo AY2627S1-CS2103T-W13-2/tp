@@ -502,7 +502,9 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 These stories record both implemented needs and possible future work. A priority is **not** an implementation-status
 claim. The [User Guide](UserGuide.md) is the source of truth for commands available in the current release;
-multiple roles, attendance, import/export, undo, and backup commands are not implemented.
+multiple roles, dedicated attendance, dietary/accessibility and emergency-contact fields, import/export, undo,
+and backup commands are not implemented. An authorised free-text remark is available, but it is not a dedicated
+field for those future needs.
 
 | ID | Priority | As a …​ | I want to …​ | So that I can …​ |
 | -- | -------- | ------- | ------------ | ---------------- |
@@ -532,7 +534,7 @@ multiple roles, attendance, import/export, undo, and backup commands are not imp
 | ZA-24 | `* *` | event director | list participants without any activity | identify incomplete allocations |
 | ZA-25 | `* *` | busy event director | filter by group, role, and activity together | answer operational questions quickly |
 | ZA-26 | `* *` | event director | sort participant records by name | scan a large directory predictably |
-| ZA-27 | `*` | event director | add a short note to a participant | retain context not covered by standard fields |
+| ZA-27 | `*` | event director | add a free-text note to a participant | retain context not covered by standard fields |
 | ZA-28 | `*` | event director | mark a participant's attendance | see who has arrived |
 | ZA-29 | `*` | event director | list participants whose attendance is unconfirmed | follow up on missing people |
 | ZA-30 | `*` | event director | record authorised dietary or accessibility needs | support participants appropriately |
