@@ -620,6 +620,11 @@ ZoomAddress shows a startup error instead of opening an editable empty directory
 path and explains how to recover. ZoomAddress does not change the participant file on a failed start. Back up the
 file first, then correct the JSON or read permissions, or restore a known-good copy before restarting. Do not run
 commands against an assumed empty directory or delete the original file as a recovery step.<br>
+Each JSON object must have unique field names. For example, `{"persons":[],"persons":[]}` is rejected even though
+the arrays match; repeating a field inside a participant is also rejected. ZoomAddress does not choose the first or
+last value. If a manual edit or merge introduces duplicate keys, back up the original file, then reconcile the
+records into one `persons` array (and one value per participant field), or restore a known-good copy. Restart only
+after the ambiguity is resolved; a failed start leaves the original participant file unchanged.<br>
 If the data file is genuinely absent on first launch, ZoomAddress still opens with sample participants. Editing JSON
 directly can also cause unexpected behavior when values fall outside the supported range; edit it only if you are
 confident you can restore a valid copy.
