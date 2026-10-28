@@ -90,6 +90,11 @@ The `UI` component,
 * keeps a reference to the `Logic` component, because the `UI` relies on the `Logic` to execute commands.
 * depends on some classes in the `Model` component because it displays `Person` objects from the model.
 
+`PersonListPanel` creates a `PersonCard` for each person in the displayed list. The card reads the stored remark
+without changing it. For a non-empty remark, `PersonCard` sets the label to `Remark: ` followed by the exact text;
+the FXML label wraps long text so the card can grow vertically. For an empty remark, both `visible` and `managed`
+are false, so the row does not leave a blank gap. The list remains scrollable when cards become taller.
+
 ### Logic component
 
 **API** : [`Logic.java`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/java/seedu/address/logic/Logic.java)
@@ -177,8 +182,8 @@ booleans are rejected with `Remark must be a JSON string or null.` through the e
 path. Quoted strings such as `"42"` and `"true"` remain valid text. Saving emits the string, including `""`.
 Existing files need no manual migration or deletion, and a read leaves their bytes unchanged.
 All paths that replace a `Person` in edit, assign-group, assign-role, assign-activity and unassign carry the original
-remark forward. The `remark` command described below is the only command that changes this value. Detail and card
-rendering remain separate increments.
+remark forward. The `remark` command described below is the only command that changes this value. The `view`
+detail formatter and participant cards consume the stored remark without changing it.
 
 `RemarkStorageTest` covers legacy/null/empty input, rejection of non-text JSON without changing the file,
 unchanged bytes on read and full-field disk round trips. It inspects each saved remark's JSON type and exact text,
@@ -264,6 +269,21 @@ Save diagnostics log operation phases and recovery-file locations, without parti
 This change therefore does not roll back the in-memory model. The writer assumes one writer and does not provide
 power-loss durability, cross-process coordination, automatic startup recovery, or new guarantees for preferences.
 Retained backups are deliberately not overwritten or automatically consumed by subsequent saves.
+
+### Viewing a participant's full record
+
+`ViewCommand` resolves its positive index against `Model.getFilteredPersonList()`, the same filtered and sorted
+list shown in the UI. It rejects an index outside that displayed list before selecting a `Person`. The command
+formats the selected participant into labelled lines in a fixed order; it does not alter the model or the current
+view. Tags are sorted by name (case-sensitively) and comma-separated, with `(none)` reserved for an empty tag set.
+Missing group, role and activity assignments display as `Unassigned`.
+
+An empty remark displays as `None`. A present remark is quoted, so the literal text `None` remains distinguishable
+from the empty marker. The formatter escapes backslashes, quotes, newline, carriage return and tab characters;
+it does not change the stored remark. `LogicManager` still follows its normal save path after a successful `view`,
+so this command does not promise that the JSON file is never rewritten.
+`ViewCommandTest` covers filtered indices, all detail fields, sorted and empty tags, absent assignments, empty and
+literal-`None` remarks, and escaped multiline text.
 
 ### Clearing a participant assignment
 
@@ -496,7 +516,9 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 These stories record both implemented needs and possible future work. A priority is **not** an implementation-status
 claim. The [User Guide](UserGuide.md) is the source of truth for commands available in the current release;
-multiple roles, attendance, import/export, undo, and backup commands are not implemented.
+multiple roles, dedicated attendance, dietary/accessibility and emergency-contact fields, import/export, undo,
+and backup commands are not implemented. An authorised free-text remark is available, but it is not a dedicated
+field for those future needs.
 
 | ID | Priority | As a …​ | I want to …​ | So that I can …​ |
 | -- | -------- | ------- | ------------ | ---------------- |
@@ -526,7 +548,7 @@ multiple roles, attendance, import/export, undo, and backup commands are not imp
 | ZA-24 | `* *` | event director | list participants without any activity | identify incomplete allocations |
 | ZA-25 | `* *` | busy event director | filter by group, role, and activity together | answer operational questions quickly |
 | ZA-26 | `* *` | event director | sort participant records by name | scan a large directory predictably |
-| ZA-27 | `*` | event director | add a short note to a participant | retain context not covered by standard fields |
+| ZA-27 | `*` | event director | add a free-text note to a participant | retain context not covered by standard fields |
 | ZA-28 | `*` | event director | mark a participant's attendance | see who has arrived |
 | ZA-29 | `*` | event director | list participants whose attendance is unconfirmed | follow up on missing people |
 | ZA-30 | `*` | event director | record authorised dietary or accessibility needs | support participants appropriately |
@@ -746,9 +768,11 @@ participant records, each with at most one group, one role, and one activity ass
    at least 95 of 100 consecutive valid local participant-management commands must display their result within
    two seconds of submission. The trial must include adding, listing, finding, editing, deleting, and changing
    assignments, with no other resource-intensive applications running.
-4. **Portability:** The same release JAR must launch and pass the add, list, find, edit, delete, and save/reopen
-   smoke checks on Windows 11 x64, Ubuntu 24.04 LTS x64, and macOS 14 x64 with Java 25 and compatible JavaFX
-   libraries, without changing the source code or rebuilding the JAR.
+4. **Portability:** The release's x64 JAR must launch and pass the add, list, find, edit, delete, and save/reopen
+   smoke checks on Windows 11 x64, Ubuntu 24.04 LTS x64, and macOS 14 x64 with Java 25. The separate
+   macOS arm64 JAR must pass the same checks on Apple Silicon with native arm64 Java 25. Neither check may
+   require changing the source code or rebuilding the tested JAR. These are targets, not a claim that every
+   platform has already been tested.
 5. **Reliability - persistence:** After each of 20 valid data-changing commands that completes without a save
    error, closing the application normally and reopening it must restore all participant fields and assignments
    exactly as they were before closing. This target excludes forced termination and hardware failure.
@@ -775,6 +799,8 @@ participant records, each with at most one group, one role, and one activity ass
   and people with event responsibilities.
 * **Participant record**: The stored details and assignments for one participant; represented by `Person` in the
   existing codebase and referred to as a person or contact in inherited documentation.
+* **Remark**: Free-text note stored with a participant record. An empty string represents no note; it is distinct
+  from the participant's tags and event assignments.
 * **Role**: An event responsibility assigned to a participant. In the requirements, this means an event role,
   not a software development team role or an application access permission.
 * **Unassigned participant**: A participant with no assignment in the category being queried; for example, no group
@@ -844,11 +870,13 @@ silently; any rebuilt JAR needs new checksums and relevant retesting.
    package for Windows/Linux x64 and macOS with x64 Java (including Apple Silicon
    via Rosetta). Check `os.arch` using `java -XshowSettings:properties -version`:
    `amd64`/`x86_64` is x64; `aarch64`/`arm64` is arm64. Published filenames are in the User Guide.
-1. Open a terminal in that folder and run `java -jar addressbook.jar`.
+1. Open a terminal in that folder and run `java -version` to confirm the active Java runtime is version 25.
+   Then run `java -jar addressbook.jar` from the same folder.
 
 Expected output: the ZoomAddress window opens and shows the sample participants. No error dialog appears.
 
-Expected data change: none until a command is run. ZoomAddress subsequently stores participant data at
+Expected participant-data change: none until a command is run. Startup can create or update
+`preferences.json` even without a participant command. ZoomAddress stores participant data at
 `data/addressbook.json`, relative to the folder from which the JAR was launched.
 
 To test window preferences, resize and move the window, exit, and run `java -jar addressbook.jar` again. The window
@@ -876,7 +904,7 @@ Expected data change: the previous participant data is removed and the four reco
 
 | Preconditions | Command or action | Expected output | Expected data change |
 |---|---|---|---|
-| Prepared data is loaded. | `view 2` | Details for Beth Lee, including `Unassigned` for group, role, and activity. | None. |
+| Prepared data is loaded. | `view 2` | Labelled details for Beth Lee, including `Unassigned` for group, role, and activity; `Tags: facilitator`; and `Remark: None`. | None. |
 | Prepared data is loaded. | `find bEtH` | One indexed result, Beth Lee; matching is case-insensitive. | None. |
 | The Beth Lee search result is displayed. | `assign-group 1 g/Logistics` | Confirms that Beth Lee was assigned to Logistics. | Beth's group becomes Logistics; other fields remain unchanged. |
 | Run `find Beth` again. | `assign-role 1 r/Facilitator` | Confirms that Beth Lee received the Facilitator role. | Beth's role becomes Facilitator; group and other fields remain unchanged. |
@@ -902,6 +930,12 @@ Use the prepared data and complete Beth's group, role, activity and phone update
 Also run `filter g/Logistics`, `sort name`, and `remark 1 r/Filtered index check`. Confirm the command updates the
 participant currently shown at index 1 without restoring the full directory or changing the stored participant order.
 Clear the test remark afterward with `remark 1 r/`.
+
+With Beth displayed, run
+`remark 1 r/Accessibility check: confirm the step-free entrance, reserve a hearing loop, and brief the registration team before doors open.`
+Narrow the window until the card's remark wraps across lines, and scroll the participant list to check that the
+whole note remains visible. Run `remark 1 r/` and confirm the remark row disappears without a blank gap; `view 1`
+should end with `Remark: None`.
 
 #### Clearing assignments
 
@@ -930,8 +964,13 @@ use the indices in the sorted list while it is displayed.
 |---|---|---|---|
 | Prepared data is loaded. | `find-contact 81234567` | One indexed result: Alice Tan. | None. |
 | Prepared data is loaded. | `find-contact ALICE@EXAMPLE.COM` | One indexed result: Alice Tan; email matching is case-insensitive. | None. |
+| Prepared data is loaded. | `find-contact  ALICE@EXAMPLE.COM ` | One indexed result: Alice Tan; surrounding U+2003 EM SPACE characters are removed. | None. |
 | Prepared data is loaded. | `find-contact 8123` | Zero results because phone matching requires the complete number. | None. |
 | Prepared data is loaded. | `find-contact nobody@example.com` | A clear zero-result response and an empty displayed list. | None. |
+
+Copy and paste the EM SPACE example as shown; those spaces are not ordinary ASCII spaces. In contrast, inserting
+an EM SPACE *inside* a phone number or email address must report an invalid contact and leave the current view
+unchanged.
 
 #### Filtering by assignment
 
@@ -972,7 +1011,8 @@ restore the full sorted view. Restarting restores stored order and clears these 
 #### Combined assignment filtering
 
 Using the participants and restored Beth assignments above, run `filter-all g/Logistics r/Facilitator`: only Beth
-should appear. Adding `a/Campfire` should retain Beth; replacing it with `a/Nonexistent` should show zero matches.
+should appear. Run `filter-all g/Logistics r/Facilitator a/Campfire` to retain Beth, then
+`filter-all g/Logistics r/Facilitator a/Nonexistent` to show zero matches.
 Run `filter g/Nonexistent`, then `filter-all r/facilitator g/logistics`: Beth should reappear. After `sort name`,
 run the combined query and `view 1` to verify the displayed index points to Beth. `list` restores everyone in sorted
 order. Save/restart and check that all original participant fields and stored order remain unchanged.
@@ -1024,7 +1064,7 @@ Each indexed command should report an invalid displayed index, and the stored pa
 
 ### Saving, exiting, and restarting
 
-1. Complete the core-operation and v1.3 workflow tests above.
+1. Complete the core participant operations and assignment/query workflows above.
 1. Run `exit` and wait for the window to close.
 1. From the same folder, run `java -jar addressbook.jar`.
 1. Run `find Beth`, then `view 1`.
