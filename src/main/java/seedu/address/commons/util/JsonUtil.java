@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,13 +20,14 @@ import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.exceptions.DataLoadingException;
 
 /**
- * Converts a Java object instance to JSON and vice versa
+ * Converts Java objects to JSON and reads JSON without duplicate object field names.
  */
 public class JsonUtil {
 
     private static final Logger logger = LogsCenter.getLogger(JsonUtil.class);
 
     private static ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules()
+            .configure(JsonParser.Feature.STRICT_DUPLICATE_DETECTION, true)
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
@@ -43,10 +45,11 @@ public class JsonUtil {
     /**
      * Returns the JSON object from the given file or {@code Optional.empty()} object if the file is not found.
      * If any values are missing from the file, default values will be used, as long as the file is a valid JSON file.
+     * Rejects repeated field names within the same JSON object without changing the file.
      *
      * @param filePath cannot be null.
      * @param classOfObjectToDeserialize JSON file has to correspond to the structure in the class given here.
-     * @throws DataLoadingException if loading of the JSON file failed.
+     * @throws DataLoadingException if reading or parsing fails, including duplicate field names or a null root.
      */
     public static <T> Optional<T> readJsonFile(
             Path filePath, Class<T> classOfObjectToDeserialize) throws DataLoadingException {
@@ -90,9 +93,14 @@ public class JsonUtil {
 
 
     /**
-     * Converts a given string representation of JSON data to an instance of a class
-     * @param <T> The generic type to create an instance of
-     * @return The instance of T with the specified values in the JSON string
+     * Converts JSON text to an instance of the given class, rejecting duplicate object field names.
+     * Duplicate detection also applies to nested objects and fields ignored by the target class.
+     *
+     * @param json The JSON text to deserialize.
+     * @param instanceClass The target class for deserialization.
+     * @param <T> The type of the resulting instance.
+     * @return The deserialized value, or null for a JSON null root.
+     * @throws IOException if parsing fails, including repeated field names within the same JSON object.
      */
     public static <T> T fromJsonString(String json, Class<T> instanceClass) throws IOException {
         return objectMapper.readValue(json, instanceClass);

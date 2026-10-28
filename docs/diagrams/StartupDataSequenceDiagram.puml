@@ -24,6 +24,7 @@ alt genuinely absent file
 else existing readable file
     Json -> JsonUtil : readJsonFile(path)
     activate JsonUtil
+    note over JsonUtil : Jackson rejects duplicate keys within each object,\nincluding nested and escaped field names.
     JsonUtil --> Json : parsed JSON or DataLoadingException
     deactivate JsonUtil
     note over Json : Convert valid values to model data;

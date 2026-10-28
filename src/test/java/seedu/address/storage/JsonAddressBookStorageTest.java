@@ -1,5 +1,6 @@
 package seedu.address.storage;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -161,6 +162,51 @@ public class JsonAddressBookStorageTest {
 
         assertThrows(DataLoadingException.class, () -> new JsonAddressBookStorage(filePath).readAddressBook());
         assertEquals("{\"persons\":null}", Files.readString(filePath));
+    }
+
+    @Test
+    public void readAddressBook_duplicatePersonsKeys_preservesBytes() throws Exception {
+        assertDuplicateKeysRejected("""
+                {"persons": [
+                  {"name":"Alice", "phone":"91234567", "email":"alice@example.com",
+                   "address":"Kent Ridge", "tags":[]}
+                ], "persons": []}
+                """);
+    }
+
+    @Test
+    public void readAddressBook_duplicateEmptyOrEscapedPersonsKeys_preservesBytes() throws Exception {
+        assertDuplicateKeysRejected("{\"persons\":[],\"persons\":[]}");
+        assertDuplicateKeysRejected("{\"persons\":[],\"per\\u0073ons\":[]}");
+    }
+
+    @Test
+    public void readAddressBook_duplicateParticipantFields_preservesBytes() throws Exception {
+        assertDuplicateKeysRejected("""
+                {"persons": [{"name":"Alice", "phone":"91234567", "email":"alice@example.com",
+                  "address":"Kent Ridge", "tags":[], "remark":"Original note", "remark":""}]}
+                """);
+    }
+
+    @Test
+    public void readAddressBook_distinctUnknownFields_successWithoutChangingBytes() throws Exception {
+        Path filePath = testFolder.resolve("FutureFields.json");
+        Files.writeString(filePath, "{\"persons\":[],\"future\":{\"first\":1,\"second\":2}}");
+        byte[] originalBytes = Files.readAllBytes(filePath);
+
+        ReadOnlyAddressBook loaded = new JsonAddressBookStorage(filePath).readAddressBook().orElseThrow();
+
+        assertEquals(new AddressBook(), new AddressBook(loaded));
+        assertArrayEquals(originalBytes, Files.readAllBytes(filePath));
+    }
+
+    private void assertDuplicateKeysRejected(String content) throws Exception {
+        Path filePath = testFolder.resolve("DuplicateKeys.json");
+        Files.writeString(filePath, content);
+        byte[] originalBytes = Files.readAllBytes(filePath);
+
+        assertThrows(DataLoadingException.class, () -> new JsonAddressBookStorage(filePath).readAddressBook());
+        assertArrayEquals(originalBytes, Files.readAllBytes(filePath));
     }
 
     @Test

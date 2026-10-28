@@ -202,6 +202,15 @@ dangling final symbolic link produces `DataLoadingException` instead. The extra 
 entries with `IllegalValueException`; storage translates that checked validation failure to `DataLoadingException`
 without masking unrelated runtime errors during model conversion.
 
+The shared `JsonUtil` mapper enables Jackson's `JsonParser.Feature.STRICT_DUPLICATE_DETECTION`. Repeated field
+names within the same object throw a parsing exception before model construction, including duplicate `persons`
+arrays, nested participant fields, ignored fields and equivalent escaped key names. Jackson compares decoded field
+names per object, so different participants can each have a `name` field. Unknown fields with unique names remain
+ignored, and missing optional fields retain their legacy defaults. `readJsonFile` wraps the parsing failure in
+`DataLoadingException`; neither the read nor the startup blocker repairs or rewrites participant data.
+This shared parsing rule also rejects duplicate keys in preferences. The existing `initPrefs` fallback still uses
+and saves default preferences on a load failure; participant-file preservation is not a preference-file guarantee.
+
 On a load failure, `MainApp` retains an actionable error containing the absolute data path and does not construct
 `ModelManager`, `LogicManager` or `UiManager`. Its `start` method shows an error dialog, then exits when the user
 closes it. The participant file is not modified, and `stop` skips preference saving when initialization did not
@@ -210,6 +219,11 @@ correct the input or restore a known-good copy before restarting.
 Read failures log the file path and exception type, not the malformed JSON or participant values.
 
 ![Participant startup and load failure](images/StartupDataSequenceDiagram.png)
+
+`JsonAddressBookStorageTest` exercises duplicate arrays, matching empty arrays, escaped key names and nested remark
+fields with byte-for-byte preservation checks. `JsonUtilTest` covers known and ignored duplicate fields, while
+`MainAppTest` verifies repeated startup attempts leave model, logic and UI unavailable and skip shutdown saving.
+Existing legacy, empty-directory, multi-participant and full-field persistence tests remain compatibility controls.
 
 ### Common classes
 
@@ -1095,3 +1109,16 @@ value (for example, an invalid phone number) and with a directory at the data-fi
 afterward. Permission failures vary by OS; the automated startup tests inject a deterministic read failure and verify
 the same blocked behavior without relying on `chmod`.
 Automated tests also cover a top-level JSON `null`, null person and tag entries, and unchanged file bytes.
+
+Repeat the disposable-file test with the following ambiguous JSON. The second `persons` array must not silently
+replace the first; both startup attempts must fail without changing the file or opening an editable directory:
+
+```json
+{"persons":[{"name":"Alice","phone":"81234567","email":"alice@example.com",
+  "address":"Kent Ridge","tags":[]}],"persons":[]}
+```
+
+Back up the ambiguous file before repairing it. In this disposable example, keep Alice in a single `persons` array,
+restart and confirm `list` shows Alice. Also check that a valid `{"persons":[]}` still opens an empty directory and
+that distinct participant objects can each contain the same field names. These controls distinguish duplicate keys
+inside one object from ordinary repeated field names across participants.
