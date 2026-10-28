@@ -1,14 +1,17 @@
 @startuml
+!pragma layout smetana
 hide circle
 skinparam classAttributeIconSize 0
 
-Class "<<interface>>\nParser" as Parser
+Class "<<interface>>\nParser<RemarkCommand>" as Parser
 Class RemarkCommandParser {
-  +parse(): RemarkCommand
+  +parse(args: String): RemarkCommand
 }
-Class ParserException
+Class ParseException
+Class RemarkCommand
 
 RemarkCommandParser .up.|> Parser
-Parser .right.> ParserException: throws >
-RemarkCommandParser .right.> ParserException: throws >
+Parser .right.> ParseException: throws >
+RemarkCommandParser .right.> ParseException: throws >
+RemarkCommandParser .down.> RemarkCommand: creates >
 @enduml

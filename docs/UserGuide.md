@@ -45,6 +45,8 @@ ZoomAddress is a **desktop participant-management application for directors of l
 
    * `view 3` : Displays all stored details of the 3rd participant shown in the current list.
 
+   * `remark 3 r/Needs wheelchair access` : Records a note for the 3rd displayed participant.
+
    * `find-contact 98765432` : Finds participants with the exact phone number `98765432`.
 
    * `clear` : Deletes all participant records.
@@ -69,7 +71,7 @@ ZoomAddress is a **desktop participant-management application for directors of l
 4. Enter `filter-all g/Logistics r/Facilitator` to find participants who have **both** assignments. If you need
    only one category, use `filter g/Logistics` instead.
 5. Enter `sort name` to order the current results by name. Use the indices shown **after** sorting for
-   `view`, `edit`, or `delete`. Sorting and filtering change the view, not participant fields.
+   `view`, `edit`, `remark`, or `delete`. Sorting and filtering change the view, not participant fields.
 
 The screenshots in this guide use synthetic participants from the v1.4 release. They show the application content,
 not OS window decorations; fonts may differ by platform.
@@ -105,9 +107,9 @@ not OS window decorations; fonts may differ by platform.
 
 *Invalid input such as `list extra` shows a command-specific usage message without changing the displayed list.*
 
-ZoomAddress adds `view`, `assign-group`, `assign-role`, `assign-activity`, `unassign`, `unassigned`, `sort`, `filter`, `filter-all`, and
-`find-contact` to the original AddressBook-Level3 commands. The other commands below retain their familiar
-AddressBook workflow, with participant-focused wording.
+ZoomAddress adds `view`, `remark`, `assign-group`, `assign-role`, `assign-activity`, `unassign`, `unassigned`,
+`sort`, `filter`, `filter-all`, and `find-contact` to the original AddressBook-Level3 commands. The other commands
+below retain their familiar AddressBook workflow, with participant-focused wording.
 
 ### Viewing help: `help`
 
@@ -201,6 +203,38 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`
 Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st participant to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd participant to be `Betsy Crower` and clears all existing tags.
+
+### Recording or clearing a participant remark: `remark`
+
+Sets, replaces, or clears the free-text remark stored for one participant.
+
+Format: `remark INDEX r/REMARK`
+
+* `INDEX` is the positive integer shown beside the participant in the current list. After a search, filter, or
+  `sort name`, use the index in that displayed view.
+* `REMARK` may contain spaces, punctuation, and Unicode text. Surrounding whitespace is removed. Use an empty `r/`
+  to clear the existing remark: `remark INDEX r/`.
+* The command must contain one recognized `r/` prefix. In this command it means remark; in `assign-role`, `filter`,
+  and `filter-all`, it means role. The shared command tokenizer recognizes a prefix only when it is immediately
+  preceded by the ASCII space character. Therefore, a second ASCII-space-delimited `r/` is rejected as a duplicate;
+  an `r/` preceded by a tab or another Unicode whitespace character remains part of the remark text.
+* The change is saved automatically. The participant's name, contact details, tags, group, role, and activity are
+  preserved.
+* The current search, filter, and sort order are also preserved. This lets you update several participants in a
+  focused view without having to run the query again.
+* A successful non-empty update reports `Updated remark for NAME.`; clearing reports `Cleared remark for NAME.`
+
+Examples:
+* `remark 2 r/Needs wheelchair access` records the note for the second displayed participant.
+* `remark 1 r/Check in at 09:00; use entrance A/B.` accepts spaces, punctuation, and an embedded slash.
+* `remark 2 r/` clears the second displayed participant's remark.
+
+Invalid examples:
+* `remark`, `remark 1`, and `remark one r/Note` show the command format because the index or `r/` is missing or
+  malformed.
+* `remark 1 r/First note r/Second note` is rejected because `r/` is repeated.
+* `remark 99 r/Note` reports that the participant index is invalid when fewer than 99 participants are displayed.
+  Invalid commands leave both the current view and all participant data unchanged.
 
 ### Assigning an activity: `assign-activity`
 
@@ -518,7 +552,8 @@ succeeds. Existing participant and assignment fields retain their format.
 Participant records also support an optional text `remark` field. Older data files with no `remark`, or a JSON
 `null` remark, load with empty remark text; reading does not rewrite the file. A later successful save writes the
 remark as a JSON string, including `""` for no remark. Existing edit, assignment and unassignment commands preserve
-this text. This storage increment does not yet add a remark command or show remarks on participant cards.
+this text. Use the `remark` command to update it; participant cards may not show the text, so use `view INDEX` to
+check the exact saved remark.
 Numbers, booleans, arrays and objects are not valid remark values. If you manually edit the data file, enclose
 remark text in JSON double quotes; otherwise ZoomAddress refuses to load that file without rewriting it.
 Restore a known-good backup or correct the invalid value before reopening the application.
@@ -599,6 +634,7 @@ Action | Format, Examples
 **Filter by combined assignments** | `filter-all g/GROUP r/ROLE [a/ACTIVITY]` (any two or three categories)<br> e.g., `filter-all g/Logistics r/Facilitator`
 **Find incomplete allocations** | `unassigned g/` or `unassigned r/` or `unassigned a/`
 **List** | `list`
+**Remark** | `remark INDEX r/REMARK` or `remark INDEX r/` to clear<br> e.g., `remark 2 r/Needs wheelchair access`
 **Sort** | `sort name`
 **View** | `view INDEX`<br> e.g., `view 3`
 **Help** | `help`
