@@ -5,12 +5,10 @@ title: User Guide
 
 ZoomAddress is a **desktop participant-management application for directors of large-scale computing events**. It is optimized for keyboard-driven commands while retaining the benefits of a graphical interface, allowing event directors to manage participant records quickly and locally.
 
-**Using the v1.4.1 release?** The Quick Start below installs v1.4.1, but the Features section also describes
-changes intended for v1.5, including `remark` and quoted single-criterion `filter` values. Those newer commands
-will not work in the v1.4.1 JAR. Use the
+This guide describes **v1.5**. If you are using v1.4.1, use the
 [archived v1.4.1 User Guide](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4.1/UserGuide-e493f549.md)
-for instructions that match your installed JAR. The installed app's Help link still opens this mutable online
-guide, so check the version shown in the application before following an example below.
+for instructions that match your installed JAR. The app's Help link opens this online guide, which can change
+between releases, so check the version shown in the application before following an example.
 
 * Table of Contents
 {:toc}
@@ -22,9 +20,9 @@ guide, so check the version shown in the application before following an example
 1. Ensure that Java `25` is installed on your computer.<br>
    **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 
-1. Open the [v1.4.1 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.4.1) and download the JAR matching your **Java runtime architecture**:
-   * Windows x64, Linux x64 or macOS with x64 Java 25 (including Apple Silicon via Rosetta): `ZoomAddress-v1.4.1.jar`.
-   * Apple Silicon macOS with native arm64 Java 25: `ZoomAddress-v1.4.1-mac-aarch64.jar`. **The older v1.4 JAR does not work with native arm64 Java**; do not use it as a fallback.
+1. Open the [v1.5 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.5) and download the JAR matching your **Java runtime architecture**:
+   * Windows x64, Linux x64 or macOS with x64 Java 25 (including Apple Silicon via Rosetta): `ZoomAddress-v1.5.jar`.
+   * Apple Silicon macOS with native arm64 Java 25: `ZoomAddress-v1.5-mac-aarch64.jar`. Do not use the x64 JAR with native arm64 Java.
    * Run `java -XshowSettings:properties -version` and find `os.arch` to check the active Java runtime: `amd64` or `x86_64` means x64; `aarch64` or `arm64` means arm64. Choose by this value, not the Mac's hardware alone.
    * Check the release notes and `SHA256SUMS.txt` for the tested commit, checksums and limitations.
 
@@ -34,8 +32,8 @@ guide, so check the version shown in the application before following an example
    the same folder each time to reopen the same participant data.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and use the command matching the file you downloaded:
-   * x64 Java: `java -jar ZoomAddress-v1.4.1.jar`.
-   * Native arm64 Java on Apple Silicon: `java -jar ZoomAddress-v1.4.1-mac-aarch64.jar`.
+   * x64 Java: `java -jar ZoomAddress-v1.5.jar`.
+   * Native arm64 Java on Apple Silicon: `java -jar ZoomAddress-v1.5-mac-aarch64.jar`.
 
    The ZoomAddress window should appear in a few seconds with some sample data.
 
@@ -77,13 +75,13 @@ guide, so check the version shown in the application before following an example
 5. Enter `sort name` to order the current results by name. Use the indices shown **after** sorting for
    `view`, `edit`, `remark`, or `delete`. Sorting and filtering change the view, not participant fields.
 
-The screenshots in this guide use synthetic participants from the v1.4 release. They show the application content,
-not OS window decorations; fonts may differ by platform.
+The screenshots use synthetic participants and show the JavaFX application content, not OS window decorations;
+fonts may differ by platform.
 
-![Directory after list, showing participant names, displayed indices and assignments](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4/01-participant-directory.png)
+![Directory after list, showing four participants, displayed indices, assignments and remarks](images/Ui.png)
 
-*A `list` result: cards show assigned groups, roles and activities where present. A missing group appears as
-`Unassigned`; a missing role or activity is omitted from the card.*
+*A `list` result: cards show assignments and non-empty remarks. Chen and Devi still need groups, shown as
+`Unassigned`; missing roles or activities are omitted from their cards.*
 
 <div markdown="block" class="alert alert-info">
 
@@ -108,7 +106,7 @@ not OS window decorations; fonts may differ by platform.
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </div>
 
-![Invalid list command with extra text and a usage message; the existing participant view remains visible](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4/04-invalid-command.png)
+![Invalid list command with extra text and a usage message; the two unassigned participants remain visible](images/invalidCommand.png)
 
 *Invalid input such as `list extra` shows a command-specific usage message without changing the displayed list.*
 
@@ -243,9 +241,9 @@ Examples:
 * `remark 1 r/Check in at 09:00; use entrance A/B.` accepts spaces, punctuation, and an embedded slash.
 * `remark 2 r/` clears the second displayed participant's remark.
 
-![Participant card with a wrapped accessibility remark below the role](images/remarkCard.png)
+![Participant card with a wrapped arrival and registration remark below the role](images/remarkCard.png)
 
-*A JavaFX participant-card capture from the v1.5 feature build, using synthetic data. The note wraps within
+*A JavaFX participant-card capture using synthetic data. The note wraps within
 the card; this component image is not a full application-window screenshot.*
 
 Invalid examples:
@@ -417,7 +415,7 @@ Examples:
 * `filter-all g/"Team A/B" r/Facilitator` matches the literal group label `Team A/B` and role Facilitator.
 * `filter-all g/"Team r/Lead" r/"Say \"Hi\" \\ Lead"` matches group `Team r/Lead` and role `Say "Hi" \ Lead`.
 
-![Combined filter result with two participants matching Logistics and Facilitator](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4/02-combined-filter.png)
+![Combined filter result with Alex and Beth matching Logistics and Facilitator](images/combinedFilter.png)
 
 *A `filter-all g/Logistics r/Facilitator` result: only participants satisfying both criteria remain visible.*
 
@@ -465,7 +463,7 @@ Examples:
 * `unassigned a/` shows everyone without an activity. Use the resulting displayed index for `view`, `assign-activity`,
   `edit`, or other index-based commands.
 
-![Unassigned group query showing two participants without a group](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4/03-unassigned-groups.png)
+![Unassigned group query showing Chen and Devi without a group](images/unassignedGroups.png)
 
 *An `unassigned g/` result: a participant may still have a role or activity while lacking a group.*
 
@@ -499,7 +497,7 @@ Examples:
   each participant's group. The screenshot illustrates the layout, not this specific
   search result.
 
-![Current participant-card layout showing group, role, and activity fields](images/participantDirectory-v1.4.1.png)
+![Current directory showing participant assignments and non-empty remarks](images/Ui.png)
 
 ### Locating participants by contact information: `find-contact`
 
