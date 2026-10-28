@@ -45,22 +45,36 @@ public class LogicManager implements Logic {
 
     @Override
     public CommandResult execute(String commandText) throws CommandException, ParseException {
-        logger.info("----------------[USER COMMAND][" + commandText + "]");
+        Command command;
+        try {
+            command = addressBookParser.parseCommand(commandText);
+        } catch (ParseException e) {
+            logger.info("Command parsing rejected");
+            throw e;
+        }
 
+        // Use the parsed implementation type, never user input or Command.toString().
+        String commandType = command.getClass().getSimpleName();
         CommandResult commandResult;
-        Command command = addressBookParser.parseCommand(commandText);
-        commandResult = command.execute(model);
+        try {
+            commandResult = command.execute(model);
+        } catch (CommandException e) {
+            logger.info(commandType + ": rejected");
+            throw e;
+        }
 
         try {
             storage.saveAddressBook(model.getAddressBook());
         } catch (AccessDeniedException e) {
+            logger.info(commandType + ": save failed");
             logSaveFailure(e);
             throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
         } catch (IOException ioe) {
+            logger.info(commandType + ": save failed");
             logSaveFailure(ioe);
             throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
         }
-
+        logger.info(commandType + ": succeeded");
         return commandResult;
     }
 
