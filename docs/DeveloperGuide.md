@@ -264,8 +264,20 @@ or a missing assignment produces an error without modifying the participant.
 
 The `remark INDEX r/TEXT` command sets or replaces the selected participant's remark; an empty `r/` clears it.
 `AddressBookParser` delegates to `RemarkCommandParser`, which tokenizes the single `r/` prefix, rejects duplicate or
-missing prefixes, and parses the positive displayed index. It strips surrounding Unicode whitespace from the remark
-text after tokenization. Empty text is deliberately valid because it represents a clear operation.
+missing prefixes, and parses the positive displayed index. The shared tokenizer recognizes prefixes only when they
+are preceded by an ASCII space. Consequently, a second ASCII-space-delimited `r/` is rejected, while an `r/`
+preceded by a tab or another Unicode whitespace character remains part of the remark text. The parser strips
+surrounding Unicode whitespace from the remark text after tokenization. Empty text is deliberately valid because it
+represents a clear operation.
+
+The following class diagram shows the parser's contract and its creation of a `RemarkCommand`:
+
+![Classes used to parse the remark command](images/ParserClass.png)
+
+The parsed command owns one displayed `Index` and one immutable `Remark`. During execution, it uses the `Model` API
+to replace only the selected participant:
+
+![Classes used to execute the remark command](images/RemarkClass.png)
 
 `RemarkCommand` resolves the index against `Model.getFilteredPersonList()`, so the command uses the exact indices
 shown after filtering and sorting. It constructs a replacement `Person` with the new `Remark` and every other field
@@ -276,8 +288,9 @@ the existing `LogicManager` save path persists the new remark.
 
 `RemarkCommandTest` covers adding, replacing and clearing remarks, full-field preservation, filtered/sorted indices,
 view preservation and invalid indices. `RemarkCommandParserTest` covers empty remarks, missing and malformed indices,
-missing and duplicate prefixes, punctuation and Unicode whitespace. `RemarkCommandIntegrationTest` routes the real
-command through logic and JSON storage, then reloads after add, replace and clear operations.
+missing and duplicate prefixes, punctuation, Unicode whitespace stripping, and ASCII-space versus Unicode-space
+prefix boundaries. `RemarkCommandIntegrationTest` routes the real command through logic and JSON storage, then
+reloads after add, replace and clear operations.
 
 ### Sorting participants by name
 

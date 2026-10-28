@@ -214,8 +214,10 @@ Format: `remark INDEX r/REMARK`
   `sort name`, use the index in that displayed view.
 * `REMARK` may contain spaces, punctuation, and Unicode text. Surrounding whitespace is removed. Use an empty `r/`
   to clear the existing remark: `remark INDEX r/`.
-* Supply `r/` exactly once. In this command it means remark; in `assign-role`, `filter`, and `filter-all`, it means
-  role. A second whitespace-delimited `r/` is treated as a duplicate prefix, not as remark text.
+* The command must contain one recognized `r/` prefix. In this command it means remark; in `assign-role`, `filter`,
+  and `filter-all`, it means role. The shared command tokenizer recognizes a prefix only when it is immediately
+  preceded by the ASCII space character. Therefore, a second ASCII-space-delimited `r/` is rejected as a duplicate;
+  an `r/` preceded by a tab or another Unicode whitespace character remains part of the remark text.
 * The change is saved automatically. The participant's name, contact details, tags, group, role, and activity are
   preserved.
 * The current search, filter, and sort order are also preserved. This lets you update several participants in a

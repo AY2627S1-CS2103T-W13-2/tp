@@ -56,8 +56,16 @@ public class RemarkCommandParserTest {
     }
 
     @Test
-    public void parse_repeatedRemarkPrefix_failure() {
+    public void parse_repeatedRemarkPrefixSeparatedByAsciiSpace_failure() {
         assertParseFailure(parser, " 1 r/First note r/Second note",
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_REMARK));
+    }
+
+    @Test
+    public void parse_secondRemarkPrefixSeparatedByNonAsciiSpace_success() {
+        assertParseSuccess(parser, " 1 r/First note\tr/Second note",
+                new RemarkCommand(INDEX_FIRST_PERSON, new Remark("First note\tr/Second note")));
+        assertParseSuccess(parser, " 1 r/First note\u2003r/Second note",
+                new RemarkCommand(INDEX_FIRST_PERSON, new Remark("First note\u2003r/Second note")));
     }
 }
