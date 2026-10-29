@@ -846,17 +846,17 @@ All required JavaFX modules are explicit, with host-selected transitive classifi
   JavaFX SDK cannot hide missing dependencies. Native Apple Silicon startup must still
   be tested on a Mac with a fresh writable `-Djavafx.cachedir=...` directory.
 
-Copy each build output before running the next `clean`. The v1.4.1 release copies are named
-`ZoomAddress-v1.4.1.jar` and `ZoomAddress-v1.4.1-mac-aarch64.jar`; record each SHA-256
-and the exact commit independently. These are distinct artifacts: test each on its
-supported platform and audit the User Guide against the exact packaged JARs. A
-checksum or approval for one artifact does not establish the identity or behavior
-of a rebuilt artifact.
+Copy each build output before running the next `clean`. The v1.5 release artifacts
+are named `ZoomAddress-v1.5.jar` and `ZoomAddress-v1.5-mac-aarch64.jar`. Record
+each SHA-256 and the exact source commit in the release evidence. These are
+distinct artifacts: test each on its supported platform and audit the User Guide
+against the exact packaged JARs. A checksum or approval for one artifact does
+not establish the identity or behavior of a rebuilt artifact.
 
-The published [v1.4.1 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.4.1)
-uses commit `8bd9682b5c51bb80f6a6038924238ba443e2f17b`; its two JARs, checksums,
-source archives and screenshots are release assets. For a future release, align
-`MainApp.VERSION`, the tag, asset names and both guides before building. Verify that
+The previous [v1.4.1 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.4.1)
+uses commit `8bd9682b5c51bb80f6a6038924238ba443e2f17b`; its assets are not
+substitutes for the v1.5 candidate. Before publishing v1.5, align
+`MainApp.VERSION`, the tag, asset names and both guides. Verify that
 the tag and GitHub-generated source archives identify the build commit, then
 download and hash the public JARs, check screenshot and guide links, and record the
 tested platforms and limitations. Never move a published tag or replace a tested JAR
