@@ -5,6 +5,12 @@ title: User Guide
 
 ZoomAddress is a **desktop participant-management application for directors of large-scale computing events**. It is optimized for keyboard-driven commands while retaining the benefits of a graphical interface, allowing event directors to manage participant records quickly and locally.
 
+This guide describes **v1.5**. If you are using v1.4.1, use the
+[archived v1.4.1 User Guide](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4.1/UserGuide-e493f549.md)
+for instructions that match your installed JAR. The app's Help window shows a URL you can copy to open the online
+guide; it does not open the browser automatically. The online guide can change between releases, so compare this
+guide's version with the downloaded JAR's original filename or release notes before following an example.
+
 * Table of Contents
 {:toc}
 
@@ -15,9 +21,9 @@ ZoomAddress is a **desktop participant-management application for directors of l
 1. Ensure that Java `25` is installed on your computer.<br>
    **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 
-1. Open the [v1.4.1 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.4.1) and download the JAR matching your **Java runtime architecture**:
-   * Windows x64, Linux x64 or macOS with x64 Java 25 (including Apple Silicon via Rosetta): `ZoomAddress-v1.4.1.jar`.
-   * Apple Silicon macOS with native arm64 Java 25: `ZoomAddress-v1.4.1-mac-aarch64.jar`. **The older v1.4 JAR does not work with native arm64 Java**; do not use it as a fallback.
+1. Open the [v1.5 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.5) and download the JAR matching your **Java runtime architecture**:
+   * Windows x64, Linux x64 or macOS with x64 Java 25 (including Apple Silicon via Rosetta): `ZoomAddress-v1.5.jar`.
+   * Apple Silicon macOS with native arm64 Java 25: `ZoomAddress-v1.5-mac-aarch64.jar`. Do not use the x64 JAR with native arm64 Java.
    * Run `java -XshowSettings:properties -version` and find `os.arch` to check the active Java runtime: `amd64` or `x86_64` means x64; `aarch64` or `arm64` means arm64. Choose by this value, not the Mac's hardware alone.
    * Check the release notes and `SHA256SUMS.txt` for the tested commit, checksums and limitations.
 
@@ -27,8 +33,8 @@ ZoomAddress is a **desktop participant-management application for directors of l
    the same folder each time to reopen the same participant data.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and use the command matching the file you downloaded:
-   * x64 Java: `java -jar ZoomAddress-v1.4.1.jar`.
-   * Native arm64 Java on Apple Silicon: `java -jar ZoomAddress-v1.4.1-mac-aarch64.jar`.
+   * x64 Java: `java -jar ZoomAddress-v1.5.jar`.
+   * Native arm64 Java on Apple Silicon: `java -jar ZoomAddress-v1.5-mac-aarch64.jar`.
 
    The ZoomAddress window should appear in a few seconds with some sample data.
 
@@ -41,17 +47,14 @@ ZoomAddress is a **desktop participant-management application for directors of l
 
    * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a participant named `John Doe` to ZoomAddress.
 
-   * `delete 3` : Deletes the 3rd participant shown in the current list.
-
    * `view 3` : Displays all stored details of the 3rd participant shown in the current list.
-
-   * `remark 3 r/Needs wheelchair access` : Records a note for the 3rd displayed participant.
 
    * `find-contact 98765432` : Finds participants with the exact phone number `98765432`.
 
-   * `clear` : Deletes all participant records.
-
    * `exit` : Exits the app.
+
+   `delete` and `clear` are described below, but are deliberately omitted from this starter list because
+   they permanently remove records without confirmation or undo.
 
 1. Refer to the [Features](#features) section below for details of each command.
 
@@ -73,13 +76,13 @@ ZoomAddress is a **desktop participant-management application for directors of l
 5. Enter `sort name` to order the current results by name. Use the indices shown **after** sorting for
    `view`, `edit`, `remark`, or `delete`. Sorting and filtering change the view, not participant fields.
 
-The screenshots in this guide use synthetic participants from the integrated v1.5 candidate. They show real
-JavaFX application content from that packaged JAR, not OS window decorations; fonts may differ by platform.
-The candidate is not yet a published release.
+The screenshots use synthetic participants and show the JavaFX application content, not OS window decorations;
+fonts may differ by platform.
 
 ![Directory after list, showing four participants, displayed indices, assignments and remarks](images/Ui.png)
 
-*A `list` result: participant cards show assignments and non-empty remarks. Chen and Devi still need groups.*
+*A `list` result: cards show assignments and non-empty remarks. Chen and Devi still need groups, shown as
+`Unassigned`; missing roles or activities are omitted from their cards.*
 
 <div markdown="block" class="alert alert-info">
 
@@ -108,13 +111,12 @@ The candidate is not yet a published release.
 
 *Invalid input such as `list extra` shows a command-specific usage message without changing the displayed list.*
 
-ZoomAddress adds `view`, `remark`, `assign-group`, `assign-role`, `assign-activity`, `unassign`, `unassigned`,
-`sort`, `filter`, `filter-all`, and `find-contact` to the original AddressBook-Level3 commands. The other commands
-below retain their familiar AddressBook workflow, with participant-focused wording.
+The commands below cover both participant records and event assignments. Use the command summary at the end of
+this guide when you need a quick syntax reminder.
 
 ### Viewing help: `help`
 
-Opens a window with a link to this ZoomAddress User Guide.
+Opens a window showing the URL of this ZoomAddress User Guide. Use **Copy URL** to copy it into a browser.
 
 Format: `help`
 
@@ -128,6 +130,10 @@ Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
 A participant can have any number of tags, including zero.
 </div>
+
+ZoomAddress currently identifies duplicates by **exact name**. It rejects a second participant with the same
+capitalization and spelling, even if their contact details differ; a case-only variation of the name is treated as
+different. Check the displayed directory before adding someone who may share a name with an existing participant.
 
 Examples:
 * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
@@ -238,7 +244,7 @@ Examples:
 
 ![Participant card with a wrapped arrival and registration remark below the role](images/remarkCard.png)
 
-*A JavaFX participant-card capture from the integrated v1.5 candidate, using synthetic data. The note wraps within
+*A JavaFX participant-card capture using synthetic data. The note wraps within
 the card; this component image is not a full application-window screenshot.*
 
 Invalid examples:
@@ -259,6 +265,8 @@ Format: `assign-activity INDEX a/ACTIVITY`
 * `ACTIVITY` must not be blank. Names can contain spaces and punctuation; surrounding whitespace is removed.
 * Supply `a/` exactly once. In this command it means activity; in `add` and `edit`, it still means address.
 * The assignment is saved automatically and retained after restarting or editing the participant's other details. Assigning or replacing an activity preserves their role; assigning or replacing a role preserves their activity.
+* The current filter remains active. If the new activity no longer matches it (for example, after `unassigned a/`),
+  the participant disappears from the results. Check displayed indices before another index-based command.
 * Records created before activity assignments were introduced start without an activity. Multiple activities and
   attendance are not supported yet.
 
@@ -276,6 +284,7 @@ Format: `assign-role INDEX r/ROLE`
 * The index **must be a positive integer** 1, 2, 3, …​ and refer to a displayed participant.
 * The role must contain at least one non-whitespace character.
 * Assigning another role to the same participant replaces the existing role.
+* A successful assignment restores the full directory view. Check displayed indices before assigning another role.
 
 Example:
 * `assign-role 2 r/Logistics Lead` assigns the role `Logistics Lead` to the second displayed participant.
@@ -290,6 +299,7 @@ Format: `assign-group INDEX g/GROUP`
 * The index refers to the index number shown in the displayed participant list and must be a positive integer.
 * `GROUP` must not be blank and may contain spaces.
 * A participant can belong to at most one group. Assigning another group replaces the current group and preserves their role and activity.
+* A successful assignment restores the full directory view. Check displayed indices before assigning another group.
 * Managing a separate list of groups is not supported yet.
 
 Example:
@@ -305,6 +315,8 @@ Format: `unassign INDEX g/` or `unassign INDEX r/` or `unassign INDEX a/`
   shown in that filtered or sorted view.
 * Supply exactly one empty prefix: `g/` for group, `r/` for role, or `a/` for activity. Do not add a value after the prefix.
 * Clearing one assignment preserves the participant's name, contact details, tags, and other assignments. The change is saved automatically.
+* A successful `unassign` restores the full directory view. Check displayed indices before another index-based
+  command.
 * You cannot clear an assignment that is already absent.
 * On success, ZoomAddress names the removed value, for example,
   `Cleared group assignment 'Logistics' for Beth Lee.`
@@ -332,8 +344,8 @@ If Beth Lee has no group assignment, `unassign 2 g/` reports `Beth Lee has no gr
 
 ### Filtering participants by assignment: `filter`
 
-Filters the displayed participant list to one exact group, role, or activity. This helps event directors quickly find
-everyone sharing an assignment during event operations.
+Searches all stored participants for one exact group, role, or activity, replacing the current displayed view. This
+helps event directors quickly find everyone sharing an assignment during event operations.
 
 Formats:
 * `filter g/GROUP`
@@ -543,8 +555,10 @@ Clears all participant records from ZoomAddress.
 
 Format: `clear`
 
-`clear` takes effect immediately, with **no confirmation or undo**. Back up `data/addressbook.json` before using it
-on a directory you need to keep.
+`clear` deletes **all stored participants**, not just those currently shown. A search or filter can display an
+empty list while records still exist; `clear` will delete those hidden records too. It takes effect immediately,
+with **no confirmation or undo**. Enter `list` to inspect the full directory and back up `data/addressbook.json`
+before using `clear` on data you need to keep.
 
 ### Exiting the program: `exit`
 
@@ -654,10 +668,11 @@ Action | Format, Examples
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **Find by contact** | `find-contact PHONE_OR_EMAIL`<br> e.g., `find-contact alex@example.com`
 **Filter by assignment** | `filter g/GROUP` or `filter r/ROLE` or `filter a/ACTIVITY`<br> e.g., `filter g/Logistics`
-**Filter by combined assignments** | `filter-all g/GROUP r/ROLE [a/ACTIVITY]` (any two or three categories)<br> e.g., `filter-all g/Logistics r/Facilitator`
+**Filter by combined assignments** | `filter-all g/GROUP r/ROLE`, `filter-all g/GROUP a/ACTIVITY`, or `filter-all r/ROLE a/ACTIVITY`; optionally include the third distinct category<br> e.g., `filter-all g/Logistics r/Facilitator`
 **Find incomplete allocations** | `unassigned g/` or `unassigned r/` or `unassigned a/`
 **List** | `list`
 **Remark** | `remark INDEX r/REMARK` or `remark INDEX r/` to clear<br> e.g., `remark 2 r/Needs wheelchair access`
 **Sort** | `sort name`
 **View** | `view INDEX`<br> e.g., `view 3`
 **Help** | `help`
+**Exit** | `exit`
