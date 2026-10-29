@@ -7,8 +7,9 @@ ZoomAddress is a **desktop participant-management application for directors of l
 
 This guide describes **v1.5**. If you are using v1.4.1, use the
 [archived v1.4.1 User Guide](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4.1/UserGuide-e493f549.md)
-for instructions that match your installed JAR. The app's Help link opens this online guide, which can change
-between releases, so check the version shown in the application before following an example.
+for instructions that match your installed JAR. The app's Help window shows a URL you can copy to open the online
+guide; it does not open the browser automatically. The online guide can change between releases, so compare this
+guide's version with the downloaded JAR's original filename or release notes before following an example.
 
 * Table of Contents
 {:toc}
@@ -115,7 +116,7 @@ this guide when you need a quick syntax reminder.
 
 ### Viewing help: `help`
 
-Opens a window with a link to this ZoomAddress User Guide.
+Opens a window showing the URL of this ZoomAddress User Guide. Use **Copy URL** to copy it into a browser.
 
 Format: `help`
 
@@ -264,6 +265,8 @@ Format: `assign-activity INDEX a/ACTIVITY`
 * `ACTIVITY` must not be blank. Names can contain spaces and punctuation; surrounding whitespace is removed.
 * Supply `a/` exactly once. In this command it means activity; in `add` and `edit`, it still means address.
 * The assignment is saved automatically and retained after restarting or editing the participant's other details. Assigning or replacing an activity preserves their role; assigning or replacing a role preserves their activity.
+* The current filter remains active. If the new activity no longer matches it (for example, after `unassigned a/`),
+  the participant disappears from the results. Check displayed indices before another index-based command.
 * Records created before activity assignments were introduced start without an activity. Multiple activities and
   attendance are not supported yet.
 
@@ -281,6 +284,7 @@ Format: `assign-role INDEX r/ROLE`
 * The index **must be a positive integer** 1, 2, 3, …​ and refer to a displayed participant.
 * The role must contain at least one non-whitespace character.
 * Assigning another role to the same participant replaces the existing role.
+* A successful assignment restores the full directory view. Check displayed indices before assigning another role.
 
 Example:
 * `assign-role 2 r/Logistics Lead` assigns the role `Logistics Lead` to the second displayed participant.
@@ -295,6 +299,7 @@ Format: `assign-group INDEX g/GROUP`
 * The index refers to the index number shown in the displayed participant list and must be a positive integer.
 * `GROUP` must not be blank and may contain spaces.
 * A participant can belong to at most one group. Assigning another group replaces the current group and preserves their role and activity.
+* A successful assignment restores the full directory view. Check displayed indices before assigning another group.
 * Managing a separate list of groups is not supported yet.
 
 Example:
@@ -310,6 +315,8 @@ Format: `unassign INDEX g/` or `unassign INDEX r/` or `unassign INDEX a/`
   shown in that filtered or sorted view.
 * Supply exactly one empty prefix: `g/` for group, `r/` for role, or `a/` for activity. Do not add a value after the prefix.
 * Clearing one assignment preserves the participant's name, contact details, tags, and other assignments. The change is saved automatically.
+* A successful `unassign` restores the full directory view. Check displayed indices before another index-based
+  command.
 * You cannot clear an assignment that is already absent.
 * On success, ZoomAddress names the removed value, for example,
   `Cleared group assignment 'Logistics' for Beth Lee.`
@@ -337,8 +344,8 @@ If Beth Lee has no group assignment, `unassign 2 g/` reports `Beth Lee has no gr
 
 ### Filtering participants by assignment: `filter`
 
-Filters the displayed participant list to one exact group, role, or activity. This helps event directors quickly find
-everyone sharing an assignment during event operations.
+Searches all stored participants for one exact group, role, or activity, replacing the current displayed view. This
+helps event directors quickly find everyone sharing an assignment during event operations.
 
 Formats:
 * `filter g/GROUP`
