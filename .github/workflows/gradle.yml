@@ -72,7 +72,11 @@ jobs:
         shell: bash
         run: |
           cd candidate
-          shasum -a 256 -c SHA256SUMS.txt
+          if [ "$RUNNER_OS" = macOS ]; then
+            shasum -a 256 -c SHA256SUMS.txt
+          else
+            sha256sum -c SHA256SUMS.txt
+          fi
           cd ..
           ./gradlew verifyExternalMacNatives -PjavafxVerificationJar=candidate/addressbook.jar
           if ./gradlew verifyMacNatives -PuniversalNativesDir=prepared-natives -PjavafxVerificationJar=candidate/addressbook.jar > override.log 2>&1; then
