@@ -12,6 +12,10 @@ ZoomAddress is a **desktop participant-management application for directors of l
 
 ## Quick start
 
+The instructions below describe the published v1.4.1 release. A universal JAR is
+being prepared for a future release; CI candidates are for testing and do not
+replace these downloads until cross-platform testing and publication are complete.
+
 1. Ensure that Java `25` is installed on your computer.<br>
    **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 

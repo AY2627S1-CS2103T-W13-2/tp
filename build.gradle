@@ -49,7 +49,7 @@ task coverage(type: JacocoReport) {
     }
 }
 
-// mac and mac-aarch64 contain identically named native resources. Never merge both.
+// Keep host-compatible libraries for development; packaging replaces Mac natives.
 def nativeMacPlatform = System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('mac')
         && System.getProperty('os.arch') in ['aarch64', 'arm64'] ? 'mac-aarch64' : 'mac'
 def javafxMacPlatform = providers.gradleProperty('javafxMacPlatform').getOrElse(nativeMacPlatform)
@@ -81,11 +81,11 @@ dependencies {
 }
 
 shadowJar {
-    archiveFileName = javafxMacPlatform == 'mac-aarch64'
-            ? 'addressbook-mac-aarch64.jar' : 'addressbook.jar'
+    archiveFileName = 'addressbook.jar'
 }
 
 defaultTasks 'clean', 'test'
 
 ext.javafxMacPlatform = javafxMacPlatform
+apply from: 'gradle/universal-natives.gradle'
 apply from: 'gradle/native-verification.gradle'

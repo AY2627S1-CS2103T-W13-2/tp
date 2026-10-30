@@ -19,11 +19,11 @@ The following commands perform common Gradle tasks.
 * **`clean`**: Deletes the files created during the previous build tasks (e.g. files in the `build` folder).<br>
   For example: `./gradlew clean`
 
-* **`shadowJar`**: Uses the Shadow plugin to create `build/libs/addressbook-mac-aarch64.jar`
-  when building with native arm64 Java on macOS; other hosts produce `build/libs/addressbook.jar`.<br>
-  Use the explicit classifier and verification commands in
-  [Packaging JavaFX for macOS architectures](DeveloperGuide.md#packaging-javafx-for-macos-architectures)
-  to build both release variants. `./gradlew shadowJar` alone does not verify the native payloads.
+* **`shadowJar`**: Creates one `build/libs/addressbook.jar` with universal Mac natives.
+  Build on macOS with Apple command-line tools, or import the verified native artifact
+  from CI as described in
+  [Packaging JavaFX for macOS architectures](DeveloperGuide.md#packaging-javafx-for-macos-architectures).
+  Run `verifyMacNatives` before distributing a candidate.
 
 * **`run`**: Builds and runs the application.<br>
   **`runShadow`**: Builds the application as a fat JAR, then runs it.
@@ -78,16 +78,16 @@ Here are the steps to create a new release.
 
 1. Agree the release version and new tag in release tracking. Update `MainApp.VERSION`,
    guide filenames and release asset names before merging the release source.
-1. From that exact merged commit, build and verify **both** variants using the
-   [architecture-specific recipe](DeveloperGuide.md#packaging-javafx-for-macos-architectures).
-   Preserve each output before the next `clean`; record the full commit and each SHA-256.
-1. Test those exact artifacts on the supported runtimes (including native M1 startup
+1. From that exact merged commit, build and verify **one universal JAR** using the
+   [universal packaging recipe](DeveloperGuide.md#packaging-javafx-for-macos-architectures).
+   Preserve the output; record the full commit and its SHA-256.
+1. Test that exact artifact on the supported runtimes (including native M1 startup
    with a fresh JavaFX cache), audit the guide and screenshots, and obtain renewed
    approval for those hashes. Rebuilding invalidates the previous artifact approval.
 1. Create the agreed tag at the tested commit. Never silently move an existing published
    tag or attach a different commit's binaries to it. The tag and generated source archives
    must match the approved build commit.
 1. Create the release with detailed evidence and limitations, upload only the approved
-   JARs/checksums/screenshots, and verify public downloads, hashes, tag/source identity
+   JAR/checksum/screenshots, and verify public downloads, hashes, tag/source identity
    and documentation links. Complete remaining issue tracking before closing the release
    issue and milestone.

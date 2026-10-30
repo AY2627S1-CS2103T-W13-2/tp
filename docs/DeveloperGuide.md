@@ -769,8 +769,7 @@ participant records, each with at most one group, one role, and one activity ass
    two seconds of submission. The trial must include adding, listing, finding, editing, deleting, and changing
    assignments, with no other resource-intensive applications running.
 4. **Portability:** The release's x64 JAR must launch and pass the add, list, find, edit, delete, and save/reopen
-   smoke checks on Windows 11 x64, Ubuntu 24.04 LTS x64, and macOS 14 x64 with Java 25. The separate
-   macOS arm64 JAR must pass the same checks on Apple Silicon with native arm64 Java 25. Neither check may
+   smoke checks on Windows 11 x64, Ubuntu 24.04 LTS x64, and macOS 14 x64 with Java 25. The same universal JAR must pass these checks on Apple Silicon with native arm64 Java 25. Neither check may
    require changing the source code or rebuilding the tested JAR. These are targets, not a claim that every
    platform has already been tested.
 5. **Reliability - persistence:** After each of 20 valid data-changing commands that completes without a save
@@ -815,61 +814,49 @@ temporary folder so that the test data does not replace a real `data/addressbook
 
 ### Packaging JavaFX for macOS architectures
 
-JavaFX 17.0.7 publishes separate `mac` (Intel x86-64) and `mac-aarch64`
-(Apple Silicon arm64) artifacts. Their native libraries have the same resource
-names, so merging both into one fat JAR can silently retain the wrong CPU binary.
-The build includes Windows/Linux x64 libraries and exactly one macOS classifier.
-All required JavaFX modules are explicit, with host-selected transitive classifiers disabled.
+JavaFX 17.0.7 provides Intel and ARM macOS libraries with identical resource names.
+The packaging build merges each matching pair with Apple's `lipo` and includes each
+universal library once, alongside the unchanged Windows/Linux x64 natives.
+Development tasks (`run`, `test`) still use the host-compatible JavaFX classifier.
 
-* `./gradlew clean shadowJar verifyMacNatives -PjavafxMacPlatform=mac` produces
-  `build/libs/addressbook.jar` for Windows/Linux x64 and macOS with x64 Java
-  (including Apple Silicon via Rosetta).
-* `./gradlew clean shadowJar verifyMacNatives -PjavafxMacPlatform=mac-aarch64` produces
-  `build/libs/addressbook-mac-aarch64.jar` for native Apple Silicon Java.
-* Without an override, a native arm64 macOS JVM selects `mac-aarch64`; other build
-  hosts select `mac`. Only these two values are accepted. Build tests on the host's
-  matching classifier; cross-building a JAR does not prove it starts on the target OS.
-* `verifyMacNatives`, also run by `check`, always opens the newly built JAR. It
-  requires all seven macOS libraries and all Windows/Linux native resources from
-  the selected dependencies, rejects missing/duplicate/unexpected entries, checks
-  Mach-O headers and CPU types, and compares complete payload SHA-256 digests with
-  the dependency JARs. This detects shading damage; it is not an independent audit
-  of upstream binaries or proof of native startup.
-* `testNativeVerifier`, also run by `check`, tests valid payloads and rejects missing,
-  truncated, corrupted, duplicate, unexpected and wrong-architecture fixtures.
-  CI runs these cases for both classifiers.
-* To inspect an existing artifact separately, run
-  `./gradlew verifyExternalMacNatives -PjavafxMacPlatform=mac-aarch64 -PjavafxVerificationJar=/path/to/candidate.jar`
-  (use `mac` for the x64 variant). Passing `javafxVerificationJar` to the normal
-  build verifier fails explicitly, so an external file cannot substitute for its output.
-* CI checks both package variants, and runs host tests using a plain JDK so a bundled
-  JavaFX SDK cannot hide missing dependencies. Native Apple Silicon startup must still
-  be tested on a Mac with a fresh writable `-Djavafx.cachedir=...` directory.
+* On macOS with Apple command-line tools, run `./gradlew clean shadowJar verifyMacNatives`.
+  The single output is `build/libs/addressbook.jar`.
+* Without a Mac, use the Java CI workflow. Its macOS packaging job uploads
+  `universal-candidate` (JAR, SHA-256 and source commit) and `universal-natives`.
+  Download and extract the latter outside `build/`, then run
+  `./gradlew clean shadowJar check coverage -PuniversalNativesDir=/path/to/extracted/natives`.
+  Windows users can invoke `gradlew.bat` with the same arguments. Imported natives
+  are checked against both pinned upstream payloads before packaging.
+* `verifyMacNatives`, also run by `check`, rejects missing, duplicate and unexpected
+  natives, malformed universal headers, missing CPU slices and altered slice bytes.
+  It checks each Mac slice against its upstream library and preserves full-payload
+  verification for Windows/Linux. It rejects JARs larger than 100,000,000 bytes.
+* `testNativeVerifier`, also run by `check`, exercises valid and damaged archives,
+  including thin Mac binaries, missing/duplicate CPUs and invalid slice offsets.
+* Inspect an existing candidate with
+  `./gradlew verifyExternalMacNatives -PjavafxVerificationJar=/path/to/candidate.jar`.
+  This needs neither `lipo` nor prepared native files. The normal build verifier
+  refuses an external artifact override.
+* CI runs checks on Windows, Linux, Intel macOS and ARM macOS, and verifies the
+  checksum and native payloads of the same downloaded candidate on each platform.
+  These structural checks and unit tests do not establish GUI startup or persistence.
 
-Copy each build output before running the next `clean`. The v1.4.1 release copies are named
-`ZoomAddress-v1.4.1.jar` and `ZoomAddress-v1.4.1-mac-aarch64.jar`; record each SHA-256
-and the exact commit independently. These are distinct artifacts: test each on its
-supported platform and audit the User Guide against the exact packaged JARs. A
-checksum or approval for one artifact does not establish the identity or behavior
-of a rebuilt artifact.
+Before release, test the same candidate with native Java 25 in clean folders on
+Windows, Linux (including WSL), Intel Mac and ARM Mac. Use a fresh writable
+`-Djavafx.cachedir=...` directory to avoid previously extracted JavaFX libraries.
+Check startup, commands, save/reopen behavior and the guide examples. Record the
+source commit, SHA-256, byte size, runtime architecture and results for each platform.
+Do not rebuild between platform tests; a rebuilt JAR needs a new checksum and retesting.
 
-The published [v1.4.1 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.4.1)
-uses commit `8bd9682b5c51bb80f6a6038924238ba443e2f17b`; its two JARs, checksums,
-source archives and screenshots are release assets. For a future release, align
-`MainApp.VERSION`, the tag, asset names and both guides before building. Verify that
-the tag and GitHub-generated source archives identify the build commit, then
-download and hash the public JARs, check screenshot and guide links, and record the
-tested platforms and limitations. Never move a published tag or replace a tested JAR
-silently; any rebuilt JAR needs new checksums and relevant retesting.
+The published v1.4.1 packages remain architecture-specific. This build change does
+not replace those assets or establish that the universal candidate is release-ready.
+Update the release version, public download instructions and checksum only after
+candidate testing succeeds; never silently replace an existing published artifact.
 
 ### Launching the JAR
 
-1. Copy the JAR matching your Java runtime architecture into an empty folder.
-   For the manual scenarios below, name this local test copy `addressbook.jar`.
-   Use the Apple Silicon package for native arm64 Java on macOS; use the standard
-   package for Windows/Linux x64 and macOS with x64 Java (including Apple Silicon
-   via Rosetta). Check `os.arch` using `java -XshowSettings:properties -version`:
-   `amd64`/`x86_64` is x64; `aarch64`/`arm64` is arm64. Published filenames are in the User Guide.
+1. Copy the universal candidate into an empty folder as `addressbook.jar`.
+   Use the same candidate and checksum on every platform, with a native Java 25 JVM.
 1. Open a terminal in that folder and run `java -version` to confirm the active Java runtime is version 25.
    Then run `java -jar addressbook.jar` from the same folder.
 

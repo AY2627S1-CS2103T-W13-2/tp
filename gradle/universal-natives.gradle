@@ -1,0 +1,103 @@
+import java.util.zip.ZipFile
+
+configurations {
+    macIntelNatives
+    macArmNatives
+}
+
+dependencies {
+    macIntelNatives('org.openjfx:javafx-graphics:17.0.7:mac') { transitive = false }
+    macArmNatives('org.openjfx:javafx-graphics:17.0.7:mac-aarch64') { transitive = false }
+}
+
+// Read both upstream payloads independently of the development JVM architecture.
+ext.macNativePayloads = {
+    def result = [:]
+    [macIntelNatives: 0x01000007, macArmNatives: 0x0100000c].each { configuration, cpu ->
+        new ZipFile(configurations.getByName(configuration).singleFile).withCloseable { zip ->
+            zip.entries().toList().findAll { it.name.endsWith('.dylib') }.each { entry ->
+                if (entry.name.contains('/') || entry.name.contains('\\')) {
+                    throw new GradleException("Unexpected nested Mac native: ${entry.name}")
+                }
+                def slices = result.computeIfAbsent(entry.name) { [:] }
+                slices[cpu] = zip.getInputStream(entry).withCloseable { it.readAllBytes() }
+            }
+        }
+    }
+    if (result.isEmpty() || result.values().any { it.size() != 2 }) {
+        throw new GradleException('Mac native libraries must have matching Intel and ARM payloads')
+    }
+    result
+}
+
+def preparedDirectory = providers.gradleProperty('universalNativesDir')
+def universalDirectory = layout.buildDirectory.dir('universal-natives')
+ext.universalNativeDirectory = universalDirectory
+
+tasks.register('prepareUniversalNatives') {
+    inputs.files(configurations.macIntelNatives, configurations.macArmNatives)
+    if (preparedDirectory.isPresent()) {
+        inputs.dir(file(preparedDirectory.get()))
+    }
+    outputs.dir(universalDirectory)
+    doLast {
+        def output = universalDirectory.get().asFile
+        def references = project.ext.macNativePayloads()
+        if (!preparedDirectory.isPresent()
+                && !System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('mac')) {
+            throw new GradleException('Universal packaging requires Apple lipo on macOS. '
+                    + 'Download the universal-natives CI artifact outside build/ and use '
+                    + '-PuniversalNativesDir=/path/to/extracted/artifact')
+        }
+        if (preparedDirectory.isPresent()
+                && file(preparedDirectory.get()).canonicalFile.toPath().startsWith(output.canonicalFile.toPath())) {
+            throw new GradleException('Prepared native input must be outside build/universal-natives')
+        }
+        delete(output)
+        output.mkdirs()
+        if (preparedDirectory.isPresent()) {
+            def source = file(preparedDirectory.get())
+            if (source.listFiles().collect { it.name }.toSet() != references.keySet()) {
+                throw new GradleException('Prepared native directory must contain exactly the expected dylibs')
+            }
+            references.each { name, slices ->
+                new File(output, name).bytes = new File(source, name).bytes
+            }
+        } else {
+            def inputs = layout.buildDirectory.dir('thin-mac-natives').get().asFile
+            inputs.mkdirs()
+            references.each { name, slices ->
+                def files = slices.collect { cpu, bytes ->
+                    def input = new File(inputs, "${cpu}-${name}")
+                    input.bytes = bytes
+                    input
+                }
+                def process = new ProcessBuilder(['/usr/bin/lipo', '-create',
+                        files[0].absolutePath, files[1].absolutePath,
+                        '-output', new File(output, name).absolutePath]).redirectErrorStream(true).start()
+                def message = process.inputStream.getText('UTF-8')
+                if (process.waitFor() != 0) {
+                    throw new GradleException("lipo failed for ${name}: ${message}")
+                }
+            }
+        }
+        references.each { name, slices ->
+            project.ext.verifyUniversalNative(name, new File(output, name).bytes, slices)
+        }
+    }
+}
+
+shadowJar {
+    dependsOn tasks.named('prepareUniversalNatives')
+    // Exclude original OpenJFX archives from Shadow's dependency stream, then add
+    // their contents with thin Mac natives removed. Keep Windows/Linux bytes intact.
+    dependencies {
+        exclude(dependency('org.openjfx:.*:.*'))
+    }
+    from({ configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts.findAll {
+        it.moduleVersion.id.group == 'org.openjfx'
+    }.collect { zipTree(it.file) } }) {
+        exclude '**/*.dylib'
+    }
+    from(universalDirectory)
+}
