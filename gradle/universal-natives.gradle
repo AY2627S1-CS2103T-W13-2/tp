@@ -94,7 +94,7 @@ shadowJar {
     dependencies {
         exclude(dependency('org.openjfx:.*:.*'))
     }
-    from({ configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts.findAll {
+    from({ project.configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts.findAll {
         it.moduleVersion.id.group == 'org.openjfx'
     }.collect { zipTree(it.file) } }) {
         exclude '**/*.dylib'

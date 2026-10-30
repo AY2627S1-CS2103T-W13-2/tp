@@ -768,8 +768,9 @@ participant records, each with at most one group, one role, and one activity ass
    at least 95 of 100 consecutive valid local participant-management commands must display their result within
    two seconds of submission. The trial must include adding, listing, finding, editing, deleting, and changing
    assignments, with no other resource-intensive applications running.
-4. **Portability:** The release's x64 JAR must launch and pass the add, list, find, edit, delete, and save/reopen
-   smoke checks on Windows 11 x64, Ubuntu 24.04 LTS x64, and macOS 14 x64 with Java 25. The same universal JAR must pass these checks on Apple Silicon with native arm64 Java 25. Neither check may
+4. **Portability:** The universal JAR must launch and pass the add, list, find, edit, delete, and save/reopen
+   smoke checks on Windows 11 x64, Ubuntu 24.04 LTS x64 (including WSL), and macOS with Java 25.
+   Test both Intel and Apple Silicon Macs using native Java runtimes. No platform check may
    require changing the source code or rebuilding the tested JAR. These are targets, not a claim that every
    platform has already been tested.
 5. **Reliability - persistence:** After each of 20 valid data-changing commands that completes without a save
