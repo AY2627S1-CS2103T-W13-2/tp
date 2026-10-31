@@ -78,6 +78,9 @@ Here are the steps to create a new release.
 
 1. Agree the release version and new tag in release tracking. Update `MainApp.VERSION`,
    guide filenames and release asset names before merging the release source.
+   For v1.6, name the public JAR `ZoomAddress-v1.6.jar`. Keep the User Guide's candidate
+   notice until publication is approved. The Canvas filename is `CS2103T-W13-2ZoomAddress.jar`;
+   renaming the approved JAR must preserve its bytes and SHA-256.
 1. From that exact merged commit, build and verify **one universal JAR** using the
    [universal packaging recipe](DeveloperGuide.md#packaging-javafx-for-macos-architectures).
    Preserve the output; record the full commit and its SHA-256.
