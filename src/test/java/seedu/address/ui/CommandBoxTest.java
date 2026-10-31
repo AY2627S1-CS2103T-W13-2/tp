@@ -76,6 +76,25 @@ public class CommandBoxTest {
     }
 
     @Test
+    public void paste_tabs_undoRedoPreservesSeparateEdit() throws Exception {
+        onFxThread(() -> {
+            TextField input = commandField(new CommandBox(command -> new CommandResult("Executed")));
+            input.setText("edit 1 a/");
+            input.end();
+            input.appendText("Room");
+
+            paste(input, "\t1");
+            assertEquals("edit 1 a/Room 1", input.getText());
+
+            input.undo();
+            assertEquals("edit 1 a/Room", input.getText());
+
+            input.redo();
+            assertEquals("edit 1 a/Room 1", input.getText());
+        });
+    }
+
+    @Test
     public void paste_editCommand_separatesAddressAndTagAfterReload() throws Exception {
         onFxThread(() -> {
             JsonAddressBookStorage data = new JsonAddressBookStorage(temporaryFolder.resolve("participants.json"));
