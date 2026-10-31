@@ -849,7 +849,7 @@ Check startup, commands, save/reopen behavior and the guide examples. Record the
 source commit, SHA-256, byte size, runtime architecture and results for each platform.
 Do not rebuild between platform tests; a rebuilt JAR needs a new checksum and retesting.
 
-The published v1.4.1 packages remain architecture-specific. This build change does
+The published v1.5 packages remain architecture-specific. This build change does
 not replace those assets or establish that the universal candidate is release-ready.
 Update the release version, public download instructions and checksum only after
 candidate testing succeeds; never silently replace an existing published artifact.
