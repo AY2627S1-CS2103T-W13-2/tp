@@ -108,6 +108,10 @@ fonts may differ by platform.
 * Commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, reject extraneous parameters.<br>
   For example, `help 123` is invalid and the application displays the correct `help` command format.
 
+* When text is pasted into the command box, each tab character is converted to an ordinary space before the
+  command is executed. This preserves field boundaries in tab-separated text. Check the command before pressing
+  Enter if a tab was intended to be part of a field value, as it will become a space.
+
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </div>
 
@@ -230,8 +234,9 @@ Format: `remark INDEX r/REMARK`
   to clear the existing remark: `remark INDEX r/`.
 * The command must contain one recognized `r/` prefix. In this command it means remark; in `assign-role`, `filter`,
   and `filter-all`, it means role. The shared command tokenizer recognizes a prefix only when it is immediately
-  preceded by the ASCII space character. Therefore, a second ASCII-space-delimited `r/` is rejected as a duplicate;
-  an `r/` preceded by a tab or another Unicode whitespace character remains part of the remark text.
+  preceded by the ASCII space character. Therefore, a second ASCII-space-delimited `r/` is rejected as a duplicate.
+  The command box converts pasted tabs to ASCII spaces before tokenization, while other Unicode whitespace before
+  an `r/` remains part of the remark text.
 * The change is saved automatically. The participant's name, contact details, tags, group, role, and activity are
   preserved.
 * The current search, filter, and sort order are also preserved. This lets you update several participants in a

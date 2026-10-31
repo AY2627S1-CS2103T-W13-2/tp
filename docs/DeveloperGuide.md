@@ -81,6 +81,12 @@ The **API** of this component is specified in [`Ui.java`](https://github.com/AY2
 
 The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `PersonListPanel`, and `StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
 
+`CommandBox` uses a `CommandTextField`, a focused `TextField` subclass that handles clipboard paste at the input
+boundary. JavaFX otherwise removes literal tab characters from pasted text and can silently join adjacent command
+fields. `CommandTextField` replaces each pasted tab with one ASCII space before the text reaches JavaFX's normal
+replacement path; paste operations without tabs retain the standard `TextField` behavior. The parser therefore
+receives an explicit separator without gaining platform-specific clipboard logic.
+
 The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/java/seedu/address/ui/MainWindow.java).
 
 The `UI` component,
@@ -309,10 +315,11 @@ transition when a name edit changes search membership.
 The `remark INDEX r/TEXT` command sets or replaces the selected participant's remark; an empty `r/` clears it.
 `AddressBookParser` delegates to `RemarkCommandParser`, which tokenizes the single `r/` prefix, rejects duplicate or
 missing prefixes, and parses the positive displayed index. The shared tokenizer recognizes prefixes only when they
-are preceded by an ASCII space. Consequently, a second ASCII-space-delimited `r/` is rejected, while an `r/`
-preceded by a tab or another Unicode whitespace character remains part of the remark text. The parser strips
-surrounding Unicode whitespace from the remark text after tokenization. Empty text is deliberately valid because it
-represents a clear operation.
+are preceded by an ASCII space. Consequently, a second ASCII-space-delimited `r/` is rejected. At the UI boundary,
+`CommandTextField` converts pasted tabs to ASCII spaces before parsing, so a tab-delimited second `r/` is also
+recognized; other Unicode whitespace before an `r/` remains part of the remark text. The parser strips surrounding
+Unicode whitespace from the remark text after tokenization. Empty text is deliberately valid because it represents
+a clear operation.
 
 The following class diagram shows the parser's contract and its creation of a `RemarkCommand`:
 
