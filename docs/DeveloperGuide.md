@@ -835,12 +835,17 @@ Development tasks (`run`, `test`) still use the host-compatible JavaFX classifie
   `./gradlew clean shadowJar check coverage -PuniversalNativesDir=/path/to/extracted/natives`.
   Windows users can invoke `gradlew.bat` with the same arguments. Imported natives
   are checked against both pinned upstream payloads before packaging.
-* `verifyMacNatives`, also run by `check`, rejects missing, duplicate and unexpected
-  natives, malformed universal headers, missing CPU slices and altered slice bytes.
-  It checks each Mac slice against its upstream library and preserves full-payload
-  verification for Windows/Linux. It rejects JARs larger than 100,000,000 bytes.
-* `testNativeVerifier`, also run by `check`, exercises valid and damaged archives,
-  including thin Mac binaries, missing/duplicate CPUs and invalid slice offsets.
+* `verifyMacNatives` rejects missing, duplicate and unexpected natives, malformed
+  universal headers, missing CPU slices and altered slice bytes. It checks each Mac
+  slice against its upstream library and preserves full-payload verification for
+  Windows/Linux. It rejects JARs larger than 100,000,000 bytes. The packaging job
+  invokes it explicitly. `check` includes it on macOS, or when
+  `-PuniversalNativesDir=/path/to/extracted/natives` is supplied on another platform.
+  Without that property, ordinary `check coverage` runs on Windows/Linux without
+  building the universal JAR.
+* `testNativeVerifier` exercises valid and damaged archives, including thin Mac
+  binaries, missing/duplicate CPUs and invalid slice offsets. It runs with
+  `verifyMacNatives` under the same `check` conditions.
 * Inspect an existing candidate with
   `./gradlew verifyExternalMacNatives -PjavafxVerificationJar=/path/to/candidate.jar`.
   This needs neither `lipo` nor prepared native files. The normal build verifier

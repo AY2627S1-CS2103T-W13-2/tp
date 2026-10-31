@@ -148,5 +148,3 @@ tasks.register('testNativeVerifier') {
         logger.lifecycle("Passed ${cases} native verifier regression cases (${target})")
     }
 }
-
-check.dependsOn tasks.named('testNativeVerifier')

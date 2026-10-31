@@ -153,6 +153,15 @@ tasks.register('verifyExternalMacNatives') {
     }
 }
 
-check.dependsOn tasks.named('verifyMacNatives')
 project.ext.verifyNativeArchive = verifyNativeArchive
 apply from: 'gradle/native-verification-tests.gradle'
+
+// Ordinary check/coverage runs should remain available on Windows and Linux
+// without downloading the CI-produced universal Mac native bundle. Packaging
+// CI invokes these verification tasks explicitly, and platform matrix jobs opt
+// in by providing the prepared bundle. On Mac, local checks can build it with lipo.
+def isMacHost = System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('mac')
+if (isMacHost || providers.gradleProperty('universalNativesDir').isPresent()) {
+    check.dependsOn tasks.named('verifyMacNatives')
+    check.dependsOn tasks.named('testNativeVerifier')
+}
