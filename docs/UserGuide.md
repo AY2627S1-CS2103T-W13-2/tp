@@ -5,7 +5,9 @@ title: User Guide
 
 ZoomAddress is a **desktop participant-management application for directors of large-scale computing events**. It is optimized for keyboard-driven commands while retaining the benefits of a graphical interface, allowing event directors to manage participant records quickly and locally.
 
-This guide describes **v1.5**. If you are using v1.4.1, use the
+This guide describes the **v1.6 release candidate**. For the published v1.5 packages, use the
+[v1.5 User Guide](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/v1.5/docs/UserGuide.md).
+If you are using v1.4.1, use the
 [archived v1.4.1 User Guide](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4.1/UserGuide-e493f549.md)
 for instructions that match your installed JAR. The app's Help window shows a URL you can copy to open the online
 guide; it does not open the browser automatically. The online guide can change between releases, so compare this
@@ -18,27 +20,28 @@ guide's version with the downloaded JAR's original filename or release notes bef
 
 ## Quick start
 
-The instructions below describe the published v1.5 release. A universal JAR is
-being prepared for a future release; CI candidates are for testing and do not
-replace these downloads until cross-platform testing and publication are complete.
+The v1.6 candidate contains Windows x64, Linux x64, Intel Mac and Apple Silicon Mac
+native libraries in one JAR. Final cross-platform testing and publication are pending;
+the candidate does not replace the published v1.5 downloads yet.
 
 1. Ensure that Java `25` is installed on your computer.<br>
    **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 
-1. Open the [v1.5 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.5) and download the JAR matching your **Java runtime architecture**:
-   * Windows x64, Linux x64 or macOS with x64 Java 25 (including Apple Silicon via Rosetta): `ZoomAddress-v1.5.jar`.
-   * Apple Silicon macOS with native arm64 Java 25: `ZoomAddress-v1.5-mac-aarch64.jar`. Do not use the x64 JAR with native arm64 Java.
-   * Run `java -XshowSettings:properties -version` and find `os.arch` to check the active Java runtime: `amd64` or `x86_64` means x64; `aarch64` or `arm64` means arm64. Choose by this value, not the Mac's hardware alone.
-   * Check the release notes and `SHA256SUMS.txt` for the tested commit, checksums and limitations.
+1. For candidate testing, obtain the v1.6 JAR and its checksum from the team and save it as
+   `ZoomAddress-v1.6.jar`. The same JAR is used on all four platforms above; no separate Mac ARM JAR is needed.
+   * Use Java 25 for your runtime architecture. Windows and Linux ARM runtimes are not covered by this package.
+   * Run `java -XshowSettings:properties -version` and find `os.arch` to check the active Java runtime:
+     `amd64` or `x86_64` means x64; `aarch64` or `arm64` means arm64.
+   * Check the accompanying evidence and `SHA256SUMS.txt` for the source commit, checksum and tested platforms.
+     Public downloads will be available on the [releases page](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases)
+     after publication is approved.
 
 1. Copy the file to the folder you want to use as the _home folder_ for ZoomAddress.
 
    ZoomAddress writes `data/addressbook.json` relative to the terminal's **working folder**, so run the JAR from
    the same folder each time to reopen the same participant data.
 
-1. Open a terminal, `cd` to the folder containing the JAR file, and use the command matching the file you downloaded:
-   * x64 Java: `java -jar ZoomAddress-v1.5.jar`.
-   * Native arm64 Java on Apple Silicon: `java -jar ZoomAddress-v1.5-mac-aarch64.jar`.
+1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar ZoomAddress-v1.6.jar`.
 
    The ZoomAddress window should appear in a few seconds with some sample data.
 
@@ -651,7 +654,8 @@ confident you can restore a valid copy.
 **Q**: How do I transfer my data to another computer?<br>
 **A**: Close the app on both computers. Copy `data/addressbook.json` from the folder where you ran the old JAR to
 the corresponding `data` folder on the new computer. Keep a backup of the destination file before replacing it,
-then launch ZoomAddress from that folder. Use a release JAR compatible with the new computer's Java architecture.
+then launch ZoomAddress from that folder. The v1.6 universal JAR contains native libraries for Windows x64,
+Linux x64, Intel Mac and Apple Silicon Mac; use Java 25 on the destination computer.
 
 --------------------------------------------------------------------------------------------------------------------
 

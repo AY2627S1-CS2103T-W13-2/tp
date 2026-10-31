@@ -5,7 +5,7 @@
 ![ZoomAddress directory with four participants, assignments and event-day remarks](docs/images/Ui.png)
 
 *Integrated v1.5 candidate captured from the packaged JavaFX application with synthetic data; OS window
-decorations are omitted. This candidate is not yet published. See the
+decorations are omitted. This image predates v1.6. See the
 [releases](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases) for available downloads.*
 
 ZoomAddress is a desktop participant-management application for directors of large-scale computing events, such as
