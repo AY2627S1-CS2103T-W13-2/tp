@@ -12,6 +12,12 @@ tasks.register('testNativeVerifier') {
                 baseline[entry.name] = zip.getInputStream(entry).withCloseable { it.readAllBytes() }
             }
         }
+        baseline.findAll { name, bytes -> name.endsWith('.dylib') }.each { name, bytes ->
+            int magic = java.nio.ByteBuffer.wrap(bytes).getInt()
+            if (magic != (int) 0xcafebabe) {
+                throw new GradleException("Universal packaging regression: ${name} must contain both Mac architectures")
+            }
+        }
         def failures = []
         int cases = 0
         def exerciseArchiveFailure = { String label, File fixture, String expected,
@@ -67,6 +73,30 @@ tasks.register('testNativeVerifier') {
         }
         def target = project.ext.javafxMacPlatform
         exercise('Valid payloads', baseline, target, null)
+        project.ext.macNativePayloads()['libglass.dylib'].each { cpu, thin ->
+            def singleArchitecture = new LinkedHashMap(baseline)
+            singleArchitecture['libglass.dylib'] = thin
+            exercise("Thin Mac library ${cpu}", singleArchitecture, target, 'Wrong native architecture')
+        }
+        [
+            'Missing CPU slice': [4, 1, 'Wrong native architecture'],
+            'Unknown CPU slice': [8, 0, 'Wrong native architecture'],
+            'Out-of-bounds slice': [16, Integer.MAX_VALUE, 'Malformed universal slice'],
+            'Slice overlaps header': [16, 0, 'Malformed universal slice'],
+            'Invalid alignment': [24, 31, 'Malformed universal slice']
+        ].each { label, mutation ->
+            def damaged = new LinkedHashMap(baseline)
+            byte[] payload = baseline['libglass.dylib'].clone()
+            java.nio.ByteBuffer.wrap(payload).putInt(mutation[0], mutation[1])
+            damaged['libglass.dylib'] = payload
+            exercise(label, damaged, target, mutation[2])
+        }
+        def duplicateCpu = new LinkedHashMap(baseline)
+        byte[] repeated = baseline['libglass.dylib'].clone()
+        def fatHeader = java.nio.ByteBuffer.wrap(repeated)
+        fatHeader.putInt(28, fatHeader.getInt(8))
+        duplicateCpu['libglass.dylib'] = repeated
+        exercise('Duplicate CPU slice', duplicateCpu, target, 'Wrong native architecture')
         baseline.keySet().each { name ->
             def missing = new LinkedHashMap(baseline)
             missing.remove(name)
@@ -118,5 +148,3 @@ tasks.register('testNativeVerifier') {
         logger.lifecycle("Passed ${cases} native verifier regression cases (${target})")
     }
 }
-
-check.dependsOn tasks.named('testNativeVerifier')
