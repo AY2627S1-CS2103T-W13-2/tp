@@ -883,16 +883,17 @@ Check startup, commands, save/reopen behavior and the guide examples. Record the
 source commit, SHA-256, byte size, runtime architecture and results for each platform.
 Do not rebuild between platform tests; a rebuilt JAR needs a new checksum and retesting.
 
-The application version is V1.6 and the User Guide describes the universal candidate.
-The published v1.5 packages remain architecture-specific. Preparing this candidate does
-not replace those assets or establish release readiness. After candidate testing succeeds,
-replace the guide's candidate notice with the verified public download instructions and
-publish the approved checksum; never silently replace an existing published artifact.
+These are pre-release validation steps. The v1.6 User Guide now links the published
+universal `ZoomAddress-v1.6.jar` and its checksum; the v1.5 downloads remain
+architecture-specific. For a future release, keep its candidate separate from
+published assets until testing and approval are complete. Replace candidate-only
+guide notices with verified public download instructions at publication, and never
+silently replace an existing published artifact.
 
 ### Launching the JAR
 
-1. Copy the universal candidate into an empty folder as `addressbook.jar`.
-   Use the same candidate and checksum on every platform, with a native Java 25 JVM.
+1. For manual testing, copy the JAR under test into an empty folder as `addressbook.jar`.
+   Use copies with the same checksum on every platform, with a native Java 25 JVM.
 1. Open a terminal in that folder and run `java -version` to confirm the active Java runtime is version 25.
    Then run `java -jar addressbook.jar` from the same folder.
 
