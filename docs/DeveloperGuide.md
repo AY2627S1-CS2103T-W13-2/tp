@@ -113,6 +113,8 @@ The sequence diagram below illustrates command execution, model lookup, and savi
 
 ![Interactions Inside the Logic Component for the `delete 1` Command](images/DeleteSequenceDiagram.png)
 
+[Open the delete command diagram at full size](images/DeleteSequenceDiagram.png).
+
 The command resolves index `1` against the **currently displayed list**, then passes the selected `Person` to
 `Model.deletePerson`. `LogicManager` saves after command execution; a save failure reports an error but does not
 restore the in-memory deletion.
@@ -366,6 +368,8 @@ changing the order of records stored in `AddressBook`.
 
 ![Interactions for the `sort name` command](images/SortSequenceDiagram.png)
 
+[Open the sort command diagram at full size](images/SortSequenceDiagram.png).
+
 The diagram omits parser construction to keep the view-update and subsequent save path readable. Although sorting
 only changes a `SortedList` comparator, `LogicManager` still invokes the normal address-book save path before
 returning the result; the comparator itself is not serialized.
@@ -480,6 +484,8 @@ therefore match a missing-group query while still having a role and activity.
 The sequence below focuses on command execution after parsing has created `command` and `predicate`.
 
 ![Execution of an unassigned-group query](images/UnassignedSequenceDiagram.png)
+
+[Open the unassigned query diagram at full size](images/UnassignedSequenceDiagram.png).
 
 1. `LogicManager` executes the parsed `UnassignedCommand` against the current model.
 1. The command replaces the `FilteredList` predicate through `Model.updateFilteredPersonList`. Because that list is
