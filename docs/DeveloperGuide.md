@@ -18,6 +18,11 @@ title: Developer Guide
 * Automated tests use [JUnit 5](https://junit.org/junit5/), and diagrams are rendered with
   [PlantUML](https://plantuml.com/).
 
+Notable uses of AI:
+
+* ChatGPT and Codex were used for preliminary PR reviews and code-quality checks.
+* ChatGPT and Codex were used to draft and refine code, tests, documentation, and UML diagrams.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Setting up, getting started**
