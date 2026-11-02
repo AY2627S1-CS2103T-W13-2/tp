@@ -147,10 +147,19 @@ How the parsing works:
 ### Model component
 **API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/master/src/main/java/seedu/address/model/Model.java)
 
-<img src="images/ModelClassDiagram.png" width="450" />
+![Selected model classes and participant value associations](images/ModelClassDiagram.png)
 
-This partial diagram includes the optional group, role, and activity value objects: a participant has **zero or one**
-of each, not a separate collection of assignments.
+[Open the model component diagram at full size](images/ModelClassDiagram.png).
+
+This partial diagram shows the model interfaces, state holders, and participant value classes as separate boxes.
+Every shown association uses a navigable line with its multiplicity at the target end; none is repeated as an
+attribute. `GuiSettings` belongs to the Commons component and is referenced by `UserPrefs`.
+Each participant has exactly one name, phone, email, address, and remark; tags form a set, and group, role, and activity
+are independent optional assignments. A remark containing empty text represents no note.
+
+The composition diamond identifies the `UniquePersonList` created and owned by `AddressBook`. Participant value objects
+are immutable references that can be shared when constructing replacement `Person` instances. `UniquePersonList`
+enforces uniqueness using `Person.isSamePerson()`, which compares exact name values.
 
 
 The `Model` component,
@@ -182,8 +191,8 @@ separate persisted group, role, or activity directory. The `0..*` multiplicities
 exactly, including Unicode, whitespace, quotes and line breaks. Legacy `Person` constructors default to an empty
 remark, while the full constructor accepts it after the optional group. `getRemark()` provides the value for
 dependent command and UI increments. Remark changes affect `equals` and `hashCode`, but not name-based identity.
-The partial model diagram focuses on stored participant values; the derived filtered/sorted view pipeline is
-described in the Model component text rather than expanded in this diagram.
+The partial model diagram focuses on participant value associations. The filtered/sorted JavaFX view internals
+are omitted and are described in the Model component text.
 
 `JsonAdaptedPerson` stores `remark` as a JSON string. Its creator reads a `JsonNode` so Jackson cannot silently
 coerce numbers or booleans to text. Missing or JSON `null` values become empty text; arrays, objects, numbers and
