@@ -1052,6 +1052,10 @@ For every command below, the status area should identify the actual problem and 
 
 | Command | Expected output |
 |---|---|
+| `help extra` | `Invalid command format!` followed by the `help` usage message. The Help window does not open, and the current displayed list remains unchanged. |
+| `list extra` | `Invalid command format!` followed by the `list` usage message. The current displayed list remains unchanged. |
+| `clear extra` | `Invalid command format!` followed by the `clear` usage message. No participant record is cleared. |
+| `exit extra` | `Invalid command format!` followed by the `exit` usage message. The application remains open. |
 | `add` | The `add` usage message because required arguments are missing. |
 | `add n/ p/81234567 e/alice2@example.com a/COM 1` | The name constraint message because the name is blank. |
 | `add n/Alice n/Alicia p/81234567 e/alice2@example.com a/COM 1` | A duplicate `n/` prefix message. |
