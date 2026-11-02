@@ -38,6 +38,7 @@ Refer to the guide [_Setting up and getting started_](SettingUp.md).
 <img src="images/ArchitectureDiagram.png" width="280" />
 
 The ***Architecture Diagram*** given above explains the high-level design of the App.
+The person icon represents the user interacting with `UI`; the document icon represents the data file that `Storage` reads and writes.
 
 The following provides a quick overview of the main components and their interactions.
 
